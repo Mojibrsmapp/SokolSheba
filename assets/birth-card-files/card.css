@@ -1,0 +1,298 @@
+p, h2, h1 {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ddd;
+  flex-direction: column;
+  font-family: Arial, sans-serif;
+}
+body .a4_page {
+  height: 11.7in;
+  width: 8.3in;
+  background: white;
+  background-position: center;
+  background-size: 100% 100%;
+}
+body .a4_page .main_wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: column;
+  position: relative;
+  height: 11.7in;
+  padding: 20px;
+  padding-left: 40px;
+}
+body .a4_page .main_wrapper img.main_logo_r {
+  position: absolute;
+  left: 314px;
+  top: -8px;
+}
+body .a4_page .main_wrapper img.main_logo {
+  position: absolute;
+  top: 56.5%;
+  left: 52%;
+  transform: translate(-50%, -50%);
+}
+body .a4_page .main_wrapper .mr_header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  margin-top: 57px;
+}
+body .a4_page .main_wrapper .mr_header .middle_part {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+body .a4_page .main_wrapper .mr_header .middle_part p.office {
+  font-size: 16px !important;
+}
+body .a4_page .main_wrapper .mr_header .middle_part p.address1 {
+  font-size: 16px !important;
+  margin-top: 4px !important;
+}
+body .a4_page .main_wrapper .mr_header .middle_part p.address2 {
+  font-size: 16px !important;
+  margin-top: 6px !important;
+}
+body .a4_page .main_wrapper .mr_header .middle_part p.rule_y {
+  font-size: 14px !important;
+  margin-top: 2px !important;
+}
+body .a4_page .main_wrapper .mr_header .middle_part h2 {
+  font-size: 20px;
+  font-family: 'Roboto', sans-serif;
+  color: #353535;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+body .a4_page .main_wrapper .mr_header .middle_part p {
+  margin-bottom: -3px;
+  font-size: 18px;
+  color: #1a1a1a;
+  font-weight: 500;
+}
+body .a4_page .main_wrapper .mr_header .middle_part h1 {
+  font-size: 25px;
+  font-family: 'Roboto', sans-serif;
+  color: black;
+  font-weight: 600;
+  margin-top: -2px;
+  margin-left: -62px;
+  letter-spacing: 1px;
+}
+body .a4_page .main_wrapper .mr_header .middle_part h1 .bn {
+  font-family: "bangla_font";
+  font-size: 21px;
+}
+body .a4_page .main_wrapper .mr_header .middle_part h1 .en {
+  font-size: 21px;
+  font-family: 'Roboto', sans-serif;
+}
+body .a4_page .main_wrapper .mr_header .left_part {
+  position: absolute;
+  top: 40px;
+  left: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+body .a4_page .main_wrapper .mr_header .left_part h2 {
+  color: #999999;
+  font-size: 17px;
+  margin-top: 11px;
+}
+body .a4_page .main_wrapper .mr_header .left_part_hidden {
+  width: 150px;
+}
+body .a4_page .main_wrapper .mr_header .right_part_hidden {
+  width: 65px;
+}
+body .a4_page .main_wrapper .mr_header .right_part {
+  position: absolute;
+  right: 20px;
+  top: 17.6%;
+}
+body .a4_page .main_wrapper .mr_body {
+  margin-top: 7px;
+}
+body .a4_page .main_wrapper .mr_body .top_part1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 51px;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 13px;
+}
+body .a4_page .main_wrapper .mr_body .top_part1 .middle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin-left: -37px;
+}
+body .a4_page .main_wrapper .mr_body .top_part1 .middle h1 {
+  font-size: 18px;
+  font-family: 'Roboto', sans-serif;
+  color: black;
+  font-weight: 600;
+}
+body .a4_page .main_wrapper .mr_body .top_part1 .middle h2 {
+  font-size: 18px;
+  color: #1a1a1a;
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+body .a4_page .main_wrapper .mr_body .top_part1 .left p, body .a4_page .main_wrapper .mr_body .top_part1 .right p {
+  margin-bottom: 0px;
+  font-size: 13px;
+  color: #232323;
+  font-weight: 600;
+  font-family: 'Roboto', sans-serif;
+}
+body .a4_page .main_wrapper .mr_body .middle {
+  padding: 20px;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-right: 0;
+  padding-left: 52px;
+}
+body .a4_page .main_wrapper .mr_body .middle .td {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 15px !important;
+}
+body .a4_page .main_wrapper .mr_body .middle .td p {
+  font-size: 15px;
+  color: black;
+  font-weight: 500;
+}
+body .a4_page .main_wrapper .mr_body .middle .td .left, body .a4_page .main_wrapper .mr_body .middle .td .right {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+body .a4_page .main_wrapper .mr_body .middle .td .left .bn, body .a4_page .main_wrapper .mr_body .middle .td .right .bn {
+  color: #2f2f2f !important;
+  font-size: 13px !important;
+}
+body .a4_page .main_wrapper .mr_body .middle .td .left .part1, body .a4_page .main_wrapper .mr_body .middle .td .right .part1 {
+  margin-right: 7px;
+}
+body .a4_page .main_wrapper .mr_body .middle .td .left .part1 p, body .a4_page .main_wrapper .mr_body .middle .td .right .part1 p {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+body .a4_page .main_wrapper .mr_body .middle .new_td {
+  width: 100%;
+  float: left;
+}
+body .a4_page .main_wrapper .mr_body .middle .new_td p {
+    font-size: 15px;
+    color: #1a1a1a;
+    font-weight: 500;
+}
+body .a4_page .main_wrapper .mr_body .middle .new_td .bn {
+  color: #2f2f2f !important;
+  font-size: 17px !important;
+  font-family: "bangla_font";
+}
+body .a4_page .main_wrapper .mr_body .middle .new_td .left, body .a4_page .main_wrapper .mr_body .middle .new_td .right {
+  float: left;
+  width: 50%;
+  display: flex;
+  align-items: start;
+  justify-content: start;
+}
+body .a4_page .main_wrapper .mr_body .middle .new_td .left .part2, body .a4_page .main_wrapper .mr_body .middle .new_td .right .part2 {
+  width: 188px;
+}
+body .a4_page .main_wrapper .mr_body .middle .new_td .left span.clone, body .a4_page .main_wrapper .mr_body .middle .new_td .right span.clone {
+  margin-right: 13px;
+}
+body .a4_page .main_wrapper .mr_body .middle .new_td_2 {
+  width: 100%;
+  float: left;
+}
+body .a4_page .main_wrapper .mr_body .middle .new_td_2 p {
+  font-size: 15px;
+  color: black;
+  font-weight: 500;
+}
+body .a4_page .main_wrapper .mr_body .middle .new_td_2 .left span.clone, body .a4_page .main_wrapper .mr_body .middle .new_td_2 .right span.clone {
+  margin-right: 13px;
+}
+body .a4_page .main_wrapper .mr_body .middle .new_td_2 .left {
+  width: 50%;
+  float: left;
+  display: flex;
+}
+body .a4_page .main_wrapper .mr_body .middle .new_td_2 .right {
+  width: 39%;
+  float: left;
+  display: flex;
+  margin-left: 35px;
+}
+body .a4_page .main_wrapper .mr_footer {
+  padding: 3px;
+  padding-top: 0;
+  margin-bottom: 0;
+  padding-bottom: 22px;
+}
+body .a4_page .main_wrapper .mr_footer .top {
+  display: block;
+  margin-bottom: 20px;
+  width: 655px;
+  float: left;
+}
+body .a4_page .main_wrapper .mr_footer .top .left {
+  float: left;
+  width: 31% !important;
+}
+body .a4_page .main_wrapper .mr_footer .top .right {
+  float: right;
+  width: 20% !important;
+}
+body .a4_page .main_wrapper .mr_footer .top .left, body .a4_page .main_wrapper .mr_footer .top .right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 50%;
+}
+body .a4_page .main_wrapper .mr_footer .top .left h2, body .a4_page .main_wrapper .mr_footer .top .right h2 {
+  font-size: 17px;
+  color: black;
+  font-weight: 400;
+  text-align: center;
+  margin-bottom: 5px;
+  font-family: 'Roboto', sans-serif;
+}
+body .a4_page .main_wrapper .mr_footer .top .left p, body .a4_page .main_wrapper .mr_footer .top .right p {
+  margin-bottom: 0px;
+  font-size: 13px;
+  color: #232323;
+  font-weight: 500;
+  font-family: 'Roboto', sans-serif;
+  text-align: center;
+}
+body .a4_page .main_wrapper .mr_footer .bottom p {
+  font-size: 10px;
+  color: #232323;
+  font-weight: 500;
+  font-family: 'Roboto', sans-serif;
+  text-align: center;
+}/*# sourceMappingURL=new.css.map */

@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
+
+:root {
+    --bg-gradient: linear-gradient(180deg, #e7ecff, #c8d0ff);
+    --text-color: #111111;
+    --container-bg: rgba(255, 255, 255, 0.2);
+    --card-blur: blur(15px);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    --heading-color: #4e54c8;
+    --heading-glow: 0 0 10px #4e54c8aa, 0 0 20px #8f94fb77;
+    --input-border: rgba(0, 0, 0, 0.1);
+    --input-bg: rgba(255, 255, 255, 0.15);
+    --input-focus-border: #4e54c8;
+    --input-focus-glow: 0 0 10px #4e54c888;
+    --placeholder-color: #444;
+    --btn-gradient: linear-gradient(90deg, #4e54c8, #8f94fb);
+    --btn-gradient-hover: linear-gradient(90deg, #8f94fb, #4e54c8);
+    --btn-shadow: 0 0 15px rgba(78, 84, 200, 0.6);
+    --btn-hover-shadow: 0 0 25px rgba(143, 148, 251, 1);
+    --btn-disabled-bg: #cbd2ff;
+    --btn-disabled-text: #888;
+}
+
+body, html {
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: 'Orbitron', sans-serif;
+    background: var(--bg-gradient);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow-y: auto;
+}
+
+.container {
+    animation: slideFadeIn 0.8s ease forwards;
+    opacity: 0;
+    transform: translateY(30px);
+    margin: 50px;
+    box-shadow: var(--shadow);
+    background: var(--container-bg);
+    backdrop-filter: var(--card-blur);
+    -webkit-backdrop-filter: var(--card-blur);
+    padding: 20px 25px;
+    border-radius: 15px;
+    max-width: 500px;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+@keyframes slideFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+h2 {
+    color: var(--heading-color);
+    font-size: 25px;
+    margin-bottom: 25px;
+    text-shadow: var(--heading-glow);
+    user-select: none;
+}
+
+form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    border: 2px solid var(--input-border);
+    border-radius: 6px;
+    background: var(--input-bg);
+    padding: 12px 15px;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.input-group:focus-within {
+    border-color: var(--input-focus-border);
+    box-shadow: var(--input-focus-glow);
+}
+
+.input-group input,
+.input-group textarea {
+    border: none;
+    color: var(--text-color);
+    outline: none;
+    background: transparent;
+    font-size: 16px;
+    width: 100%;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.input-group input::placeholder,
+.input-group textarea::placeholder {
+    color: var(--placeholder-color);
+    opacity: 0.7;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 50px;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background: var(--btn-gradient);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--btn-shadow);
+    transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    user-select: none;
+}
+
+button:hover:not(:disabled) {
+    background: var(--btn-gradient-hover);
+    box-shadow: var(--btn-hover-shadow);
+    transform: translateY(-3px);
+}
+
+button:disabled {
+    background: var(--btn-disabled-bg);
+    cursor: not-allowed;
+    box-shadow: none;
+    color: var(--btn-disabled-text);
+}
+
+.image-upload {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.image-upload label {
+    position: relative;
+    border: 2px solid var(--input-focus-border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--input-bg);
+    box-shadow: 0 0 15px var(--input-focus-border)66 inset;
+    transition: box-shadow 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.image-upload .signLabel {
+    width: 130px;
+    height: 100px;
+}
+.image-upload .photoLabel {
+    width: 100px;
+    height: 130px;
+}
+
+
+.image-upload label:hover {
+    box-shadow: 0 0 25px var(--btn-gradient-hover)cc inset;
+}
+
+.image-upload img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+}
+
+.image-upload label.uploaded img {
+    display: block;
+}
+
+.placeholder {
+    position: absolute;
+    color: var(--input-focus-border);
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 10px;
+    user-select: none;
+}
+
+.placeholder.hidden {
+    display: none;
+}
+
+input[type="file"] {
+    display: none;
+}
