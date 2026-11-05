@@ -35,7 +35,7 @@ if (isset($_SESSION['user_token'])) {
 
 // Database theke custom_services gulo category onujayi group kora
 $services_by_cat = [];
-$q_serv = @$conn->query("SELECT id, service_name, category, price, access_link, description, status FROM custom_services WHERE status = 'active' ORDER BY category ASC, id ASC");
+$q_serv = @$conn->query("SELECT id, service_name, category, price, service_type, access_link, description, status FROM custom_services WHERE status = 'active' ORDER BY category ASC, id ASC");
 if ($q_serv && $q_serv->num_rows > 0) {
     while ($srv = $q_serv->fetch_assoc()) {
         $cat = !empty($srv['category']) ? trim($srv['category']) : 'অন্যান্য সেবা';
@@ -175,7 +175,13 @@ $category_colors = [
                         <!-- Service Grid (Mobile 2 Columns) -->
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3.5">
                             <?php foreach ($items as $srv): 
-                                $srv_link = !empty($srv['access_link']) ? $srv['access_link'] : 'order_file.php?service=' . urlencode($srv['service_name']);
+                                // custom service -> nijer order page (protiti service er alada field), auto service -> tar nijer page
+                                $srv_type = isset($srv['service_type']) ? strtolower(trim($srv['service_type'])) : 'custom';
+                                if ($srv_type === 'auto' && !empty($srv['access_link'])) {
+                                    $srv_link = $srv['access_link'];
+                                } else {
+                                    $srv_link = 'service_order.php?id=' . (int)$srv['id'];
+                                }
                             ?>
                                 <div class="service-card p-3 service-item">
                                     <div>

@@ -16,7 +16,7 @@ if (strlen($_SESSION['user_id']) == 0) {
 if (isset($_GET["id"])) {
     $id = base64_decode($_GET["id"]);
     
-    include_once("includes/configuration.php");
+    include_once("../includes/configuration.php");
     // Prepare SQL query to fetch data based on nid and id
     $sql = "SELECT * FROM sign_to_server WHERE  id = ?";
     $stmt = $conn->prepare($sql);

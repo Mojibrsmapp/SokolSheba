@@ -2,7 +2,7 @@
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 include_once("../includes/configuration.php"); 
-include 'db.php'; // Ensure this file connects to DB
+include_once('../includes/db.php'); // Ensure this file connects to DB
 
 // Get user's IP address
 function getUserIP() {
