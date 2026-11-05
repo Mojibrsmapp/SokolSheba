@@ -247,6 +247,26 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <?php endif; ?>
             </a>
 
+            <a href="payment_verify.php" class="sidebar-menu-item <?php echo ($current_page === 'payment_verify.php') ? 'active' : ''; ?>">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-money-check-dollar text-emerald-400"></i>
+                    <span>পেমেন্ট যাচাই</span>
+                </div>
+                <?php
+                    $__pending_payments = 0;
+                    $__pay_tbl = @$conn->query("SHOW TABLES LIKE 'order_payments'");
+                    if ($__pay_tbl && $__pay_tbl->num_rows > 0) {
+                        $__pay_res = @$conn->query("SELECT COUNT(id) AS c FROM order_payments WHERE status = 'pending'");
+                        if ($__pay_res && $__pay_row = $__pay_res->fetch_assoc()) {
+                            $__pending_payments = (int)$__pay_row['c'];
+                        }
+                    }
+                ?>
+                <?php if ($__pending_payments > 0): ?>
+                    <span class="counter-pill-sm bg-emerald-500 text-white"><?php echo $__pending_payments; ?></span>
+                <?php endif; ?>
+            </a>
+
             <a href="work_history.php" class="sidebar-menu-item <?php echo ($current_page === 'work_history.php') ? 'active' : ''; ?>">
                 <div class="flex items-center gap-2.5">
                     <i class="fa-solid fa-clock-rotate-left text-violet-400"></i>
