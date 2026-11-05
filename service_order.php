@@ -168,7 +168,11 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 
             $conn->commit();
 
-            header("Location: receipt.php?order=" . $order_id . "&new=1");
+            if ($payment_method === 'wallet') {
+                header("Location: receipt.php?order=" . $order_id . "&new=1");
+            } else {
+                header("Location: payment_gateway.php?order=" . $order_id);
+            }
             exit;
 
         } catch (Exception $ex) {

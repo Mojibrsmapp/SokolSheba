@@ -1,14 +1,14 @@
 <?php
 /**
- * Sokol Sheba — unified order receipt.
+ * Sokol Sheba — payment receipt (A4 style, one page for every service).
  *
- * Every service (NID, sign copy, TIN, birth registration …) ends here with the
- * same receipt layout. Reached after an order is placed, or later from the
- * order history: receipt.php?order=<order_id>
+ * Receipt.php?order=<order_id>
+ * Shows the order, the payment (wallet / bKash / Nagad / Rocket / Upay TrxID)
+ * and prints cleanly on A4.
  */
 session_start();
 include_once("includes/configuration.php");
-include_once("includes/service_catalog.php");
+include_once("includes/payment_flow.php");
 
 $user = soko_current_user($conn);
 if (!$user) {
@@ -18,7 +18,6 @@ if (!$user) {
 
 $order_id = isset($_GET['order']) ? (int)$_GET['order'] : 0;
 $order = soko_order_by_id($conn, $order_id, (int)$user['id']);
-
 if (!$order) {
     header("Location: work_history.php");
     exit;
@@ -27,47 +26,79 @@ if (!$order) {
 $is_new = isset($_GET['new']) && (string)$_GET['new'] === '1';
 
 $parsed = soko_read_payment_note($order['input_data']);
-$payment_method = $parsed['payment'];
+$payment_method = $parsed['payment'];          // wallet | mobile | bank
 $detail_rows = $parsed['rows'];
 
+$state = soko_order_payment_state($conn, $order);   // wallet|verified|pending|rejected|unpaid
+$payment = soko_pay_latest($conn, (int)$order['id']);
+$amount = (float)$order['price'];
 $service_title = trim((string)$order['order_type']);
-$order_price = (float)$order['price'];
-$service_charge = 0.0;
-$channels = soko_payment_channels($conn);
+$receipt_no = soko_receipt_no($order);
 
 $service_row = soko_get_service($conn, 0, $service_title);
 $category = 'সেবা';
 $service_id = 0;
 if ($service_row) {
-    $category = trim((string)$service_row['category']);
-    if ($category === '') {
-        $category = 'সেবা';
+    if (trim((string)$service_row['category']) !== '') {
+        $category = trim((string)$service_row['category']);
     }
     $service_id = (int)$service_row['id'];
 }
-$service_icon = soko_service_icon($service_title, $category);
 
 $support_number = '';
 if (function_exists('get_site_setting')) {
     $support_number = trim((string)get_site_setting($conn, 'support_whatsapp_num', ''));
 }
-$whatsapp_link = '';
-if ($support_number !== '') {
-    $digits = preg_replace('/[^0-9]/', '', $support_number);
-    if (strlen($digits) === 11) {
-        $digits = '88' . $digits;
-    }
-    $whatsapp_link = 'https://wa.me/' . $digits;
+
+if ($state === 'wallet') {
+    $method_name = 'ওয়ালেট ব্যালেন্স';
+    $method_css = 'mk-wallet';
+    $payer_number = isset($user['mobile']) ? (string)$user['mobile'] : '';
+    $trx_display = 'WALLET-' . $receipt_no;
+    $paid_at = $order['created_at'];
+} elseif ($payment) {
+    $meta = soko_pay_method_meta($payment['method']);
+    $method_name = $meta['name'];
+    $method_css = $meta['css'];
+    $payer_number = (string)$payment['sender_number'];
+    $trx_display = (string)$payment['trx_id'];
+    $paid_at = $payment['created_at'];
+} else {
+    $method_name = 'মোবাইল ব্যাংকিং';
+    $method_css = 'mk-bkash';
+    $payer_number = '';
+    $trx_display = '—';
+    $paid_at = $order['created_at'];
 }
 
-$status_key = strtolower(trim((string)$order['status']));
-$is_unpaid = ($payment_method === 'mobile' || $payment_method === 'bank');
+$is_paid = ($state === 'wallet' || $state === 'verified');
+
+if ($state === 'pending') {
+    $badge_title = 'পেমেন্ট যাচাই চলছে';
+    $badge_text = 'আপনার পেমেন্ট তথ্য যাচাই করা হচ্ছে, কনফার্ম হতে কয়েক মিনিট সময় লাগতে পারে।';
+    $badge_class = 'is-wait';
+    $badge_icon = 'fa-clock';
+} elseif ($state === 'rejected') {
+    $badge_title = 'পেমেন্ট বাতিল হয়েছে';
+    $badge_text = 'আপনার জমা দেওয়া TrxID যাচাই করা যায়নি। আবার পেমেন্ট করুন অথবা সাপোর্টে যোগাযোগ করুন।';
+    $badge_class = 'is-bad';
+    $badge_icon = 'fa-circle-xmark';
+} elseif ($state === 'unpaid') {
+    $badge_title = 'পেমেন্ট বাকি আছে';
+    $badge_text = 'অর্ডারটি নিশ্চিত করতে পেমেন্ট সম্পন্ন করুন।';
+    $badge_class = 'is-wait';
+    $badge_icon = 'fa-circle-exclamation';
+} else {
+    $badge_title = 'পেমেন্ট সফল';
+    $badge_text = 'আপনার পেমেন্ট সফলভাবে সম্পন্ন হয়েছে।';
+    $badge_class = 'is-ok';
+    $badge_icon = 'fa-check';
+}
 
 function soko_receipt_is_file($value)
 {
     $lower = strtolower((string)$value);
-    $extensions = array('.jpg', '.jpeg', '.png', '.webp', '.pdf');
-    foreach ($extensions as $extension) {
+    foreach (array('.jpg', '.jpeg', '.png', '.webp', '.pdf') as $extension) {
         $length = strlen($extension);
         if ($length < strlen($lower) && substr($lower, -$length) === $extension) {
             return true;
@@ -81,320 +112,349 @@ function soko_receipt_is_file($value)
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>রশিদ #<?php echo (int)$order['id']; ?> — <?php echo soko_h($service_title); ?> | সকল সেবা</title>
+<title>পেমেন্ট রশিদ #<?php echo soko_h($receipt_no); ?> — <?php echo soko_h($service_title); ?></title>
 <link rel="shortcut icon" href="assets/logo.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-:root{
-  --green:#0B7A3B;
-  --green-dark:#07612E;
-  --green-soft:#EAF6EE;
-  --green-line:#D6EBDC;
-  --red:#E51B23;
-  --ink:#123225;
-  --muted:#5E7466;
-  --line:#E3EDE6;
-  --page:#F5FAF6;
-}
+:root{--green:#0B7A3B;--green-dark:#075F2D;--green-soft:#EAF6EE;--green-line:#CFE6D7;--red:#E51B23;--ink:#123225;--muted:#5E7466;--line:#E3EDE6;--page:#EEF4F0}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:'Hind Siliguri',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--page);color:var(--ink);font-size:15px;line-height:1.55;padding-bottom:70px}
+body{font-family:'Hind Siliguri',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--page);color:var(--ink);font-size:14.5px;line-height:1.55;padding:16px 10px 30px}
 a{text-decoration:none;color:inherit}
 button{font-family:inherit}
+.sheet{max-width:820px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 10px 34px rgba(11,122,59,.12)}
 
-/* top bar */
-.topbar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:60}
-.topbar-inner{max-width:880px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:10px 16px}
-.brand{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
-.brand-logo{width:48px;height:48px;border-radius:50%;overflow:hidden;flex:0 0 48px;border:2px solid var(--green);background:#fff}
-.brand-logo img{width:100%;height:100%;object-fit:cover}
-.brand-name{font-size:23px;font-weight:700;color:var(--green);line-height:1.1;display:block;letter-spacing:-.3px}
-.brand-name em{color:var(--red);font-style:normal}
-.brand-tag{display:block;font-size:12.5px;color:var(--muted);font-weight:500;margin-top:1px}
-.wallet-pill{display:flex;align-items:center;gap:8px;border:1.5px solid var(--green);border-radius:12px;padding:6px 12px 6px 6px;background:#fff}
-.wallet-ic{width:30px;height:30px;border-radius:8px;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px}
-.wallet-txt{display:flex;flex-direction:column;line-height:1.15}
-.wallet-txt small{font-size:10.5px;color:var(--muted);font-weight:600}
-.wallet-txt b{font-size:14px}
-.icon-btn{width:42px;height:42px;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:16px}
+/* ---------- header ---------- */
+.head{position:relative;padding:16px 18px;background:#fff;overflow:hidden}
+.head:before{content:"";position:absolute;right:-60px;top:-90px;width:330px;height:230px;background:linear-gradient(135deg,#0E8C4B,#0B7A3B);border-radius:0 0 0 220px;opacity:.95}
+.head:after{content:"";position:absolute;right:20px;top:0;width:120px;height:100%;background:repeating-linear-gradient(90deg,transparent 0 10px,rgba(229,27,35,.55) 10px 13px,transparent 13px 24px);opacity:.16;transform:skewX(-12deg)}
+.head-in{position:relative;z-index:2;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.h-brand{display:flex;align-items:center;gap:11px}
+.h-logo{width:64px;height:64px;border-radius:50%;overflow:hidden;background:#fff;border:3px solid var(--green);box-shadow:0 3px 10px rgba(11,122,59,.18);flex:0 0 64px}
+.h-logo img{width:100%;height:100%;object-fit:cover}
+.h-name{font-size:31px;font-weight:700;color:var(--green);line-height:1.05;letter-spacing:-.6px}
+.h-name em{color:var(--red);font-style:normal}
+.h-tag{font-size:14px;color:#33513F;font-weight:600;margin-top:2px}
+.h-panel{margin-left:auto;background:var(--green);color:#fff;border-radius:10px;padding:9px 18px;font-size:14px;font-weight:600;text-align:center;line-height:1.35;box-shadow:0 4px 12px rgba(11,122,59,.2)}
+.h-rule{height:4px;background:linear-gradient(90deg,var(--green) 0 62%,var(--red) 62% 74%,var(--green) 74% 100%)}
 
-/* success banner */
-.banner{background:linear-gradient(135deg,#0E8C4B 0%,#0B7A3B 55%,#075F2D 100%);color:#fff;text-align:center;padding:26px 16px 30px}
-.banner .tick{width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 10px}
-.banner h1{font-size:23px;font-weight:700;letter-spacing:-.2px}
-.banner p{font-size:13.5px;opacity:.92;margin-top:3px}
-.banner .order-chip{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:5px 14px;font-size:13px;font-weight:600;margin-top:12px}
+/* ---------- receipt title ---------- */
+.title-bar{display:flex;align-items:center;gap:14px;margin:14px 16px 0;border:1.5px solid var(--green-line);background:#F7FCF8;border-radius:12px;padding:12px 16px;flex-wrap:wrap}
+.title-left{display:flex;align-items:center;gap:12px}
+.title-check{width:46px;height:46px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 46px}
+.title-left b{display:block;font-size:24px;color:var(--green-dark);font-weight:700;line-height:1.1}
+.title-left small{display:block;font-size:11px;letter-spacing:2.4px;color:#8AA396;font-weight:600;text-transform:uppercase;margin-top:2px}
+.title-right{margin-left:auto;text-align:right;font-size:12.8px;color:var(--muted);line-height:1.7}
+.title-right b{color:var(--ink);font-size:13.2px}
 
-.shell{max-width:880px;margin:0 auto;padding:16px}
+/* ---------- body ---------- */
+.body{padding:14px 16px 16px}
+.seg{margin-bottom:14px}
+.seg-pill{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:#fff;font-size:14px;font-weight:700;padding:6px 16px 6px 12px;border-radius:8px 18px 18px 8px;margin-bottom:8px}
+.seg-pill i{font-size:12.5px}
+.seg-cols{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.seg-main{flex:1;min-width:240px}
+.seg-side{flex:0 0 250px}
 
-/* receipt */
-.receipt{background:#fff;border:1px solid var(--green-line);border-radius:16px;overflow:hidden;box-shadow:0 8px 24px rgba(11,122,59,.07)}
-.r-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px;border-bottom:1px dashed #D9E6DD;background:#FBFEFC}
-.r-brand{display:flex;align-items:center;gap:10px}
-.r-brand img{width:44px;height:44px;border-radius:50%;border:2px solid var(--green);object-fit:cover}
-.r-brand b{display:block;font-size:18px;color:var(--green);line-height:1.15;font-weight:700}
-.r-brand b em{color:var(--red);font-style:normal}
-.r-brand small{display:block;font-size:11.5px;color:var(--muted)}
-.r-title{text-align:right}
-.r-title b{display:block;font-size:16px;letter-spacing:.5px;font-weight:700}
-.r-title span{display:block;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1.4px}
+table.kv{width:100%;border-collapse:collapse}
+table.kv td{padding:6px 0;font-size:14px;vertical-align:top}
+table.kv td.k{color:#3C5B49;width:44%;font-weight:500}
+table.kv td.k:after{content:":";float:right;color:#9BB0A3;margin-right:8px}
+table.kv td.v{font-weight:600;word-break:break-word}
+table.kv tr.total td.v{font-size:22px;color:var(--green-dark);font-weight:700}
 
-/* meta */
-.r-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
-.meta-cell{background:#fff;padding:11px 14px}
-.meta-cell span{display:block;font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:2px}
-.meta-cell b{display:block;font-size:13.8px;font-weight:600;word-break:break-word}
-.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 10px;border-radius:20px}
-.pill.ok{background:#E7F7ED;color:#0A6B34;border:1px solid #C4E7D2}
-.pill.wait{background:#FFF6E5;color:#8A5A00;border:1px solid #F2DFB0}
-.pill.bad{background:#FDEDED;color:#A81616;border:1px solid #F4D0D0}
+.state-box{border-radius:12px;padding:16px 14px;text-align:center;border:1.5px solid}
+.state-box .sb-ic{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 8px;color:#fff}
+.state-box b{display:block;font-size:17px;font-weight:700;margin-bottom:3px}
+.state-box small{display:block;font-size:12.3px;line-height:1.5}
+.state-box.is-ok{background:#F1FAF4;border-color:#BFE3CC}
+.state-box.is-ok .sb-ic{background:var(--green)}
+.state-box.is-ok b{color:var(--green-dark)}
+.state-box.is-ok small{color:#4B6B58}
+.state-box.is-wait{background:#FFFBF1;border-color:#F1E1B4}
+.state-box.is-wait .sb-ic{background:#E0A81B}
+.state-box.is-wait b{color:#8A5A00}
+.state-box.is-wait small{color:#8A6A25}
+.state-box.is-bad{background:#FEF3F3;border-color:#F4D2D2}
+.state-box.is-bad .sb-ic{background:#D94A4A}
+.state-box.is-bad b{color:#A81616}
+.state-box.is-bad small{color:#8E4A4A}
 
-/* body */
-.r-body{padding:16px}
-.r-service{display:flex;align-items:center;gap:11px;padding:11px 13px;border:1px solid var(--line);border-radius:12px;margin-bottom:14px}
-.r-service .ic{width:36px;height:36px;border-radius:10px;background:var(--green-soft);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:15px}
-.r-service b{display:block;font-size:15px;font-weight:700}
-.r-service small{display:block;font-size:12px;color:var(--muted)}
-.r-service .amt{margin-left:auto;font-size:18px;font-weight:700;color:var(--green-dark)}
+/* method card */
+.mcard{border:1.5px solid #E2EFE6;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 4px 14px rgba(11,122,59,.06)}
+.mcard-head{color:#fff;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:14.5px}
+.mcard-head .glyph{font-size:12px;opacity:.9}
+.mcard-body{padding:12px}
+.mcard-body .mc-check{width:38px;height:38px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;margin:0 auto 6px}
+.mcard-body .mc-title{text-align:center;font-weight:700;font-size:14.5px;color:var(--green-dark);margin-bottom:8px}
+.mcard-body .mc-row{display:flex;justify-content:space-between;font-size:12.3px;color:var(--muted);padding:3px 0;border-bottom:1px dashed #EAF2EC}
+.mcard-body .mc-row:last-child{border-bottom:0}
+.mcard-body .mc-row b{color:var(--ink);font-weight:600}
 
-h3.sec{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 7px}
+.mk-bkash{background:#E2136E}
+.mk-nagad{background:#F58220}
+.mk-rocket{background:#8C3494}
+.mk-upay{background:#1C4E9B}
+.mk-wallet{background:var(--green)}
 
-table.details{width:100%;border-collapse:collapse}
-table.details tr{border-bottom:1px dashed #E7F0EA}
-table.details tr:last-child{border-bottom:0}
-table.details td{padding:9px 2px;font-size:13.8px;vertical-align:top}
-table.details td.k{color:var(--muted);width:42%;font-weight:500}
-table.details td.v{font-weight:600;text-align:right;word-break:break-word}
-table.details td.v a{color:var(--green-dark);text-decoration:underline}
+.wordmark{display:inline-flex;align-items:center;gap:5px;font-weight:800;font-size:16px}
+.wordmark.ink-bkash{color:#E2136E}
+.wordmark.ink-nagad{color:#F58220}
+.wordmark.ink-rocket{color:#8C3494}
+.wordmark.ink-upay{color:#1C4E9B}
+.wordmark.ink-wallet{color:var(--green-dark)}
 
-.totals{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
-.t-row{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;color:var(--muted)}
-.t-row span:last-child{font-weight:600;color:var(--ink)}
-.t-grand{display:flex;justify-content:space-between;align-items:center;background:var(--green-soft);border-radius:12px;padding:11px 14px;margin-top:8px;font-weight:700;font-size:15px;color:var(--green-dark)}
-.t-grand b{font-size:20px}
+/* watermark */
+.has-mark{position:relative}
+.watermark{position:absolute;right:0;top:6px;width:150px;height:150px;border-radius:50%;border:6px solid #F0F7F2;display:flex;align-items:center;justify-content:center;opacity:.9;overflow:hidden}
+.watermark img{width:100%;height:100%;object-fit:cover;opacity:.18}
 
-/* payment note */
-.pay-note{margin-top:14px;background:#FFFCF3;border:1px solid #F2E4BC;border-radius:12px;padding:12px 14px}
-.pay-note h4{font-size:13.5px;font-weight:700;color:#8A5A00;display:flex;align-items:center;gap:7px;margin-bottom:6px}
-.pay-note p{font-size:12.8px;color:#7A6320;margin-bottom:7px}
-.pay-num{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px dashed #E4D6A8;border-radius:9px;padding:8px 11px;font-size:13.5px;margin-bottom:6px}
-.pay-num b{font-size:14.5px;letter-spacing:.4px}
-.pay-num small{font-size:11.5px;color:var(--muted);font-weight:600}
+/* instructions */
+.instr{background:#F6FBF7;border:1px solid #E1EFE6;border-radius:12px;padding:12px 14px;display:flex;gap:10px}
+.instr .ii{color:var(--green);font-size:15px;margin-top:2px}
+.instr b{display:block;font-size:13.8px;margin-bottom:4px}
+.instr ul{padding-left:17px;margin:0}
+.instr li{font-size:12.6px;color:#4E6C5B;margin-bottom:3px}
 
-/* footer note */
-.r-foot{border-top:1px dashed #D9E6DD;background:#FBFEFC;padding:13px 16px;display:flex;gap:10px;align-items:flex-start}
-.r-foot i{color:var(--green);font-size:14px;margin-top:2px}
-.r-foot p{font-size:12.3px;color:var(--muted)}
-.r-foot p b{color:var(--ink)}
+/* details of submitted info */
+.submitted{margin-top:6px;border-top:1px dashed #E4EFE8;padding-top:8px}
+.submitted summary{cursor:pointer;font-size:12.8px;font-weight:700;color:var(--green-dark);list-style:none}
+.submitted summary::-webkit-details-marker{display:none}
+.submitted summary:before{content:"\f078";font-family:"Font Awesome 6 Free";font-weight:900;font-size:10px;margin-right:6px}
+.submitted[open] summary:before{content:"\f077"}
+.submitted table.kv td{padding:4px 0;font-size:13px}
+
+/* ---------- footer ---------- */
+.foot{background:linear-gradient(135deg,#0E8C4B 0%,#0B7A3B 45%,#075F2D 100%);color:#fff;padding:16px 18px;position:relative;overflow:hidden}
+.foot:before{content:"";position:absolute;left:-40px;top:-60px;width:220px;height:180px;border-radius:50%;background:rgba(255,255,255,.07)}
+.foot:after{content:"";position:absolute;right:-30px;bottom:-70px;width:200px;height:160px;border-radius:50%;background:rgba(255,255,255,.06)}
+.foot-in{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.fs{display:flex;align-items:center;gap:9px;font-size:13.2px;font-weight:700}
+.fs i{font-size:19px;opacity:.95}
+.fs small{display:block;font-size:11px;opacity:.82;font-weight:500}
+.fs.center{text-align:center;flex-direction:column;gap:2px}
+.fs.center b{font-size:17px}
+.fs.center small{font-size:11.5px}
 
 /* actions */
-.actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
-.btn{flex:1;min-width:150px;height:48px;border-radius:12px;border:0;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14.5px;font-weight:700;cursor:pointer;transition:.16s}
+.actions{max-width:820px;margin:14px auto 0;display:flex;gap:10px;flex-wrap:wrap}
+.btn{flex:1;min-width:150px;height:48px;border-radius:12px;border:0;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14.5px;font-weight:700;cursor:pointer}
 .btn.primary{background:var(--green);color:#fff;box-shadow:0 6px 16px rgba(11,122,59,.22)}
-.btn.primary:hover{background:var(--green-dark)}
 .btn.ghost{background:#fff;border:1.5px solid var(--green-line);color:var(--green-dark)}
-.btn.ghost:hover{border-color:var(--green)}
 
-.bottom-nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px 4px 8px;z-index:70}
-.bottom-nav a{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;color:#7A8F82;flex:1}
-.bottom-nav a i{font-size:17px}
-.bottom-nav a.is-active{color:var(--green)}
-
-@media (max-width:700px){
-  .r-meta{grid-template-columns:repeat(2,1fr)}
-  .brand-name{font-size:20px}
-  .brand-tag{font-size:11px}
-  .topbar-inner{padding:8px 12px;gap:8px}
-  .wallet-txt small{display:none}
-  .icon-btn{width:38px;height:38px;border-radius:10px;font-size:14px}
-  .banner h1{font-size:20px}
-  .shell{padding:12px}
-  .r-title b{font-size:14px}
-}
-@media (min-width:701px){
-  .bottom-nav{display:none}
-  body{padding-bottom:24px}
+@media (max-width:760px){
+  .h-name{font-size:23px}
+  .h-tag{font-size:12px}
+  .h-logo{width:52px;height:52px;flex:0 0 52px;border-width:2px}
+  .h-panel{margin-left:0;width:100%;margin-top:8px}
+  .head:before{width:220px;height:170px;right:-70px;top:-60px}
+  .title-left b{font-size:20px}
+  .title-right{margin-left:0;width:100%;text-align:left;border-top:1px dashed #D9E9DF;padding-top:8px;margin-top:6px}
+  .seg-side{flex:1 1 100%}
+  .watermark{display:none}
+  body{padding:8px 6px 24px;font-size:14px}
+  .body{padding:12px}
+  .title-bar{margin:10px 12px 0;padding:10px 12px}
+  .fs.center{width:100%;order:3}
 }
 @media print{
-  .topbar,.bottom-nav,.banner,.actions{display:none!important}
-  body{background:#fff;padding:0}
-  .receipt{border:0;box-shadow:none}
-  .shell{padding:0;max-width:100%}
+  body{background:#fff;padding:0;font-size:12.5px}
+  .sheet{box-shadow:none;border-radius:0;max-width:100%}
+  .actions,.no-print{display:none!important}
+  .head:before{opacity:.9}
+  @page{size:A4;margin:8mm}
 }
 </style>
 </head>
 <body>
 
-<header class="topbar">
-  <div class="topbar-inner">
-    <a href="dashboard.php" class="brand">
-      <span class="brand-logo"><img src="assets/logo.jpg" alt="সকল সেবা"></span>
-      <span>
-        <span class="brand-name">সকল <em>সেবা</em></span>
-        <span class="brand-tag">সব কাজ, এক প্ল্যাটফর্ম</span>
-      </span>
-    </a>
-    <div class="top-actions" style="display:flex;align-items:center;gap:8px">
-      <a href="recharge.php" class="wallet-pill">
-        <span class="wallet-ic"><i class="fa-solid fa-wallet"></i></span>
-        <span class="wallet-txt"><small>ওয়ালেট</small><b><?php echo soko_money($user['balance'], 2); ?></b></span>
-      </a>
-      <a href="support.php" class="icon-btn" aria-label="সাপোর্ট"><i class="fa-solid fa-headset"></i></a>
+<div class="sheet">
+
+  <div class="head">
+    <div class="head-in">
+      <div class="h-brand">
+        <span class="h-logo"><img src="assets/logo.jpg" alt="সকল সেবা"></span>
+        <span>
+          <span class="h-name">সকল <em>সেবা</em></span>
+          <span class="h-tag">সব কাজ, এক প্ল্যাটফর্ম</span>
+        </span>
+      </div>
+      <div class="h-panel">আপনার বিশ্বস্ত<br>অনলাইন সেবা কেন্দ্র</div>
     </div>
   </div>
-</header>
+  <div class="h-rule"></div>
 
-<section class="banner">
-  <div class="tick"><i class="fa-solid fa-check"></i></div>
-  <h1><?php echo $is_new ? 'আপনার অর্ডার সফলভাবে জমা হয়েছে!' : 'আপনার অর্ডারের রশিদ'; ?></h1>
-  <p><?php echo $is_new ? 'রশিদটি সংরক্ষণ করুন — এই নম্বর দিয়েই অর্ডারের অবস্থা জানতে পারবেন।' : 'নিচে আপনার অর্ডারের সম্পূর্ণ বিবরণ দেওয়া হলো।'; ?></p>
-  <span class="order-chip"><i class="fa-solid fa-receipt"></i> অর্ডার নং: #<?php echo soko_bn_digits((int)$order['id']); ?></span>
-</section>
+  <div class="title-bar">
+    <div class="title-left">
+      <span class="title-check"><i class="fa-solid fa-check"></i></span>
+      <span>
+        <b>পেমেন্ট রশিদ</b>
+        <small>Payment Receipt</small>
+      </span>
+    </div>
+    <div class="title-right">
+      <div>রশিদ নং: <b>#<?php echo soko_h($receipt_no); ?></b></div>
+      <div>তারিখ: <b><?php echo soko_bn_date($order['created_at']); ?></b></div>
+    </div>
+  </div>
 
-<main class="shell">
+  <div class="body">
 
-  <div class="receipt">
-    <div class="r-head">
-      <div class="r-brand">
-        <img src="assets/logo.jpg" alt="সকল সেবা">
-        <span>
-          <b>সকল <em>সেবা</em></b>
-          <small>সব কাজ, এক প্ল্যাটফর্ম</small>
-        </span>
-      </div>
-      <div class="r-title">
-        <b>রশিদ</b>
-        <span>Receipt</span>
+    <!-- customer -->
+    <div class="seg">
+      <div class="seg-pill"><i class="fa-solid fa-user"></i> গ্রাহকের তথ্য</div>
+      <div class="seg-cols">
+        <div class="seg-main">
+          <table class="kv">
+            <tr><td class="k">নাম</td><td class="v"><?php echo soko_h($user['name']); ?></td></tr>
+            <tr><td class="k">মোবাইল নম্বর</td><td class="v"><?php echo soko_h($user['mobile'] !== '' ? $user['mobile'] : '—'); ?></td></tr>
+            <tr><td class="k">ইমেইল</td><td class="v"><?php echo soko_h($user['email'] !== '' ? $user['email'] : '—'); ?></td></tr>
+          </table>
+        </div>
+        <div class="seg-side">
+          <div class="state-box <?php echo soko_h($badge_class); ?>">
+            <span class="sb-ic"><i class="fa-solid <?php echo soko_h($badge_icon); ?>"></i></span>
+            <b><?php echo soko_h($badge_title); ?></b>
+            <small><?php echo soko_h($badge_text); ?></small>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="r-meta">
-      <div class="meta-cell">
-        <span>গ্রাহকের নাম</span>
-        <b><?php echo soko_h($user['name']); ?></b>
-      </div>
-      <div class="meta-cell">
-        <span>মোবাইল নম্বর</span>
-        <b><?php echo soko_h($user['mobile'] !== '' ? $user['mobile'] : '—'); ?></b>
-      </div>
-      <div class="meta-cell">
-        <span>অর্ডার নম্বর</span>
-        <b>#<?php echo soko_bn_digits((int)$order['id']); ?></b>
-      </div>
-      <div class="meta-cell">
-        <span>অর্ডারের তারিখ</span>
-        <b><?php echo soko_bn_date($order['created_at']); ?></b>
-      </div>
-      <div class="meta-cell">
-        <span>পেমেন্ট পদ্ধতি</span>
-        <b><?php echo soko_h(soko_payment_label($payment_method)); ?></b>
-      </div>
-      <div class="meta-cell">
-        <span>অবস্থা</span>
-        <b>
-          <?php if ($status_key === 'cancel' || $status_key === 'cancelled'): ?>
-            <span class="pill bad"><?php echo soko_h(soko_status_bn($order['status'])); ?></span>
-          <?php elseif ($status_key === 'success' || $status_key === 'completed'): ?>
-            <span class="pill ok"><?php echo soko_h(soko_status_bn($order['status'])); ?></span>
-          <?php else: ?>
-            <span class="pill wait"><?php echo soko_h(soko_status_bn($order['status'])); ?></span>
-          <?php endif; ?>
-        </b>
-      </div>
+    <!-- service -->
+    <div class="seg has-mark">
+      <div class="seg-pill"><i class="fa-solid fa-layer-group"></i> সেবার বিবরণ</div>
+      <div class="watermark"><img src="assets/logo.jpg" alt=""></div>
+      <table class="kv" style="max-width:470px">
+        <tr><td class="k">সেবার নাম</td><td class="v"><?php echo soko_h($service_title); ?></td></tr>
+        <tr><td class="k">সেবার ধরন</td><td class="v"><?php echo soko_h($category); ?></td></tr>
+        <tr><td class="k">অর্ডার নম্বর</td><td class="v">#<?php echo soko_h($receipt_no); ?></td></tr>
+        <tr><td class="k">অর্ডার স্ট্যাটাস</td><td class="v"><?php echo soko_h(soko_status_bn($order['status'])); ?></td></tr>
+        <tr class="total"><td class="k">পরিমাণ</td><td class="v"><?php echo soko_money($amount); ?></td></tr>
+      </table>
     </div>
 
-    <div class="r-body">
-
-      <div class="r-service">
-        <span class="ic"><i class="fa-solid <?php echo soko_h($service_icon); ?>"></i></span>
-        <span>
-          <b><?php echo soko_h($service_title); ?></b>
-          <small><?php echo soko_h($category); ?></small>
-        </span>
-        <span class="amt"><?php echo soko_money($order_price); ?></span>
-      </div>
-
-      <h3 class="sec">সেবার তথ্য</h3>
-      <table class="details">
-        <?php if (count($detail_rows) > 0): ?>
-          <?php foreach ($detail_rows as $row): ?>
+    <!-- payment -->
+    <div class="seg">
+      <div class="seg-pill"><i class="fa-solid fa-wallet"></i> পেমেন্টের বিবরণ</div>
+      <div class="seg-cols">
+        <div class="seg-main">
+          <table class="kv">
             <tr>
-              <td class="k"><?php echo soko_h($row['label']); ?></td>
+              <td class="k">পেমেন্ট পদ্ধতি</td>
               <td class="v">
-                <?php if (soko_receipt_is_file($row['value'])): ?>
-                  <a href="uploads/orders/<?php echo soko_h($row['value']); ?>" target="_blank" rel="noopener"><?php echo soko_h($row['value']); ?></a>
-                <?php else: ?>
-                  <?php echo soko_h($row['value']); ?>
-                <?php endif; ?>
+                <?php
+                  $ink = 'ink-bkash';
+                  if ($method_css === 'mk-nagad') { $ink = 'ink-nagad'; }
+                  if ($method_css === 'mk-rocket') { $ink = 'ink-rocket'; }
+                  if ($method_css === 'mk-upay') { $ink = 'ink-upay'; }
+                  if ($method_css === 'mk-wallet') { $ink = 'ink-wallet'; }
+                ?>
+                <span class="wordmark <?php echo soko_h($ink); ?>"><i class="fa-solid fa-bolt"></i> <?php echo soko_h($method_name); ?></span>
               </td>
             </tr>
-          <?php endforeach; ?>
-        <?php else: ?>
-          <tr>
-            <td class="k">তথ্য</td>
-            <td class="v">—</td>
-          </tr>
-        <?php endif; ?>
-      </table>
-
-      <div class="totals">
-        <div class="t-row"><span>সেবা মূল্য</span><span><?php echo soko_money($order_price); ?></span></div>
-        <div class="t-row"><span>সার্ভিস চার্জ</span><span><?php echo soko_money($service_charge); ?></span></div>
-        <div class="t-grand"><span>মোট পরিশোধ</span><b><?php echo soko_money($order_price + $service_charge); ?></b></div>
+            <tr><td class="k">পেমেন্ট নম্বর</td><td class="v"><?php echo soko_h($payer_number !== '' ? soko_bn_digits($payer_number) : '—'); ?></td></tr>
+            <tr><td class="k">লেনদেনের পরিমাণ</td><td class="v"><?php echo soko_money($amount); ?></td></tr>
+            <tr><td class="k">ট্রানজেকশন আইডি (TrxID)</td><td class="v"><?php echo soko_h($trx_display); ?></td></tr>
+            <tr><td class="k">পেমেন্টের তারিখ</td><td class="v"><?php echo soko_bn_date($paid_at); ?></td></tr>
+          </table>
+        </div>
+        <div class="seg-side">
+          <div class="mcard">
+            <div class="mcard-head <?php echo soko_h($method_css); ?>">
+              <span><?php echo soko_h($method_name); ?></span>
+              <span class="glyph"><i class="fa-solid fa-bolt"></i></span>
+            </div>
+            <div class="mcard-body">
+              <div class="mc-check"><i class="fa-solid <?php echo $is_paid ? 'fa-check' : 'fa-clock'; ?>"></i></div>
+              <div class="mc-title"><?php echo $is_paid ? 'পেমেন্ট সফল' : 'যাচাই চলছে'; ?></div>
+              <div class="mc-row"><span>পরিমাণ</span><b><?php echo soko_money($amount); ?></b></div>
+              <div class="mc-row"><span>প্রাপক</span><b>সকল সেবা</b></div>
+              <div class="mc-row"><span>ট্রানজেকশন আইডি</span><b><?php echo soko_h($trx_display); ?></b></div>
+              <div class="mc-row"><span>তারিখ ও সময়</span><b><?php echo soko_bn_date($paid_at); ?></b></div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <?php if ($is_unpaid && $status_key !== 'cancel' && $status_key !== 'success' && $status_key !== 'completed'): ?>
-        <div class="pay-note">
-          <h4><i class="fa-solid fa-circle-exclamation"></i> পেমেন্ট বাকি আছে</h4>
-          <p>নিচের যেকোনো একটি নম্বরে <?php echo soko_money($order_price + $service_charge); ?> সেন্ড মানি করে ট্রানজেকশন আইডি সাপোর্টে পাঠান। পেমেন্ট ভেরিফাই হলে অর্ডার প্রসেস শুরু হবে।</p>
-          <?php foreach ($channels as $channel): ?>
-            <?php if ($channel['number'] !== ''): ?>
-              <div class="pay-num">
-                <span><?php echo soko_h($channel['name']); ?> <small>(<?php echo soko_h($channel['type']); ?>)</small></span>
-                <b><?php echo soko_bn_digits(soko_h($channel['number'])); ?></b>
-              </div>
-            <?php endif; ?>
-          <?php endforeach; ?>
-          <?php if ($whatsapp_link !== ''): ?>
-            <a class="btn ghost" style="margin-top:6px;height:42px" href="<?php echo soko_h($whatsapp_link); ?>" target="_blank" rel="noopener">
-              <i class="fa-brands fa-whatsapp"></i> ট্রানজেকশন আইডি পাঠান
-            </a>
-          <?php endif; ?>
-        </div>
+      <?php if (count($detail_rows) > 0): ?>
+        <details class="submitted">
+          <summary>অর্ডারে দেওয়া তথ্য দেখুন</summary>
+          <table class="kv">
+            <?php foreach ($detail_rows as $row): ?>
+              <tr>
+                <td class="k"><?php echo soko_h($row['label']); ?></td>
+                <td class="v">
+                  <?php if (soko_receipt_is_file($row['value'])): ?>
+                    <a href="uploads/orders/<?php echo soko_h($row['value']); ?>" target="_blank" rel="noopener" style="color:#075F2D;text-decoration:underline"><?php echo soko_h($row['value']); ?></a>
+                  <?php else: ?>
+                    <?php echo soko_h($row['value']); ?>
+                  <?php endif; ?>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          </table>
+        </details>
       <?php endif; ?>
-
     </div>
 
-    <div class="r-foot">
-      <i class="fa-solid fa-circle-info"></i>
-      <p>
-        <b>ধন্যবাদ!</b> অর্ডারটি আমাদের সিস্টেমে জমা হয়েছে। সাধারণত ১–২ ঘণ্টার মধ্যে প্রসেস সম্পন্ন হয়।
-        অর্ডারের অবস্থা জানতে <b>অর্ডার হিস্টোরি</b> দেখুন
-        <?php if ($support_number !== ''): ?>
-          অথবা সাপোর্টে যোগাযোগ করুন: <b><?php echo soko_bn_digits(soko_h($support_number)); ?></b>
-        <?php endif; ?>।
-      </p>
+    <!-- instructions -->
+    <div class="instr">
+      <i class="fa-solid fa-circle-info ii"></i>
+      <div>
+        <b>গুরুত্বপূর্ণ নির্দেশনা</b>
+        <ul>
+          <?php if ($is_paid): ?>
+            <li>আপনার পেমেন্ট সফলভাবে গ্রহণ করা হয়েছে।</li>
+            <li>প্রয়োজনে অ্যাডমিন প্যানেল থেকে পেমেন্ট যাচাইয়ের পর অর্ডার প্রসেস করা হবে।</li>
+          <?php elseif ($state === 'rejected'): ?>
+            <li>আপনার দেওয়া TrxID যাচাই করা যায়নি — সঠিক TrxID দিয়ে আবার চেষ্টা করুন।</li>
+            <li>টাকা কেটে নেওয়া হয়ে থাকলে সাপোর্টে ট্রানজেকশন আইডি পাঠান।</li>
+          <?php elseif ($state === 'unpaid'): ?>
+            <li>পেমেন্ট সম্পন্ন না হলে অর্ডার প্রসেস শুরু হবে না।</li>
+            <li>বিকাশ / নগদ / রকেট / উপায় — যেকোনোভাবে সেন্ড মানি করতে পারেন।</li>
+          <?php else: ?>
+            <li>আপনার TrxID যাচাই করা হচ্ছে, সাধারণত ৫–১৫ মিনিট সময় লাগে।</li>
+            <li>যাচাই সম্পন্ন হলে এই রশিদেই "পেমেন্ট সফল" দেখতে পাবেন।</li>
+          <?php endif; ?>
+          <li>কোনো সমস্যায় পড়লে আমাদের সাপোর্টে যোগাযোগ করুন।</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    <div class="foot-in">
+      <div class="fs">
+        <i class="fa-solid fa-headset"></i>
+        <span>সাপোর্ট হেল্পলাইন<small><?php echo $support_number !== '' ? soko_bn_digits(soko_h($support_number)) : '২৪/৭ সাপোর্ট'; ?> (সকাল ১০টা – রাত ১০টা)</small></span>
+      </div>
+      <div class="fs center">
+        <b>ধন্যবাদ</b>
+        <small>সকল সেবার সাথে থাকার জন্য!</small>
+      </div>
+      <div class="fs">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>নিরাপদ লেনদেন<small>আপনার তথ্য ১০০% নিরাপদ</small></span>
+      </div>
     </div>
   </div>
 
-  <div class="actions">
-    <button type="button" class="btn primary" onclick="window.print()"><i class="fa-solid fa-print"></i> রশিদ প্রিন্ট করুন</button>
-    <a class="btn ghost" href="work_history.php"><i class="fa-solid fa-clock-rotate-left"></i> অর্ডার হিস্টোরি</a>
-    <?php if ($service_id > 0): ?>
-      <a class="btn ghost" href="service_order.php?id=<?php echo (int)$service_id; ?>"><i class="fa-solid fa-rotate-right"></i> আবার অর্ডার করুন</a>
-    <?php endif; ?>
-    <a class="btn ghost" href="dashboard.php"><i class="fa-solid fa-house"></i> ড্যাশবোর্ড</a>
-  </div>
+</div>
 
-</main>
-
-<nav class="bottom-nav">
-  <a href="dashboard.php"><i class="fa-solid fa-house"></i><span>হোম</span></a>
-  <a href="services.php"><i class="fa-solid fa-layer-group"></i><span>সেবা</span></a>
-  <a href="recharge.php"><i class="fa-solid fa-wallet"></i><span>ওয়ালেট</span></a>
-  <a href="profile.php"><i class="fa-regular fa-user"></i><span>প্রোফাইল</span></a>
-</nav>
+<div class="actions no-print">
+  <button type="button" class="btn primary" onclick="window.print()"><i class="fa-solid fa-print"></i> রশিদ প্রিন্ট / PDF</button>
+  <?php if ($state === 'unpaid' || $state === 'rejected'): ?>
+    <a class="btn primary" href="payment_gateway.php?order=<?php echo (int)$order['id']; ?>"><i class="fa-solid fa-money-bill-transfer"></i> পেমেন্ট করুন</a>
+  <?php endif; ?>
+  <a class="btn ghost" href="work_history.php"><i class="fa-solid fa-clock-rotate-left"></i> অর্ডার হিস্টোরি</a>
+  <?php if ($service_id > 0): ?>
+    <a class="btn ghost" href="service_order.php?id=<?php echo (int)$service_id; ?>"><i class="fa-solid fa-rotate-right"></i> আবার অর্ডার</a>
+  <?php endif; ?>
+  <a class="btn ghost" href="dashboard.php"><i class="fa-solid fa-house"></i> ড্যাশবোর্ড</a>
+</div>
 
 </body>
 </html>
