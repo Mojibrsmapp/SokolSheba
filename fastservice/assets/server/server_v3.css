@@ -1,0 +1,125 @@
+   body {
+            font-family: 'Solaiman Lipi', sans-serif;
+            margin: auto;
+            padding: 0;
+            background-color: #f4f4f9;
+            width: 210mm;
+            height: 297mm;
+        }
+
+        @page {
+            size: 210mm 297mm;
+        }
+
+        .container {
+            margin: auto;
+            background: white;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .section {
+            background-color: #bbe6ed;
+        }
+
+        .section-title {
+            font-size: 17px;
+            font-weight: bold;
+            background: #bbe6ed;
+            color: black;
+            padding: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        colgroup col {
+            width: 30%;
+        }
+
+        colgroup col:last-child {
+            width: 70%;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #EAEAEA;
+        }
+
+        th,
+        td {
+            padding: 6px;
+            text-align: left;
+        }
+
+        table td:first-child {
+            color: #000;
+        }
+
+        #footer_english {
+            text-align: center;
+            margin-top: -16px;
+            font-size: 13px;
+            font-weight: bold;
+            font-family: Arial;
+            letter-spacing: -0.2px;
+        }
+
+        .sub_container {
+            padding-left: 100px;
+            padding-right: 100px;
+        }
+
+        .header_top {
+            text-align: center;
+            border-bottom: 1px solid #c2c2c2;
+        }
+
+        p.text {
+            line-height: 10px;
+        }
+
+        img#user_img {
+            width: 110px;
+            margin-top: 1px;
+            border-radius: 10px;
+            box-shadow: rgba(0, 0, 0, 0.35) 0px 2px 10px;
+            height: 120px;
+        }
+
+        .name {
+            border: 1px solid #eaeaea;
+            padding: 1px;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        .user_photo {
+            text-align: center;
+            margin-top: 5px;
+            background-color: #bbe6ed;
+            margin-bottom: 8px;
+        }
+
+
+
+        @media print {
+          
+           * {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+            body {
+                margin: 0;
+                padding: 0;
+                background: white;
+            }
+
+            .section {
+                page-break-inside: avoid;
+            }
+        }

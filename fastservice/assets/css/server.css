@@ -1,0 +1,156 @@
+#nidNumber, #DateOfBirth {
+    width: 100% !important;
+    line-height: 40px !important;
+    padding-left: 45px;
+    background: #f4f5f7;
+    border: none;
+}
+select#versionSelect {
+    width: 100% !important;
+    height: 40px !important;
+    padding-left: 45px;
+    background: #f4f5f7;
+    border: none;
+}
+
+.inputIcon {
+    margin-top: 10px;
+}
+  form.py-5.text-center label {
+    float: left;
+  }
+
+  .inputIcon {
+    position: relative;
+  }
+
+  i.s_icon {
+    position: absolute;
+    padding-top: 12px;
+    width: 40px;
+    border-right: 1px solid #e9e9e9;
+    padding-bottom: 13px;
+  }
+
+
+
+
+  i.fa-triangle-exclamation {
+    position: absolute;
+    left: 50%;
+    top: 28%;
+    transform: translate(-50%, -50%);
+    font-size: 35px;
+  }
+
+  .modal_custom {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: #0000009c;
+    z-index: 11100;
+    overflow: hidden;
+  }
+
+  .alert.alert-danger {
+    top: 50%;
+    left: 50%;
+    width: 40%;
+    transform: translate(-50%, -50%);
+    line-height: 30px;
+    text-align: center;
+    position: relative;
+    padding: 60px 15px;
+    padding-bottom: 30px;
+    border-top: 5px solid #ffab00;
+    border-radius: 0 !important;
+    color: #ffab00;
+    background: white !important;
+  }
+
+  i.fa-solid.fa-xmark {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 30px;
+  }
+
+  @media (max-width: 769px) {
+    .alert.alert-danger {
+      width: 80%;
+      line-height: 20px;
+    }
+
+    i.fa-triangle-exclamation {
+      position: absolute;
+      left: 50%;
+      top: 32%;
+      transform: translate(-50%, -50%);
+      font-size: 35px;
+    }
+  }
+
+  .hide {
+    display: none !important;
+  }
+  
+  
+   /* progress loding pdf*/  
+
+div#loddingPdf {
+    position: fixed;
+    background: #ffffff69;
+    width: 100%;
+    height: 100%;
+    left: 0%;
+    backdrop-filter: blur(6px);
+    z-index: 1000000;
+    display: none;
+    top: 0;
+}
+
+
+
+div#loddingPdf #progress_main {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+  
+}    
+    
+@import url("https://fonts.googleapis.com/css2?family=Zen+Tokyo+Zoo&display=swap");
+
+svg {
+	font-family: "Zen Tokyo Zoo", sans-serif;
+	width: 300px; height: 100%;
+}
+svg text {
+	animation: stroke 3s infinite alternate;
+	stroke-width: 2;
+	stroke: #365FA0;
+	font-size: 30px;
+}
+@keyframes stroke {
+	0%   {
+		fill: rgba(72,138,204,0); stroke: rgba(54,95,160,1);
+		stroke-dashoffset: 25%; stroke-dasharray: 0 50%; stroke-width: 2;
+	}
+	70%  {fill: rgba(72,138,204,0); stroke: rgba(54,95,160,1); }
+	80%  {fill: rgba(72,138,204,0); stroke: rgba(54,95,160,1); stroke-width: 3; }
+	100% {
+		fill: rgba(72,138,204,1); stroke: rgba(54,95,160,0);
+		stroke-dashoffset: -25%; stroke-dasharray: 50% 0; stroke-width: 0;
+	}
+}
+
+.wrapper {background-color: #FFFFFF};
+
+.swal2-popup.swal2-modal.swal2-icon-error.swal2-show {
+    background: #ebf5fc!important;
+    box-shadow: 1px 1px 5px 0px #e7e7e759;
+}
+
+.swal2-container.swal2-center.swal2-backdrop-show {
+    background: rgb(0 0 0 / 1%)!important;
+}

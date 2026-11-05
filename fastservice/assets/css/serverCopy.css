@@ -1,0 +1,78 @@
+body {
+  margin: 0;
+  font-family: "Roboto", sans-serif;
+}
+.background {
+  background-color: lightgrey;
+  position: relative;
+  width: 790px;
+  height: 1065px;
+  margin: auto;
+  transform: scale(1.08);
+  text-align: left;
+  margin-top: 40px;
+}
+.crane {
+  max-width: 100%;
+  height: 100%;
+}
+.topTitle {
+  position: absolute;
+  left: 21%;
+  top: 8%;
+  width: auto;
+  font-size: 42px;
+  color: rgb(255, 182, 47);
+}
+#loadMe {
+  visibility: hidden;
+}
+@media print {
+  html,
+  body {
+    width: 210mm !important;
+    height: 297mm !important;
+    background-color: #fff !important;
+  }
+  .print {
+    display: none !important;
+  }
+}
+#print {
+  background: #03a9f4;
+  padding: 8px;
+  width: 700px;
+  height: 40px;
+  border: 0px;
+  font-size: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 1px 4px 4px #878787;
+  color: #fff;
+  border-radius: 10px;
+  margin: 80px 0;
+  display: none;
+}
+
+@font-face {
+  font-family: Bangla;
+  src: url("assets/fonts/Bangla.eot") format("eot"),
+    url("assets/fonts/Bangla.woff") format("woff"),
+    url("assets/fonts/Bangla.ttf") format("truetype"),
+    url("assets/fonts/Bangla.svg#Bangla") format("truetype");
+}
+@media print {
+  @page {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  body {
+    padding-top: 0px;
+    padding-bottom: 72px;
+  }
+}
+
+body {
+  position: relative;
+}

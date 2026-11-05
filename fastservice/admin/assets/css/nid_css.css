@@ -1,0 +1,50 @@
+  .increase_decrease {
+        text-align: center;
+    }
+
+    .increase_decrease button {
+        background: orange;
+        height: 50px;
+        width: 50px;
+        font-size: 30px;
+    }
+
+.group-button {
+    width: 230px;
+    background: #ebf5fc;
+    margin: auto;
+    margin-bottom: 10px;
+    position: relative;
+    height: 50px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+button.left-button {
+    left: 0;
+}
+.increase_decrease button {
+    background: #424242;
+    height: 50px;
+    width: 50px;
+    font-size: 30px;
+    position: absolute;
+    right: 0;
+    color: white;
+    background-image: linear-gradient(-20deg, #b721ff 0%, #21d4fd 100%);
+}
+button#print_id {
+    border-radius: 5px;
+    width: auto;
+    background: green;
+    color: white;
+    padding: 2px 26px;
+    position: relative;
+    background-image: linear-gradient(-225deg, #A445B2 0%, #D41872 52%, #FF0066 100%);
+}
+.increase_decrease span {
+    font-size: 17px;
+    font-family: arial;
+    position: relative;
+    line-height: 49px;
+    color: #0000af;
+}
