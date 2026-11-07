@@ -16,6 +16,70 @@ if (!$user) {
     exit;
 }
 
+$is_deposit = false;
+$dep_status_bn = '';
+$support_number = '';
+$service_row = null;
+$deposit_id = isset($_GET['deposit']) ? (int)$_GET['deposit'] : 0;
+
+if ($deposit_id > 0) {
+    /* ---------- ওয়ালেট রিচার্জের রশিদ (deposit_requests) ---------- */
+    $is_deposit = true;
+    $dep = null;
+    $d_stmt = $conn->prepare("SELECT id, method, trx_id, amount, status, created_at FROM deposit_requests WHERE id = ? AND user_id = ? LIMIT 1");
+    $d_uid = (int)$user['id'];
+    $d_stmt->bind_param("ii", $deposit_id, $d_uid);
+    $d_stmt->execute();
+    $d_res = $d_stmt->get_result();
+    if ($d_res && $d_res->num_rows > 0) {
+        $dep = $d_res->fetch_assoc();
+    }
+    $d_stmt->close();
+    if (!$dep) {
+        header("Location: recharge.php");
+        exit;
+    }
+
+    $order = array(
+        'id'         => (int)$dep['id'],
+        'created_at' => $dep['created_at'],
+        'status'     => (string)$dep['status'],
+        'price'      => $dep['amount'],
+        'order_type' => 'ব্যালেন্স রিচার্জ',
+        'input_data' => '',
+    );
+
+    $is_new = isset($_GET['new']) && (string)$_GET['new'] === '1';
+    $detail_rows = array();
+    $payment_method = 'mobile';
+    $amount = (float)$dep['amount'];
+    $service_title = 'ব্যালেন্স রিচার্জ';
+    $service_id = 0;
+    $category = 'টপ-আপ সেবা';
+    $receipt_no = soko_receipt_no($order);
+
+    $dep_state = strtolower(trim((string)$dep['status']));
+    if (in_array($dep_state, array('completed', 'approved', 'success', 'verified'), true)) {
+        $state = 'verified';
+        $dep_status_bn = 'সম্পন্ন';
+    } elseif (in_array($dep_state, array('failed', 'cancelled', 'canceled', 'rejected'), true)) {
+        $state = 'rejected';
+        $dep_status_bn = 'বাতিল';
+    } else {
+        $state = 'pending';
+        $dep_status_bn = 'অপেক্ষমাণ';
+    }
+
+    $meta = soko_pay_method_meta($dep['method']);
+    $method_name = $meta['name'];
+    $method_css = $meta['css'];
+    $payer_number = (string)$user['mobile'];
+    $trx_display = (string)$dep['trx_id'];
+    $paid_at = $dep['created_at'];
+    $payment = null;
+    $method_logo = function_exists('soko_pay_method_logo') ? soko_pay_method_logo($dep['method']) : '';
+    $is_paid = ($state === 'verified');
+} else {
 $order_id = isset($_GET['order']) ? (int)$_GET['order'] : 0;
 $order = soko_order_by_id($conn, $order_id, (int)$user['id']);
 if (!$order) {
@@ -74,6 +138,8 @@ if ($state === 'wallet') {
 $method_logo = ($state === 'wallet') ? '' : (function_exists('soko_pay_method_logo') && $payment ? soko_pay_method_logo($payment['method']) : '');
 
 $is_paid = ($state === 'wallet' || $state === 'verified');
+}
+
 
 if ($state === 'pending') {
     $badge_title = 'পেমেন্ট যাচাই চলছে';
@@ -95,6 +161,25 @@ if ($state === 'pending') {
     $badge_text = 'আপনার পেমেন্ট সফলভাবে সম্পন্ন হয়েছে।';
     $badge_class = 'is-ok';
     $badge_icon = 'fa-check';
+}
+
+if ($is_deposit) {
+    if ($state === 'verified') {
+        $badge_title = 'রিচার্জ সফল';
+        $badge_text = 'আপনার ওয়ালেটে ব্যালেন্স যোগ করা হয়েছে।';
+        $badge_class = 'is-ok';
+        $badge_icon = 'fa-check';
+    } elseif ($state === 'rejected') {
+        $badge_title = 'রিচার্জ বাতিল';
+        $badge_text = 'আপনার দেওয়া TrxID যাচাই করা যায়নি। সাপোর্টে যোগাযোগ করুন।';
+        $badge_class = 'is-bad';
+        $badge_icon = 'fa-circle-xmark';
+    } else {
+        $badge_title = 'রিচার্জ যাচাই চলছে';
+        $badge_text = 'TrxID যাচাই করে ৫–১৫ মিনিটের মধ্যে ব্যালেন্স যোগ করা হবে।';
+        $badge_class = 'is-wait';
+        $badge_icon = 'fa-clock';
+    }
 }
 
 function soko_receipt_is_file($value)
@@ -333,9 +418,9 @@ table.kv tr.total td.v{font-size:22px;color:var(--green-dark);font-weight:700}
       <table class="kv" style="max-width:470px">
         <tr><td class="k">সেবার নাম</td><td class="v"><?php echo soko_h($service_title); ?></td></tr>
         <tr><td class="k">সেবার ধরন</td><td class="v"><?php echo soko_h($category); ?></td></tr>
-        <tr><td class="k">অর্ডার নম্বর</td><td class="v">#<?php echo soko_h($receipt_no); ?></td></tr>
-        <tr><td class="k">অর্ডার স্ট্যাটাস</td><td class="v"><?php echo soko_h(soko_status_bn($order['status'])); ?></td></tr>
-        <tr class="total"><td class="k">পরিমাণ</td><td class="v"><?php echo soko_money($amount); ?></td></tr>
+        <tr><td class="k"><?php echo $is_deposit ? 'রশিদ নম্বর' : 'অর্ডার নম্বর'; ?></td><td class="v">#<?php echo soko_h($receipt_no); ?></td></tr>
+        <tr><td class="k"><?php echo $is_deposit ? 'রিচার্জ স্ট্যাটাস' : 'অর্ডার স্ট্যাটাস'; ?></td><td class="v"><?php echo soko_h($is_deposit ? $dep_status_bn : soko_status_bn($order['status'])); ?></td></tr>
+        <tr class="total"><td class="k"><?php echo $is_deposit ? 'মোট রিচার্জ' : 'পরিমাণ'; ?></td><td class="v"><?php echo soko_money($amount); ?></td></tr>
       </table>
     </div>
 
@@ -417,7 +502,19 @@ table.kv tr.total td.v{font-size:22px;color:var(--green-dark);font-weight:700}
       <div>
         <b>গুরুত্বপূর্ণ নির্দেশনা</b>
         <ul>
-          <?php if ($is_paid): ?>
+          <?php if ($is_deposit): ?>
+            <?php if ($state === 'verified'): ?>
+              <li>আপনার রিচার্জ গ্রহণ করা হয়েছে — ব্যালেন্স ওয়ালেটে যোগ হয়েছে।</li>
+              <li>রশিদটি সংরক্ষণ করুন; প্রয়োজনে সাপোর্টে দেখান।</li>
+            <?php elseif ($state === 'rejected'): ?>
+              <li>আপনার দেওয়া TrxID যাচাই করা যায়নি — সঠিক TrxID দিয়ে আবার রিচার্জ করুন।</li>
+              <li>টাকা কেটে নেওয়া হয়ে থাকলে সাপোর্টে TrxID ও স্ক্রিনশট পাঠান।</li>
+            <?php else: ?>
+              <li>TrxID যাচাই করে ৫–১৫ মিনিটের মধ্যে ব্যালেন্স যোগ করা হয়।</li>
+              <li>যাচাই হলে এই রশিদেই "রিচার্জ সফল" দেখতে পাবেন।</li>
+            <?php endif; ?>
+            <li>কোনো সমস্যায় পড়লে আমাদের সাপোর্টে যোগাযোগ করুন।</li>
+          <?php elseif ($is_paid): ?>
             <li>আপনার পেমেন্ট সফলভাবে গ্রহণ করা হয়েছে।</li>
             <li>প্রয়োজনে অ্যাডমিন প্যানেল থেকে পেমেন্ট যাচাইয়ের পর অর্ডার প্রসেস করা হবে।</li>
           <?php elseif ($state === 'rejected'): ?>
@@ -458,11 +555,18 @@ table.kv tr.total td.v{font-size:22px;color:var(--green-dark);font-weight:700}
 
 <div class="actions no-print">
   <button type="button" class="btn primary" onclick="window.print()"><i class="fa-solid fa-print"></i> রশিদ প্রিন্ট / PDF</button>
-  <?php if ($state === 'unpaid' || $state === 'rejected'): ?>
-    <a class="btn primary" href="payment_gateway.php?order=<?php echo (int)$order['id']; ?>"><i class="fa-solid fa-money-bill-transfer"></i> পেমেন্ট করুন</a>
+  <?php if ($is_deposit): ?>
+    <?php if ($state !== 'verified'): ?>
+      <a class="btn primary" href="recharge.php"><i class="fa-solid fa-rotate-right"></i> আবার রিচার্জ</a>
+    <?php endif; ?>
+    <a class="btn ghost" href="recharge.php"><i class="fa-solid fa-wallet"></i> রিচার্জ পেজ</a>
+  <?php else: ?>
+    <?php if ($state === 'unpaid' || $state === 'rejected'): ?>
+      <a class="btn primary" href="payment_gateway.php?order=<?php echo (int)$order['id']; ?>"><i class="fa-solid fa-money-bill-transfer"></i> পেমেন্ট করুন</a>
+    <?php endif; ?>
+    <a class="btn ghost" href="work_history.php"><i class="fa-solid fa-clock-rotate-left"></i> অর্ডার হিস্টোরি</a>
   <?php endif; ?>
-  <a class="btn ghost" href="work_history.php"><i class="fa-solid fa-clock-rotate-left"></i> অর্ডার হিস্টোরি</a>
-  <?php if ($service_id > 0): ?>
+  <?php if (!$is_deposit && $service_id > 0): ?>
     <a class="btn ghost" href="service_order.php?id=<?php echo (int)$service_id; ?>"><i class="fa-solid fa-rotate-right"></i> আবার অর্ডার</a>
   <?php endif; ?>
   <a class="btn ghost" href="dashboard.php"><i class="fa-solid fa-house"></i> ড্যাশবোর্ড</a>
