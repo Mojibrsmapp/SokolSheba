@@ -1,6 +1,7 @@
 <?php
 session_start();
 include_once("includes/configuration.php");
+include_once("includes/service_catalog.php");
 
 if (!isset($_SESSION['user_token'])) {
     header("Location: index.php");
@@ -31,6 +32,7 @@ $categories = [];
 $q_serv = $conn->query("SELECT id, service_name, category, price, description, custom_fields FROM custom_services WHERE status = 'active' ORDER BY id ASC");
 if ($q_serv) {
     while ($row = $q_serv->fetch_assoc()) {
+        if (soko_is_new_birth_application($row['service_name'])) $row['custom_fields'] = json_encode(soko_match_preset($row['service_name']), JSON_UNESCAPED_UNICODE);
         $services[] = $row;
         $cat = trim($row['category']);
         if (!empty($cat) && !in_array($cat, $categories)) {

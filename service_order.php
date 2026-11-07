@@ -381,8 +381,11 @@ button{font-family:inherit}
   .hero{flex-wrap:wrap;gap:12px}
   .hero-media{flex:1 1 100%;display:flex;justify-content:center}
   .nid-mock{width:100%;max-width:320px;height:auto;aspect-ratio:250/158}
-  .hero-price{position:absolute;top:12px;right:12px}
-  .hero-title-row h1{font-size:23px;padding-right:96px}
+  .hero-price{position:static;align-self:stretch;flex-direction:row;align-items:center;gap:8px}
+  .hero-price .price-tag{min-width:80px}
+  .hero-body{width:100%}
+  .card-head{flex-wrap:wrap}
+  .hero-title-row h1{font-size:23px;overflow-wrap:anywhere;line-height:1.45}
   .hero-desc{padding-right:0}
   .steps:before{top:26px;left:12%;right:12%}
   .step .dot{width:30px;height:30px;font-size:13px}
@@ -400,6 +403,7 @@ button{font-family:inherit}
   .bottom-nav{display:none}
   body{padding-bottom:24px}
 }
+.hero--birth .hero-media{display:none}
 @media print{
   .topbar,.crumb,.bottom-nav,.btn-order,.drawer,.hero-price{display:none!important}
   body{background:#fff;padding:0}
@@ -440,13 +444,13 @@ button{font-family:inherit}
     </div>
   <?php endif; ?>
 
-  <section class="hero">
+  <section class="hero<?php echo soko_is_new_birth_application($service_title) ? ' hero--birth' : ''; ?>">
     <div class="hero-media">
       <div class="nid-mock">
         <div class="gov">
           <img src="assets/birth-card-files/bd_logo.png" alt="">
           <span>
-            <b>জাতীয় পরিচয়পত্র</b>
+            <b><?php echo soko_is_new_birth_application($service_title) ? 'জন্ম নিবন্ধন আবেদন' : 'সেবার আবেদন'; ?></b>
             <small>Government of the People's Republic of Bangladesh</small>
           </span>
         </div>
@@ -487,6 +491,13 @@ button{font-family:inherit}
     <li class="step"><span class="dot">৪</span><span class="lbl">অবস্থা দেখুন</span></li>
   </ol>
 
+  <?php if (soko_is_new_birth_application($service_title)): ?>
+  <div class="ss-order-result" role="note">
+    <strong>নতুন আবেদনে আগে থেকে জন্ম নিবন্ধন নম্বর লাগবে না</strong>
+    <p>আবেদন সম্পন্ন করে নিচের অর্ডার হিস্টোরিতে অবস্থা দেখুন। নম্বর ইস্যু হলে অ্যাডমিনের দেওয়া জন্ম নিবন্ধন নম্বর/সনদ রেজাল্টে পাবেন। অর্ডার নম্বর জন্ম নিবন্ধন নম্বর নয়।</p>
+    <a class="ss-history-link" href="#service-history">হিস্টোরি ও রেজাল্ট দেখুন ↓</a>
+  </div>
+  <?php endif; ?>
   <form method="post" action="service_order.php?id=<?php echo (int)$service['id']; ?>" enctype="multipart/form-data" id="orderForm" novalidate>
     <input type="hidden" name="place_order" value="1">
     <div class="grid">

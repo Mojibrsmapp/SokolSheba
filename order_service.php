@@ -1,6 +1,7 @@
 <?php 
 session_start();
 include_once("includes/configuration.php");
+include_once("includes/service_catalog.php");
 
 if (isset($_SESSION['user_token'])) {
     $token_user = $_SESSION['user_token'];
@@ -47,6 +48,8 @@ $custom_fields = json_decode($service['custom_fields'] ?? '[]', true);
 if (!is_array($custom_fields)) {
     $custom_fields = [];
 }
+
+if (soko_is_new_birth_application($service['service_name'])) $custom_fields = soko_match_preset($service['service_name']);
 
 $order_success = "";
 $order_error = "";
@@ -144,16 +147,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_custom_order'])
     }
 }
 
-$recent_orders = [];
-$service_name_to_fetch = $service['service_name'];
-$h_stmt = $conn->prepare("SELECT * FROM orders WHERE user_id = ? AND order_type = ? ORDER BY id DESC LIMIT 20");
-$h_stmt->bind_param("is", $id, $service_name_to_fetch);
-$h_stmt->execute();
-$h_res = $h_stmt->get_result();
-while ($h_row = $h_res->fetch_assoc()) {
-    $recent_orders[] = $h_row;
-}
-$h_stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -457,6 +450,9 @@ $h_stmt->close();
                 </div>
             <?php endif; ?>
 
+            <?php if (soko_is_new_birth_application($service['service_name'])): ?>
+            <div class="ss-order-result">নতুন আবেদনে আগে থেকে জন্ম নিবন্ধন নম্বর লাগে না। নম্বর ইস্যু হলে নিচের হিস্টোরিতে অ্যাডমিনের দেওয়া নম্বর/সনদ পাবেন।</div>
+            <?php endif; ?>
             <form action="" method="POST" enctype="multipart/form-data">
 
                 <?php if (!empty($custom_fields)): ?>
@@ -502,77 +498,7 @@ $h_stmt->close();
 
         </div>
 
-        <div class="history-card">
-            <div class="flex items-center gap-2 mb-3.5">
-                <i class="fa-solid fa-table-list text-sky-500 text-base"></i>
-                <h5 class="font-bold text-sky-500 text-sm md:text-base">আপনার সাম্প্রতিক অর্ডারসমূহ</h5>
-            </div>
 
-            <div class="overflow-x-auto rounded-xl">
-                <table class="history-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>অর্ডারের ধরন</th>
-                            <th>তথ্য</th>
-                            <th>রিসিভ স্ট্যাটাস</th>
-                            <th>ডাউনলোড / স্ট্যাটাস</th>
-                            <th>রেট</th>
-                            <th>সময়</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($recent_orders)): ?>
-                            <tr>
-                                <td colspan="7" class="text-center py-6 text-slate-400 text-xs">
-                                    কোনো অর্ডারের রেকর্ড পাওয়া যায়নি।
-                                </td>
-                            </tr>
-                        <?php else: ?>
-                            <?php $serial = 1; foreach ($recent_orders as $ord): 
-                                $st_badge = 'bg-amber-50 text-amber-700 border border-amber-200';
-                                $st_text = 'পেন্ডিং';
-                                if ($ord['status'] === 'success') {
-                                    $st_badge = 'bg-emerald-50 text-emerald-700 border border-emerald-200';
-                                    $st_text = 'সফল';
-                                } elseif ($ord['status'] === 'cancel') {
-                                    $st_badge = 'bg-rose-50 text-rose-700 border border-rose-200';
-                                    $st_text = 'বাতিল';
-                                }
-                            ?>
-                            <tr>
-                                <td class="font-bold text-slate-700"><?php echo $serial++; ?></td>
-                                <td class="font-bold text-slate-800"><?php echo htmlspecialchars($ord['order_type']); ?></td>
-                                <td class="max-w-[220px] truncate" title="<?php echo htmlspecialchars($ord['input_data']); ?>">
-                                    <?php echo htmlspecialchars($ord['input_data']); ?>
-                                </td>
-                                <td>
-                                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold <?php echo $st_badge; ?>">
-                                        <?php echo $st_text; ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <?php if (!empty($ord['result_file'])): ?>
-                                        <a href="<?php echo htmlspecialchars($ord['result_file']); ?>" target="_blank" class="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1">
-                                            <i class="fa-solid fa-file-arrow-down"></i> ডাউনলোড
-                                        </a>
-                                    <?php elseif (!empty($ord['result_text'])): ?>
-                                        <span class="text-xs text-slate-700 font-semibold"><?php echo htmlspecialchars($ord['result_text']); ?></span>
-                                    <?php else: ?>
-                                        <span class="text-slate-400 text-xs">অপেক্ষমান</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="font-bold text-emerald-600">৳ <?php echo number_format($ord['price'], 2); ?></td>
-                                <td class="text-slate-400 text-xs">
-                                    <?php echo date('d M Y, h:i A', strtotime($ord['created_at'])); ?>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
     </div>
 

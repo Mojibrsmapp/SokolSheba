@@ -426,6 +426,12 @@ table.kv tr.total td.v{font-size:22px;color:var(--green-dark);font-weight:700}
       </table>
     </div>
 
+    <?php if (!$is_deposit): ?>
+    <div class="seg">
+      <?php require_once __DIR__ . '/includes/customer_history.php'; soko_render_order_result($order); ?>
+    </div>
+    <?php endif; ?>
+
     <!-- payment -->
     <div class="seg">
       <div class="seg-pill"><i class="fa-solid fa-wallet"></i> পেমেন্টের বিবরণ</div>

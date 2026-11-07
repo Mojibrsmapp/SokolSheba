@@ -328,10 +328,10 @@ if ($h_stmt) {
         }
     </style>
 </head>
-<body class="p-3 sm:p-6 lg:p-8 flex items-center justify-center">
+<body class="ss-recharge-page">
 <?php include __DIR__ . '/includes/site_header.php'; ?>
 
-    <div class="w-full max-w-5xl mx-auto">
+    <div class="ss-recharge-content w-full max-w-5xl mx-auto">
 
         <?php if (!empty($error_msg)): ?>
             <div class="mb-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs sm:text-sm font-bold rounded-xl flex items-center gap-2">
@@ -340,7 +340,7 @@ if ($h_stmt) {
             </div>
         <?php endif; ?>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <div class="ss-recharge-grid grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
             <div class="lg:col-span-6 w-full">
                 <div class="phone-card">
@@ -356,7 +356,7 @@ if ($h_stmt) {
 
                         <div class="p-4 sm:p-5 space-y-4">
 
-                            <div class="grid grid-cols-2 gap-2.5">
+                            <div class="ss-payment-methods grid grid-cols-2 gap-2.5">
                                 <?php if (isset($gateway_numbers['bkash'])): ?>
                                 <div class="method-tile <?php echo ($first_available_method === 'bkash') ? 'selected' : ''; ?>" onclick="chooseMethod('bkash', 'bKash')">
                                     <?php $rc_logo = function_exists('soko_pay_method_logo') ? soko_pay_method_logo('bkash') : ''; ?>
