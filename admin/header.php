@@ -247,6 +247,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 <?php endif; ?>
             </a>
 
+            <a href="db_check.php" class="sidebar-menu-item <?php echo ($current_page === 'db_check.php') ? 'active' : ''; ?>">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-database text-sky-400"></i>
+                    <span>ডাটাবেস চেক</span>
+                </div>
+            </a>
+
             <a href="payment_verify.php" class="sidebar-menu-item <?php echo ($current_page === 'payment_verify.php') ? 'active' : ''; ?>">
                 <div class="flex items-center gap-2.5">
                     <i class="fa-solid fa-money-check-dollar text-emerald-400"></i>

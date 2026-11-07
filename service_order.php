@@ -139,10 +139,27 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 
             if ($payment_method === 'wallet') {
                 $balance_after = $wallet_balance - $total_payable;
-                $history = $conn->prepare("INSERT INTO history_work (email, order_type, price, current_balance, balance_after_cut, about_order, order_time) VALUES (?, ?, ?, ?, ?, 'place_order', NOW())");
-                $history->bind_param("ssddd", $user['email'], $service_title, $total_payable, $wallet_balance, $balance_after);
-                $history->execute();
-                $history->close();
+                /* ব্যালেন্স হিস্ট্রি — optional। পুরনো ডাটাবেজে টেবিল/কলাম না থাকলেও
+                   অর্ডার যেন কখনো ভেঙে না পড়ে, তাই আলাদা করে ট্রাই করা হচ্ছে। */
+                try {
+                    $history = $conn->prepare("INSERT INTO history_work (email, order_type, price, current_balance, balance_after_cut, about_order, order_time) VALUES (?, ?, ?, ?, ?, 'place_order', NOW())");
+                    if ($history) {
+                        $history->bind_param("ssddd", $user['email'], $service_title, $total_payable, $wallet_balance, $balance_after);
+                        $history->execute();
+                        $history->close();
+                    }
+                } catch (Throwable $history_error) {
+                    try {
+                        $history = $conn->prepare("INSERT INTO history_work (email, order_type, price, current_balance, balance_after_cut, order_time) VALUES (?, ?, ?, ?, ?, NOW())");
+                        if ($history) {
+                            $history->bind_param("ssddd", $user['email'], $service_title, $total_payable, $wallet_balance, $balance_after);
+                            $history->execute();
+                            $history->close();
+                        }
+                    } catch (Throwable $history_error2) {
+                        /* হিস্ট্রি লেখা না গেলেও অর্ডার কনফার্ম থাকবে */
+                    }
+                }
             }
 
             $conn->commit();
@@ -154,7 +171,7 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
             }
             exit;
 
-        } catch (Exception $ex) {
+        } catch (Throwable $ex) {
             $conn->rollback();
             if ($ex->getMessage() === 'insufficient_balance') {
                 $errors[] = 'আপনার ওয়ালেট ব্যালেন্স যথেষ্ট নয়। রিচার্জ করুন অথবা মোবাইল ব্যাংকিং নির্বাচন করুন।';
