@@ -2,6 +2,7 @@
 ob_start();
 session_start();
 include_once("includes/configuration.php");
+include_once("includes/service_catalog.php");
 
 if (isset($_SESSION['user_token'])) {
     $token_user = $_SESSION['user_token'];
@@ -33,30 +34,70 @@ if (isset($_SESSION['user_token'])) {
     exit();
 }
 
+// সাইট সেটিংস (সাপোর্ট / হোয়াটসঅ্যাপ)
+$settings_data = [];
+$q_set = @$conn->query("SELECT setting_key, setting_value FROM site_settings");
+if ($q_set) {
+    while ($rs = $q_set->fetch_assoc()) {
+        $settings_data[$rs['setting_key']] = $rs['setting_value'];
+    }
+}
+$support_num = !empty($settings_data['support_whatsapp_num']) ? $settings_data['support_whatsapp_num'] : '01849207118';
+$whatsapp_link = !empty($settings_data['whatsapp_group']) ? $settings_data['whatsapp_group'] : 'https://wa.me/88' . preg_replace('/[^0-9]/', '', $support_num);
+
 // Database theke custom_services gulo category onujayi group kora
 $services_by_cat = [];
+$total_services = 0;
 $q_serv = @$conn->query("SELECT id, service_name, category, price, service_type, access_link, description, status FROM custom_services WHERE status = 'active' ORDER BY category ASC, id ASC");
 if ($q_serv && $q_serv->num_rows > 0) {
     while ($srv = $q_serv->fetch_assoc()) {
         $cat = !empty($srv['category']) ? trim($srv['category']) : 'অন্যান্য সেবা';
         $services_by_cat[$cat][] = $srv;
+        $total_services++;
     }
 }
 
 // Category color palette helper
 $category_colors = [
-    'NID সেবা'          => ['bg' => '#107C41', 'icon' => 'fa-id-card', 'badge' => 'bg-emerald-50 text-emerald-800'],
-    'পাসপোর্ট সেবা'     => ['bg' => '#0078D4', 'icon' => 'fa-passport', 'badge' => 'bg-blue-50 text-blue-800'],
-    'জন্ম নিবন্ধন সেবা' => ['bg' => '#7B1FA2', 'icon' => 'fa-file-lines', 'badge' => 'bg-purple-50 text-purple-800'],
-    'বিকাশ নগদ রকেট'    => ['bg' => '#D81B60', 'icon' => 'fa-mobile-retro', 'badge' => 'bg-pink-50 text-pink-800'],
-    'সিম বায়োমেট্রিক'   => ['bg' => '#E65100', 'icon' => 'fa-sim-card', 'badge' => 'bg-orange-50 text-orange-800'],
-    'লোকেশন ট্র্যাক'     => ['bg' => '#00897B', 'icon' => 'fa-location-dot', 'badge' => 'bg-teal-50 text-teal-800'],
-    'টিন সার্টিফিকেট'   => ['bg' => '#F57F17', 'icon' => 'fa-file-invoice', 'badge' => 'bg-amber-50 text-amber-800'],
-    'ট্রেড লাইসেন্স'     => ['bg' => '#5E35B1', 'icon' => 'fa-store', 'badge' => 'bg-indigo-50 text-indigo-800'],
-    'ভূমি সেবা'         => ['bg' => '#0288D1', 'icon' => 'fa-mountain-sun', 'badge' => 'bg-sky-50 text-sky-800'],
-    'আবেদন সেবা'        => ['bg' => '#C2185B', 'icon' => 'fa-file-signature', 'badge' => 'bg-rose-50 text-rose-800'],
-    'অটো সার্ভিস'       => ['bg' => '#0F766E', 'icon' => 'fa-bolt', 'badge' => 'bg-teal-50 text-teal-800'],
+    'NID সেবা'          => ['bg' => '#107C41', 'icon' => 'fa-id-card', 'soft' => '#E7F4EC'],
+    'পাসপোর্ট সেবা'     => ['bg' => '#0078D4', 'icon' => 'fa-passport', 'soft' => '#E7F1FB'],
+    'জন্ম নিবন্ধন সেবা' => ['bg' => '#7B1FA2', 'icon' => 'fa-file-lines', 'soft' => '#F4EAF8'],
+    'বিকাশ নগদ রকেট'    => ['bg' => '#D81B60', 'icon' => 'fa-mobile-retro', 'soft' => '#FCE9F0'],
+    'সিম বায়োমেট্রিক'   => ['bg' => '#E65100', 'icon' => 'fa-sim-card', 'soft' => '#FDEFE7'],
+    'লোকেশন ট্র্যাক'     => ['bg' => '#00897B', 'icon' => 'fa-location-dot', 'soft' => '#E6F4F2'],
+    'টিন সার্টিফিকেট'   => ['bg' => '#F57F17', 'icon' => 'fa-file-invoice', 'soft' => '#FEF3E2'],
+    'ট্রেড লাইসেন্স'     => ['bg' => '#5E35B1', 'icon' => 'fa-store', 'soft' => '#EEEAF8'],
+    'ভূমি সেবা'         => ['bg' => '#0288D1', 'icon' => 'fa-mountain-sun', 'soft' => '#E7F4FB'],
+    'আবেদন সেবা'        => ['bg' => '#C2185B', 'icon' => 'fa-file-signature', 'soft' => '#FBE9F0'],
+    'অটো সার্ভিস'       => ['bg' => '#0F766E', 'icon' => 'fa-bolt', 'soft' => '#E6F4F3'],
 ];
+$default_color = ['bg' => '#0B7A3B', 'icon' => 'fa-layer-group', 'soft' => '#E7F4EC'];
+
+// কোন ক্যাটাগরির হিরো দেখাবে (?cat= অথবা প্রথম ক্যাটাগরি)
+$all_cats = array_keys($services_by_cat);
+$active_cat = isset($_GET['cat']) ? trim($_GET['cat']) : '';
+if ($active_cat !== '' && !in_array($active_cat, $all_cats, true)) {
+    $active_cat = '';
+}
+$hero_cat = $active_cat !== '' ? $active_cat : (!empty($all_cats) ? $all_cats[0] : 'সকল সেবা');
+$hero_meta = $category_colors[$hero_cat] ?? $default_color;
+
+$hero_copy = [
+    'NID সেবা'          => ['জাতীয় পরিচয়পত্র (NID)', 'সরকারি অনুমোদিত সকল NID সেবা এখন একই প্ল্যাটফর্মে, সহজে ও নির্ভরযোগ্যভাবে।'],
+    'পাসপোর্ট সেবা'     => ['পাসপোর্ট সেবা', 'পাসপোর্ট সংক্রান্ত সকল সেবা — স্লিপ, PDF, যাচাই ও ক্লিয়ারেন্স এক জায়গায়।'],
+    'জন্ম নিবন্ধন সেবা' => ['জন্ম নিবন্ধন সেবা', 'জন্ম নিবন্ধন সংক্রান্ত সকল সেবা দ্রুত ও নির্ভরযোগ্যভাবে সম্পন্ন করুন।'],
+    'বিকাশ নগদ রকেট'    => ['মোবাইল ব্যাংকিং সেবা', 'বিকাশ, নগদ, রকেট ও উপায়ের তথ্য ও স্টেটমেন্ট সেবা এক জায়গায়।'],
+    'সিম বায়োমেট্রিক'   => ['সিম ও বায়োমেট্রিক সেবা', 'সিম বাতিল, বায়োমেট্রিক যাচাইসহ সকল সেবা সহজে অর্ডার করুন।'],
+    'লোকেশন ট্র্যাক'     => ['লোকেশন ও ট্র্যাকিং সেবা', 'মোবাইল লোকেশন ও কল লিস্ট সংক্রান্ত সেবা দ্রুত পান।'],
+    'টিন সার্টিফিকেট'   => ['টিন সার্টিফিকেট সেবা', 'TIN আবেদন, সংশোধন ও সার্টিফিকেট সেবা এক প্ল্যাটফর্মে।'],
+    'ট্রেড লাইসেন্স'     => ['ট্রেড লাইসেন্স সেবা', 'ট্রেড লাইসেন্স আবেদন ও উত্তোলন সেবা সহজে সম্পন্ন করুন।'],
+    'ভূমি সেবা'         => ['ভূমি সেবা', 'খতিয়ান, মৌজা ম্যাপ ও খাজনা সংক্রান্ত সেবা এক জায়গায়।'],
+    'আবেদন সেবা'        => ['আবেদন সেবা', 'NID, পাসপোর্ট ও মিটার সংক্রান্ত আবেদন সেবা সহজে করুন।'],
+    'অটো সার্ভিস'       => ['অটো সার্ভিস', 'তাৎক্ষণিক ফলাফল পেতে অটো সার্ভিসগুলো থেকে অর্ডার করুন।'],
+];
+$hero_h1 = isset($hero_copy[$hero_cat]) ? $hero_copy[$hero_cat][0] : ($hero_cat !== 'সকল সেবা' ? $hero_cat : 'সকল সেবা');
+$hero_sub = isset($hero_copy[$hero_cat]) ? $hero_copy[$hero_cat][1] : 'যে কোনো প্রয়োজনে সহজে ও নির্ভরযোগ্যভাবে অর্ডার করুন।';
+$search_q = isset($_GET['q']) ? trim($_GET['q']) : '';
 ?>
 <!DOCTYPE html>
 <html lang="bn">
@@ -64,231 +105,384 @@ $category_colors = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>সকল সেবাসমূহ - সকল সেবা</title>
-    
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/maateen/bangla-fonts/Nikosh/stylesheet.css">
+
+    <link rel="shortcut icon" href="assets/logo.jpg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" href="/assets/logo.jpg">
-    
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+        :root{
+            --green:#0B7A3B; --green-d:#07612E; --green-soft:#EAF6EE; --green-line:#D6EBDC;
+            --red:#E51B23; --ink:#12241B; --muted:#5E7466; --line:#E4EDE7; --page:#F4F7F5; --radius:14px;
         }
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        body{font-family:'Hind Siliguri',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--page);color:var(--ink);font-size:15px;line-height:1.5;padding-bottom:78px}
+        a{text-decoration:none;color:inherit}
+        button{font-family:inherit;border:0;background:none;cursor:pointer;color:inherit}
 
-        body, input, button, select, textarea, p, h1, h2, h3, h4, h5, h6, span, a, label, li {
-            font-family: 'Nikosh', 'SolaimanLipi', sans-serif !important;
-            -webkit-font-smoothing: antialiased;
-        }
+        /* ---------- top bar ---------- */
+        .topbar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:60}
+        .topbar-in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:9px;padding:8px 12px}
+        .brand{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+        .brand img{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--green);flex:0 0 38px;background:#fff}
+        .brand b{display:block;font-size:19px;font-weight:700;color:var(--green);line-height:1.1;letter-spacing:-.3px}
+        .brand b em{color:var(--red);font-style:normal}
+        .brand small{display:block;font-size:10.5px;color:var(--muted);font-weight:500}
+        .top-actions{display:flex;align-items:center;gap:6px}
+        .wallet{display:flex;align-items:center;gap:6px;border:1.4px solid var(--green-line);background:#fff;border-radius:10px;padding:4px 9px}
+        .wallet i{color:var(--green);font-size:12px}
+        .wallet small{display:block;font-size:9px;color:var(--muted);line-height:1.1}
+        .wallet b{display:block;font-size:12px;font-weight:700;line-height:1.2}
+        .ib{width:36px;height:36px;border-radius:10px;border:1.4px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;position:relative;color:var(--ink)}
+        .ib .dot{position:absolute;top:7px;right:8px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid #fff}
+        .menu-panel{position:absolute;right:12px;top:56px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 28px rgba(9,32,20,.12);padding:6px;min-width:174px;display:none;z-index:80}
+        .menu-panel.is-open{display:block}
+        .menu-panel a{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;font-size:13.5px;font-weight:600}
+        .menu-panel a:hover{background:var(--green-soft)}
+        .menu-panel a i{width:16px;color:var(--green);font-size:13px}
 
-        .fa, .fas, .far, .fal, .fad, .fab, .fa-solid, .fa-regular, .fa-brands {
-            font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
-        }
+        /* ---------- breadcrumb ---------- */
+        .crumb{background:var(--green);color:#fff}
+        .crumb-in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:9px;padding:10px 14px}
+        .crumb-in .back{font-size:16px;line-height:1}
+        .crumb-in b{font-size:17px;font-weight:700}
+        .crumb-chip{margin-left:auto;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.5);color:#fff;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:9px;display:flex;align-items:center;gap:5px}
 
-        body { 
-            background: #F3F4F6; 
-            color: #1E293B; 
-            min-height: 100vh; 
-            padding-bottom: 74px; 
-        }
+        /* ---------- shell ---------- */
+        .shell{max-width:760px;margin:0 auto;padding:11px 12px 6px}
 
-        .service-card {
-            background: #ffffff;
-            border-radius: 16px;
-            border: 1px solid #E5E7EB;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .service-card:hover {
-            transform: translateY(-2px);
-            border-color: #10B981;
-            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.08);
+        /* ---------- hero ---------- */
+        .hero{position:relative;overflow:hidden;border-radius:var(--radius);color:#fff;padding:14px;display:flex;align-items:center;gap:10px;background:linear-gradient(120deg,#0E8C4B 0%,#0B7A3B 52%,#075F2D 100%);box-shadow:0 6px 18px rgba(11,122,59,.16)}
+        .hero:after{content:"";position:absolute;right:-40px;top:-52px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.08)}
+        .hero-txt{flex:1;min-width:0;position:relative;z-index:1}
+        .hero h1{font-size:17px;font-weight:700;line-height:1.3}
+        .hero p{font-size:11.3px;opacity:.94;margin-top:3px;line-height:1.45}
+        .hero-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+        .hero-chips span{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.34);border-radius:20px;padding:2px 8px;font-size:9.6px;font-weight:600}
+        .hero-chips i{font-size:9px}
+        .hero-art{flex:0 0 96px;position:relative;z-index:1}
+        .id-card{background:linear-gradient(160deg,#fff,#F1F7F3);color:#123225;border-radius:9px;padding:7px;box-shadow:0 6px 14px rgba(0,0,0,.18);transform:rotate(-4deg)}
+        .id-card .ic-top{display:flex;align-items:center;gap:4px;margin-bottom:5px}
+        .id-card .ic-flag{width:14px;height:9px;border-radius:2px;background:#006A4E;position:relative;flex:0 0 14px}
+        .id-card .ic-flag:after{content:"";position:absolute;left:4px;top:2.5px;width:4.5px;height:4.5px;border-radius:50%;background:#F42A41}
+        .id-card .ic-top b{font-size:6.2px;line-height:1.15;font-weight:700}
+        .id-card .ic-body{display:flex;gap:4px}
+        .id-card .ic-photo{width:24px;height:29px;border-radius:3px;background:#DCE7E1;flex:0 0 24px;position:relative;overflow:hidden}
+        .id-card .ic-photo:after{content:"";position:absolute;left:6px;top:6px;width:12px;height:12px;border-radius:50%;background:#B9CEC3}
+        .id-card .ic-lines{flex:1;display:flex;flex-direction:column;gap:2.5px;justify-content:center}
+        .id-card .ic-lines i{display:block;height:2.6px;border-radius:2px;background:#D3E2D9}
+        .id-card .ic-lines i:nth-child(2){width:78%}
+        .id-card .ic-lines i:nth-child(3){width:60%}
+        .id-card .ic-bottom{margin-top:5px;height:2.6px;border-radius:2px;background:#E3EDE7}
+
+        /* ---------- search ---------- */
+        .search-row{display:flex;align-items:center;gap:7px;margin-top:11px}
+        .search{flex:1;display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:8px 11px}
+        .search i{color:#8AA396;font-size:12.5px}
+        .search input{flex:1;border:0;outline:none;font-size:12.8px;background:transparent;color:var(--ink)}
+        .search input::placeholder{color:#9DB0A4}
+        .filter-btn{display:flex;align-items:center;gap:5px;background:var(--green);color:#fff;border-radius:11px;padding:9px 12px;font-size:12px;font-weight:700;box-shadow:0 3px 10px rgba(11,122,59,.2)}
+
+        /* ---------- category tabs ---------- */
+        .tabs{display:none;gap:6px;overflow-x:auto;padding:9px 0 2px;scrollbar-width:none}
+        .tabs.is-open{display:flex}
+        .tabs::-webkit-scrollbar{display:none}
+        .tab{white-space:nowrap;background:#fff;border:1px solid var(--line);color:var(--muted);font-size:11.5px;font-weight:700;padding:6px 11px;border-radius:9px;cursor:pointer}
+        .tab.is-on{background:var(--green);color:#fff;border-color:var(--green)}
+
+        /* ---------- section head ---------- */
+        .sec-head{display:flex;align-items:center;gap:7px;margin:14px 0 9px}
+        .sec-head .sh-ic{width:22px;height:22px;border-radius:7px;background:var(--green-soft);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:11px}
+        .sec-head h2{font-size:14.5px;font-weight:700}
+        .sec-head .sh-count{margin-left:auto;font-size:10.5px;font-weight:700;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:20px;padding:2px 9px}
+
+        /* ---------- service cards ---------- */
+        .cat-block{margin-bottom:14px}
+        .cat-title{display:none}
+        .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+        .service-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px;display:flex;flex-direction:column;justify-content:space-between;gap:9px;transition:.15s}
+        .service-card:hover{border-color:#B7D9C4;box-shadow:0 5px 14px rgba(11,122,59,.08)}
+        .sc-top{display:flex;gap:7px;align-items:flex-start}
+        .sc-ic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;flex:0 0 30px}
+        .sc-txt{min-width:0;flex:1}
+        .sc-txt h4{font-size:11.8px;font-weight:700;line-height:1.3;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+        .sc-txt p{font-size:9.6px;color:var(--muted);line-height:1.35;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+        .sc-bottom{display:flex;align-items:center;justify-content:space-between;gap:6px;border-top:1px solid #F1F6F3;padding-top:7px}
+        .price{display:inline-flex;align-items:center;gap:3px;background:var(--green-soft);color:var(--green-d);font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px}
+        .price i{font-size:9px}
+        .order-btn{background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:5px 10px;border-radius:20px;display:inline-flex;align-items:center;gap:4px;box-shadow:0 2px 7px rgba(11,122,59,.22)}
+        .order-btn i{font-size:8px}
+
+        /* ---------- help strip ---------- */
+        .help{display:flex;align-items:center;gap:9px;background:var(--green-soft);border:1px solid var(--green-line);border-radius:12px;padding:9px 11px;margin-top:4px}
+        .help .h-ic{width:24px;height:24px;border-radius:50%;background:#1E9C55;color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;flex:0 0 24px}
+        .help .h-txt{flex:1;min-width:0}
+        .help b{display:block;font-size:11.3px;font-weight:700;color:var(--green-d)}
+        .help small{display:block;font-size:9.6px;color:#4C6B58;line-height:1.35}
+        .wa-btn{background:#25D366;color:#fff;font-size:10.3px;font-weight:700;padding:6px 10px;border-radius:9px;display:inline-flex;align-items:center;gap:5px;flex:0 0 auto}
+        .note-strip{display:flex;align-items:center;gap:6px;background:#EBF5EE;border:1px solid #DCEFE2;border-radius:9px;padding:6px 10px;margin-top:8px;font-size:9.6px;color:#3D6450;font-weight:600}
+
+        /* ---------- bottom nav ---------- */
+        .bnav{position:fixed;left:0;right:0;bottom:0;z-index:70;background:#fff;border-top:1px solid var(--line);box-shadow:0 -4px 16px rgba(0,0,0,.05)}
+        .bnav-in{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-around;padding:7px 6px 9px;position:relative}
+        .bnav a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;font-weight:600;color:#7C8F84;flex:1}
+        .bnav a i{font-size:15px}
+        .bnav a.is-on{color:var(--green-d);font-weight:700}
+        .fab{position:absolute;left:50%;transform:translate(-50%,-52%);top:0;width:46px;height:46px;border-radius:50%;background:linear-gradient(140deg,#12241B,#0B7A3B);color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 6px 16px rgba(11,122,59,.35);border:3px solid #fff}
+        .bnav .spacer{flex:1}
+
+        @media (max-width:360px){
+            .hero-art{display:none}
+            .brand b{font-size:17px}
         }
     </style>
 </head>
 <body>
 
-    <!-- Header Section -->
-    <header class="bg-white sticky top-0 z-40 border-b border-slate-100 shadow-sm">
-        <div class="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
-            <a href="dashboard.php" class="flex items-center gap-2 text-green-800 font-extrabold text-sm">
-                <i class="fa-solid fa-arrow-left text-base"></i>
-                <span>ড্যাশবোর্ড</span>
+<!-- ================= header ================= -->
+<header class="topbar">
+    <div class="topbar-in">
+        <a href="dashboard.php" class="brand">
+            <img src="assets/logo.jpg" alt="সকল সেবা">
+            <span>
+                <b>সকল <em>সেবা</em></b>
+                <small>সব কাজ, এক প্লাটফর্ম</small>
+            </span>
+        </a>
+        <div class="top-actions">
+            <a href="recharge.php" class="wallet">
+                <i class="fa-solid fa-wallet"></i>
+                <span>
+                    <small>ওয়ালেট</small>
+                    <b>৳ <?php echo number_format((float)$balance, 2); ?></b>
+                </span>
             </a>
-            
-            <div class="flex items-center gap-2">
-                <button onclick="location.href='recharge.php'" class="flex items-center gap-1.5 bg-[#059669] text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm">
-                    <i class="fa-solid fa-wallet text-sm"></i>
-                    <span>৳ <?php echo htmlspecialchars($balance); ?></span>
-                </button>
+            <a href="support.php" class="ib" aria-label="নোটিফিকেশন"><i class="fa-regular fa-bell"></i><span class="dot"></span></a>
+            <button type="button" class="ib" id="menuBtn" aria-label="মেনু"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </div>
+    <div class="menu-panel" id="menuPanel">
+        <a href="dashboard.php"><i class="fa-solid fa-house"></i> হোম</a>
+        <a href="recharge.php"><i class="fa-solid fa-wallet"></i> ওয়ালেট</a>
+        <a href="work_history.php"><i class="fa-solid fa-file-invoice"></i> অর্ডার হিস্টরি</a>
+        <a href="profile.php"><i class="fa-regular fa-user"></i> প্রোফাইল</a>
+        <a href="support.php"><i class="fa-solid fa-headset"></i> সাপোর্ট</a>
+    </div>
+</header>
+
+<!-- ================= breadcrumb ================= -->
+<div class="crumb">
+    <div class="crumb-in">
+        <a href="dashboard.php" class="back" aria-label="পিছনে"><i class="fa-solid fa-arrow-left"></i></a>
+        <b><?php echo htmlspecialchars($hero_cat); ?></b>
+        <a href="services.php" class="crumb-chip"><i class="fa-solid fa-layer-group"></i> সকল সেবা</a>
+    </div>
+</div>
+
+<main class="shell">
+
+    <!-- ================= hero ================= -->
+    <section class="hero">
+        <div class="hero-txt">
+            <h1 id="heroTitle"><?php echo htmlspecialchars($hero_h1); ?></h1>
+            <p id="heroSub"><?php echo htmlspecialchars($hero_sub); ?></p>
+            <div class="hero-chips">
+                <span><i class="fa-solid fa-circle-check"></i> সঠিক সেবা</span>
+                <span><i class="fa-solid fa-circle-check"></i> নির্ভরযোগ্য লেনদেন</span>
+                <span><i class="fa-solid fa-circle-check"></i> বিশ্বস্ত সেবা</span>
             </div>
         </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-6xl mx-auto px-3.5 sm:px-6 py-4 space-y-4">
-
-        <!-- Search Bar -->
-        <div class="bg-white p-1 rounded-full shadow-sm border border-slate-200 flex items-center">
-            <div class="pl-3.5 pr-2 text-slate-400">
-                <i class="fa-solid fa-magnifying-glass text-xs sm:text-sm"></i>
+        <div class="hero-art" aria-hidden="true">
+            <div class="id-card">
+                <div class="ic-top">
+                    <span class="ic-flag"></span>
+                    <b>গণপ্রজাতন্ত্রী<br>বাংলাদেশ</b>
+                </div>
+                <div class="ic-body">
+                    <span class="ic-photo"></span>
+                    <span class="ic-lines"><i></i><i></i><i></i></span>
+                </div>
+                <div class="ic-bottom"></div>
             </div>
-            <?php $search_q = isset($_GET['q']) ? trim($_GET['q']) : ''; ?>
-            <input type="text" id="serviceSearchInput" value="<?php echo htmlspecialchars($search_q); ?>" placeholder="ডাটাবেজ থেকে যে কোন সার্ভিস খুঁজুন..." class="w-full py-1 text-xs sm:text-sm focus:outline-none text-slate-700 bg-transparent">
         </div>
+    </section>
 
-        <!-- Filter Category Tabs -->
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs font-bold">
-            <button onclick="filterCategory('all')" class="cat-filter-btn px-3 py-1.5 rounded-xl bg-green-700 text-white whitespace-nowrap shadow-sm">সবগুলো</button>
-            <?php foreach (array_keys($services_by_cat) as $cName): ?>
-                <button onclick="filterCategory('<?php echo md5($cName); ?>')" class="cat-filter-btn px-3 py-1.5 rounded-xl bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 whitespace-nowrap transition">
-                    <?php echo htmlspecialchars($cName); ?>
-                </button>
-            <?php endforeach; ?>
+    <!-- ================= search ================= -->
+    <div class="search-row">
+        <div class="search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="serviceSearchInput" value="<?php echo htmlspecialchars($search_q); ?>" placeholder="<?php echo htmlspecialchars($hero_cat); ?> খুঁজুন...">
         </div>
+        <button type="button" class="filter-btn" id="filterBtn"><i class="fa-solid fa-sliders"></i> ফিল্টার</button>
+    </div>
 
-        <!-- Services Grouped By Category -->
-        <div class="space-y-5" id="servicesListWrapper">
-            <?php if (!empty($services_by_cat)): ?>
-                <?php foreach ($services_by_cat as $catName => $items): 
-                    $color_meta = $category_colors[$catName] ?? ['bg' => '#107C41', 'icon' => 'fa-layer-group', 'badge' => 'bg-emerald-50 text-emerald-800'];
+    <!-- category tabs (ফিল্টার বাটনে খোলে) -->
+    <div class="tabs" id="catTabs">
+        <button type="button" class="tab is-on" data-cat="all" data-title="সকল সেবা" data-sub="প্রয়োজনীয় সব সেবা এক জায়গায় — সহজে ও নির্ভরযোগ্যভাবে অর্ডার করুন।">সবগুলো</button>
+        <?php foreach ($services_by_cat as $cName => $items): ?>
+            <button type="button" class="tab" data-cat="<?php echo md5($cName); ?>" data-title="<?php echo htmlspecialchars(isset($hero_copy[$cName]) ? $hero_copy[$cName][0] : $cName); ?>" data-sub="<?php echo htmlspecialchars(isset($hero_copy[$cName]) ? $hero_copy[$cName][1] : 'যে কোনো প্রয়োজনে সহজে ও নির্ভরযোগ্যভাবে অর্ডার করুন।'); ?>">
+                <?php echo htmlspecialchars($cName); ?>
+            </button>
+        <?php endforeach; ?>
+    </div>
+
+    <!-- ================= services ================= -->
+    <div id="servicesListWrapper">
+        <?php if (!empty($services_by_cat)): ?>
+            <?php $is_first_block = true; foreach ($services_by_cat as $catName => $items): ?>
+                <?php
+                    $color_meta = $category_colors[$catName] ?? $default_color;
                     $catId = md5($catName);
                 ?>
-                    <div class="category-block space-y-2.5" data-category="<?php echo $catId; ?>">
-                        <div class="flex items-center justify-between border-b border-slate-200 pb-2">
-                            <h3 class="text-sm sm:text-base font-extrabold text-slate-800 flex items-center gap-2">
-                                <span class="w-6 h-6 rounded-lg flex items-center justify-center text-white text-xs" style="background-color: <?php echo $color_meta['bg']; ?>;">
-                                    <i class="fa-solid <?php echo $color_meta['icon']; ?>"></i>
-                                </span>
-                                <span><?php echo htmlspecialchars($catName); ?></span>
-                            </h3>
-                            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full border border-slate-200 bg-white text-slate-600">
-                                <?php echo count($items); ?> টি সেবা
-                            </span>
-                        </div>
-
-                        <!-- Service Grid (Mobile 2 Columns) -->
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3.5">
-                            <?php foreach ($items as $srv): 
-                                // custom service -> nijer order page (protiti service er alada field), auto service -> tar nijer page
+                <div class="cat-block" data-category="<?php echo $catId; ?>" data-cat-name="<?php echo htmlspecialchars($catName); ?>" data-cat-color="<?php echo $color_meta['bg']; ?>" data-cat-icon="<?php echo $color_meta['icon']; ?>">
+                    <div class="sec-head">
+                        <span class="sh-ic"><i class="fa-solid fa-table-cells-large"></i></span>
+                        <h2><?php echo htmlspecialchars($catName); ?>সমূহ</h2>
+                        <span class="sh-count"><?php echo count($items); ?> টি সেবা</span>
+                    </div>
+                    <div class="grid">
+                        <?php foreach ($items as $srv): ?>
+                            <?php
                                 $srv_type = isset($srv['service_type']) ? strtolower(trim($srv['service_type'])) : 'custom';
                                 if ($srv_type === 'auto' && !empty($srv['access_link'])) {
                                     $srv_link = $srv['access_link'];
                                 } else {
                                     $srv_link = 'service_order.php?id=' . (int)$srv['id'];
                                 }
+                                $srv_icon = function_exists('soko_service_icon') ? soko_service_icon($srv['service_name'], $catName) : $color_meta['icon'];
+                                $srv_desc = !empty($srv['description']) ? $srv['description'] : 'দ্রুত ও নির্ভরযোগ্যভাবে সেবা নিন।';
                             ?>
-                                <div class="service-card p-3 service-item">
-                                    <div>
-                                        <h4 class="text-xs sm:text-sm font-extrabold text-slate-800 line-clamp-1">
-                                            <?php echo htmlspecialchars($srv['service_name']); ?>
-                                        </h4>
-                                        <p class="text-[11px] text-slate-500 mt-0.5 line-clamp-1">
-                                            <?php echo !empty($srv['description']) ? htmlspecialchars($srv['description']) : 'তাত্ক্ষণিক অর্ডার সেবা'; ?>
-                                        </p>
-                                    </div>
-
-                                    <div class="flex items-center justify-between mt-2.5 pt-2 border-t border-slate-100">
-                                        <span class="text-xs font-black text-green-700">
-                                            ৳ <?php echo (int)$srv['price']; ?>
-                                        </span>
-                                        <a href="<?php echo htmlspecialchars($srv_link); ?>" class="bg-[#107C41] hover:bg-green-800 text-white text-[10.5px] font-bold px-2.5 py-1 rounded-full shadow-sm transition">
-                                            অর্ডার
-                                        </a>
+                            <div class="service-card service-item">
+                                <div class="sc-top">
+                                    <span class="sc-ic" style="background:<?php echo $color_meta['soft']; ?>;color:<?php echo $color_meta['bg']; ?>">
+                                        <i class="fa-solid <?php echo htmlspecialchars($srv_icon); ?>"></i>
+                                    </span>
+                                    <div class="sc-txt">
+                                        <h4><?php echo htmlspecialchars($srv['service_name']); ?></h4>
+                                        <p><?php echo htmlspecialchars($srv_desc); ?></p>
                                     </div>
                                 </div>
-                            <?php endforeach; ?>
-                        </div>
+                                <div class="sc-bottom">
+                                    <span class="price"><i class="fa-solid fa-bangladeshi-taka-sign"></i> <?php echo (int)$srv['price']; ?></span>
+                                    <a href="<?php echo htmlspecialchars($srv_link); ?>" class="order-btn">অর্ডার করুন <i class="fa-solid fa-arrow-right"></i></a>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div class="text-center py-12 bg-white rounded-2xl border border-slate-200">
-                    <i class="fa-solid fa-folder-open text-4xl text-slate-300 mb-2"></i>
-                    <p class="text-xs font-bold text-slate-500">ডাটাবেজে বর্তমানে কোনো সার্ভিস পাওয়া যায়নি।</p>
                 </div>
-            <?php endif; ?>
-        </div>
+            <?php endforeach; ?>
 
-    </main>
+            <div class="help">
+                <span class="h-ic"><i class="fa-solid fa-check"></i></span>
+                <div class="h-txt">
+                    <b>সাহায্য প্রয়োজন?</b>
+                    <small>যেকোনো প্রয়োজনে অ্যাডমিনের সাথে যোগাযোগ করুন।</small>
+                </div>
+                <a class="wa-btn" href="<?php echo htmlspecialchars($whatsapp_link); ?>" target="_blank" rel="noopener">
+                    <i class="fa-brands fa-whatsapp"></i> মেসেজ করুন
+                </a>
+            </div>
 
-    <!-- Bottom 5-Tab Bar -->
-    <nav class="fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 py-1.5 px-3 flex items-center justify-around z-50 shadow-[0_-4px_15px_rgba(0,0,0,0.04)]">
-        <a href="dashboard.php" class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-green-700 text-[10.5px] font-semibold">
-            <i class="fa-solid fa-house text-base sm:text-lg"></i>
-            <span>হোম</span>
-        </a>
-        <a href="services.php" class="flex flex-col items-center gap-0.5 text-[#107C41] text-[10.5px] font-extrabold">
-            <i class="fa-solid fa-table-cells-large text-base sm:text-lg"></i>
-            <span>সেবা</span>
-        </a>
-        <a href="recharge.php" class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-green-700 text-[10.5px] font-semibold">
-            <i class="fa-solid fa-wallet text-base sm:text-lg"></i>
-            <span>ওয়ালেট</span>
-        </a>
-        <a href="work_history.php" class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-green-700 text-[10.5px] font-semibold">
-            <i class="fa-solid fa-file-invoice text-base sm:text-lg"></i>
-            <span>অর্ডার</span>
-        </a>
-        <a href="profile.php" class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-green-700 text-[10.5px] font-semibold">
-            <i class="fa-regular fa-user text-base sm:text-lg"></i>
-            <span>প্রোফাইল</span>
-        </a>
-    </nav>
+            <div class="note-strip">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>সকল কাজ শুরু আছে — যে কোন প্রয়োজনে অ্যাডমিনের সাথে সরাসরি যোগাযোগ করুন।</span>
+            </div>
+        <?php else: ?>
+            <div style="text-align:center;padding:40px 12px;background:#fff;border:1px solid var(--line);border-radius:12px">
+                <i class="fa-solid fa-folder-open" style="font-size:30px;color:#C7D6CD;margin-bottom:8px"></i>
+                <p style="font-size:12px;font-weight:700;color:var(--muted)">ডাটাবেজে বর্তমানে কোনো সার্ভিস পাওয়া যায়নি।</p>
+            </div>
+        <?php endif; ?>
+    </div>
 
-    <script>
-        // Live Search Filter
-        function applyServiceSearch() {
-            var value = $('#serviceSearchInput').val().toLowerCase();
-            $('.service-item').filter(function() {
-                var match = $(this).text().toLowerCase().indexOf(value) > -1;
-                $(this).toggle(match);
-            });
-            $('.category-block').each(function() {
-                var visibleCount = $(this).find('.service-item:visible').length;
-                $(this).toggle(visibleCount > 0);
-            });
-        }
+</main>
 
-        // Pre-filled search from ?q= (dashboard service links)
-        $(document).ready(function() {
-            if ($('#serviceSearchInput').val() !== '') {
-                applyServiceSearch();
-            }
+<!-- ================= bottom nav ================= -->
+<nav class="bnav">
+    <div class="bnav-in">
+        <a href="dashboard.php"><i class="fa-solid fa-house"></i><span>হোম</span></a>
+        <a href="services.php" class="is-on"><i class="fa-solid fa-table-cells-large"></i><span>সেবা</span></a>
+        <a href="services.php" class="fab" aria-label="অর্ডার"><i class="fa-solid fa-bolt"></i></a>
+        <span class="spacer"></span>
+        <a href="recharge.php"><i class="fa-solid fa-wallet"></i><span>ওয়ালেট</span></a>
+        <a href="profile.php"><i class="fa-regular fa-user"></i><span>প্রোফাইল</span></a>
+    </div>
+</nav>
+
+<script>
+(function () {
+    /* ---- menu ---- */
+    var menuBtn = document.getElementById('menuBtn');
+    var menuPanel = document.getElementById('menuPanel');
+    if (menuBtn && menuPanel) {
+        menuBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            menuPanel.classList.toggle('is-open');
         });
+        document.addEventListener('click', function () { menuPanel.classList.remove('is-open'); });
+    }
 
-        $('#serviceSearchInput').on('keyup', function() {
-            var value = $(this).val().toLowerCase();
-            $('.service-item').filter(function() {
-                var match = $(this).text().toLowerCase().indexOf(value) > -1;
-                $(this).toggle(match);
-            });
+    /* ---- filter tabs ---- */
+    var filterBtn = document.getElementById('filterBtn');
+    var catTabs = document.getElementById('catTabs');
+    if (filterBtn && catTabs) {
+        filterBtn.addEventListener('click', function () { catTabs.classList.toggle('is-open'); });
+    }
 
-            // Hide empty category wrappers if no service matches
-            $('.category-block').each(function() {
-                var visibleCount = $(this).find('.service-item:visible').length;
-                $(this).toggle(visibleCount > 0);
-            });
+    var tabs = document.querySelectorAll('.tab');
+    var blocks = document.querySelectorAll('.cat-block');
+    var heroTitle = document.getElementById('heroTitle');
+    var heroSub = document.getElementById('heroSub');
+
+    /* ---- live search ---- */
+    var searchInput = document.getElementById('serviceSearchInput');
+    function applyServiceSearch() {
+        var value = (searchInput ? searchInput.value : '').toLowerCase().trim();
+        var items = document.querySelectorAll('.service-item');
+        Array.prototype.forEach.call(items, function (item) {
+            var match = item.textContent.toLowerCase().indexOf(value) > -1;
+            item.style.display = match ? '' : 'none';
         });
+        Array.prototype.forEach.call(blocks, function (block) {
+            var visible = block.querySelectorAll('.service-item:not([style*="display: none"])').length;
+            block.style.display = visible > 0 ? '' : 'none';
+        });
+    }
+    if (searchInput) {
+        searchInput.addEventListener('input', applyServiceSearch);
+        if (searchInput.value.trim() !== '') { applyServiceSearch(); }
+    }
 
-        // Category Tab Filter
-        function filterCategory(catId) {
-            $('.cat-filter-btn').removeClass('bg-green-700 text-white').addClass('bg-white text-slate-700 border border-slate-200');
-            $(event.target).removeClass('bg-white text-slate-700 border border-slate-200').addClass('bg-green-700 text-white');
+    /* ---- category filter ---- */
+    Array.prototype.forEach.call(tabs, function (tab) {
+        tab.addEventListener('click', function () {
+            Array.prototype.forEach.call(tabs, function (t) { t.classList.remove('is-on'); });
+            tab.classList.add('is-on');
 
-            if (catId === 'all') {
-                $('.category-block').show();
-            } else {
-                $('.category-block').hide();
-                $('.category-block[data-category="' + catId + '"]').fadeIn(200);
+            var cat = tab.getAttribute('data-cat');
+            Array.prototype.forEach.call(blocks, function (block) {
+                var show = (cat === 'all') || (block.getAttribute('data-category') === cat);
+                block.setAttribute('data-hidden', show ? '0' : '1');
+                block.style.display = show ? '' : 'none';
+            });
+
+            if (cat !== 'all') {
+                var shown = document.querySelector('.cat-block:not([style*="display: none"])');
+                if (shown && heroTitle) {
+                    heroTitle.textContent = tab.getAttribute('data-title') || tab.textContent.trim();
+                    if (heroSub) { heroSub.textContent = tab.getAttribute('data-sub') || ''; }
+                }
+            } else if (heroTitle) {
+                heroTitle.textContent = tab.getAttribute('data-title') || 'সকল সেবা';
+                if (heroSub) { heroSub.textContent = tab.getAttribute('data-sub') || ''; }
             }
-        }
-    </script>
+
+            if (searchInput && searchInput.value.trim() !== '') { applyServiceSearch(); }
+        });
+    });
+})();
+</script>
 </body>
 </html>
-<?php ob_end_flush(); ?>
