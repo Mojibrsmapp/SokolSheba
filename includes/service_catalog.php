@@ -204,57 +204,197 @@ if (!function_exists('soko_field')) {
     }
 }
 
-if (!function_exists('soko_service_presets')) {
+if (!function_exists('soko_field_rules')) {
     /**
-     * Field sets per service. The first keyword found inside the service name wins,
-     * so every service can ask for completely different information.
+     * Ordered rules: the FIRST matching keyword wins, so every single service
+     * gets its own field set. Add one line here to give a new service its own
+     * fields — no other change needed.
+     *
+     * match  : keyword list (Bengali / English), matched against service name
+     * fields : which inputs the order page must show for that service
      */
-    function soko_service_presets()
+    function soko_field_rules()
     {
-        $card_front = soko_field('nid_front', 'NID কার্ডের সামনের ছবি', 'file', 1, 'সামনের অংশ আপলোড করুন', 'fa-image', 'image/*');
-        $card_back = soko_field('nid_back', 'NID কার্ডের পেছনের ছবি', 'file', 1, 'পেছনের অংশ আপলোড করুন', 'fa-image', 'image/*');
-        $photo = soko_field('photo', 'আবেদনকারীর ছবি', 'file', 0, 'ছবি আপলোড করুন (ঐচ্ছিক)', 'fa-camera', 'image/*');
         $name = soko_field('name', 'নাম', 'text', 1, 'আপনার পূর্ণ নাম লিখুন', 'fa-user', '');
         $mobile = soko_field('mobile', 'মোবাইল নম্বর', 'tel', 1, '১১ ডিজিটের মোবাইল নম্বর লিখুন', 'fa-phone', '');
+        $mobile_opt = soko_field('mobile', 'মোবাইল নম্বর', 'tel', 0, 'মোবাইল নম্বর (ঐচ্ছিক)', 'fa-phone', '');
         $nid = soko_field('nid', 'NID নম্বর', 'text', 1, '১০ / ১৩ / ১৭ ডিজিটের NID নম্বর', 'fa-id-card', '');
         $nid_any = soko_field('nid', 'NID / ফরম / ভোটার নম্বর', 'text', 1, 'NID অথবা ফরম নম্বর লিখুন', 'fa-id-card', '');
         $dob = soko_field('dob', 'জন্ম তারিখ', 'date', 1, '', 'fa-calendar-days', '');
-        $dob_opt = soko_field('dob', 'জন্ম তারিখ', 'date', 0, '', 'fa-calendar-days', '');
+        $front = soko_field('nid_front', 'NID কার্ডের সামনের ছবি', 'file', 1, 'সামনের অংশ আপলোড করুন', 'fa-image', 'image/*');
+        $back = soko_field('nid_back', 'NID কার্ডের পেছনের ছবি', 'file', 1, 'পেছনের অংশ আপলোড করুন', 'fa-image', 'image/*');
+        $photo = soko_field('photo', 'আবেদনকারীর ছবি', 'file', 0, 'ছবি আপলোড করুন (ঐচ্ছিক)', 'fa-camera', 'image/*');
+        $pdf = soko_field('pdf_file', 'সংযুক্তি (PDF / ছবি)', 'file', 1, 'ফাইল আপলোড করুন (সর্বোচ্চ ৫MB)', 'fa-file-arrow-up', 'image/*,.pdf');
         $brn = soko_field('brn', 'জন্ম নিবন্ধন নম্বর', 'text', 1, '১৭ ডিজিটের জন্ম নিবন্ধন নম্বর', 'fa-file-lines', '');
+        $passport = soko_field('passport', 'পাসপোর্ট নম্বর', 'text', 1, 'পাসপোর্ট নম্বর লিখুন', 'fa-passport', '');
+        $tin = soko_field('tin', 'TIN নম্বর', 'text', 1, 'TIN / করদাতা নম্বর লিখুন', 'fa-file-invoice', '');
+        $license = soko_field('license', 'লাইসেন্স নম্বর', 'text', 1, 'লাইসেন্স নম্বর লিখুন', 'fa-address-card', '');
+        $imei = soko_field('imei', 'IMEI নম্বর', 'text', 1, 'ফোনের IMEI নম্বর লিখুন', 'fa-mobile-screen', '');
+        $duration = soko_field('duration', 'কত দিনের তথ্য', 'text', 1, 'যেমন: ৩ মাস / ৬ মাস / ১ বছর', 'fa-clock', '');
+        $reason = soko_field('reason', 'বাতিলের কারণ', 'textarea', 1, 'সংক্ষেপে কারণ লিখুন', 'fa-pen', '');
+        $address = soko_field('address', 'পূর্ণ ঠিকানা', 'textarea', 1, 'বাসা/গ্রাম, রোড, থানা, জেলা লিখুন', 'fa-location-dot', '');
         $details = soko_field('details', 'বিস্তারিত তথ্য', 'textarea', 1, 'প্রয়োজনীয় সব তথ্য বিস্তারিতভাবে লিখুন', 'fa-pen', '');
-        $pdf = soko_field('pdf_file', 'পিডিএফ ফাইল', 'file', 1, 'PDF আপলোড করুন (সর্বোচ্চ ৫MB)', 'fa-file-pdf', '.pdf');
-        $tin = soko_field('tin', 'TIN নম্বর', 'text', 1, 'TIN নম্বর লিখুন', 'fa-file-invoice', '');
+        $area = soko_field('area', 'এলাকা / ওয়ার্ড', 'textarea', 1, 'জেলা, উপজেলা, ইউনিয়ন ও ওয়ার্ড নং লিখুন', 'fa-map-location-dot', '');
+        $land = soko_field('land', 'দাগ / খতিয়ান নম্বর', 'text', 1, 'দাগ ও খতিয়ান নম্বর লিখুন', 'fa-file-contract', '');
+        $trx = soko_field('trx', 'ট্রানজেকশন আইডি (TrxID)', 'text', 0, 'যেমন: 9F3A7B6C2D (ঐচ্ছিক)', 'fa-receipt', '');
 
         return array(
-            // keyword => fields
-            'সাইন কপি' => array($name, $mobile, $nid, $dob, $card_front, $card_back),
-            'সাইন' => array($nid_any, $name, $mobile, $dob, $card_front),
-            'আইডি কার্ড' => array($name, $nid, $dob, $card_front, $card_back),
-            'সার্ভার কপি' => array($nid, $dob, $card_front),
-            'স্মার্ট' => array($nid, $dob, $photo),
-            'পাসওয়ার্ড' => array($nid, $dob, $mobile),
-            'মোবাইল নাম্বার' => array($mobile, $nid),
-            'জন্ম নিবন্ধন' => array($brn, $dob, $name, $mobile),
-            'ভোটার' => array($details, $mobile),
-            'সংশোধন' => array($nid, $details, $mobile),
-            'টিন' => array($tin, $name, $mobile, $nid),
-            'পাসপোর্ট' => array(soko_field('passport', 'পাসপোর্ট নম্বর', 'text', 1, 'পাসপোর্ট নম্বর লিখুন', 'fa-passport', ''), $dob, $name, $pdf),
-            'কল' => array($mobile, soko_field('duration', 'কত দিনের তথ্য', 'text', 1, 'যেমন: ৩০ দিন', 'fa-clock', '')),
-            'লোকেশন' => array($mobile, $name),
+            /* ---------------- NID সেবা ---------------- */
+            array('match' => array('সাইন কপি', 'sign copy', 'sign 2', 'sign2'), 'fields' => array($name, $mobile, $nid, $dob, $front, $back)),
+            array('match' => array('মোবাইল নাম্বার দিয়ে', 'মোবাইল নম্বর দিয়ে', 'mobile to nid'), 'fields' => array($mobile, $name, $nid_any)),
+            array('match' => array('পাসওয়ার্ড', 'password'), 'fields' => array($nid, $dob, $mobile)),
+            array('match' => array('স্মার্ট কার্ড', 'smart card'), 'fields' => array($nid, $dob, $name, $photo)),
+            array('match' => array('আইডি কার্ড', 'id card'), 'fields' => array($name, $nid, $dob, $front, $back)),
+            array('match' => array('অটো nid', 'auto nid', 'অটো এনআইডি'), 'fields' => array($name, $nid, $dob, $photo)),
+            array('match' => array('সার্ভার কপি', 'server copy'), 'fields' => array($nid, $dob, $front)),
+            array('match' => array('জন্ম নিবন্ধন দিয়ে', 'জন্মনিবন্ধন দিয়ে'), 'fields' => array($brn, $dob, $name, $mobile)),
+            array('match' => array('ভোটার লিস্ট', 'voter list'), 'fields' => array($area)),
+            array('match' => array('ভোটার'), 'fields' => array($name, $area, $mobile_opt)),
+            array('match' => array('বয়স সংশোধন'), 'fields' => array($nid, $dob, $details)),
+            array('match' => array('টিন নিজ', 'টিন অল', 'সংশোধন ও সার্টিফিকেট'), 'fields' => array($tin, $nid, $details, $mobile)),
+            array('match' => array('সংশোধন', 'correction'), 'fields' => array($nid, $details, $mobile)),
+
+            /* ---------------- পাসপোর্ট ---------------- */
+            array('match' => array('nid দিয়ে পাসপোর্ট', 'passport from nid'), 'fields' => array($nid, $name, $dob, $pdf)),
+            array('match' => array('ইমিগ্রেশন', 'ভিসা যাচাই', 'visa'), 'fields' => array($passport, $dob, $name)),
+            array('match' => array('পুলিশ ক্লিয়ারেন্স', 'police clearance'), 'fields' => array($nid, $name, $address, $photo)),
+            array('match' => array('পাসপোর্ট', 'passport'), 'fields' => array($passport, $dob, $name, $pdf)),
+
+            /* ---------------- জন্ম নিবন্ধন ---------------- */
+            array('match' => array('জন্ম নিবন্ধন', 'জন্মনিবন্ধন', 'birth'), 'fields' => array($brn, $name, $dob, $mobile)),
+
+            /* ---------------- মোবাইল ব্যাংকিং ---------------- */
+            array('match' => array('ইনফো', 'info'), 'fields' => array($mobile, $trx)),
+
+            /* ---------------- সিম / বায়োমেট্রিক ---------------- */
+            array('match' => array('সিম বাতিল', 'sim cancel'), 'fields' => array($nid, $mobile, $reason)),
+            array('match' => array('বায়োমেট্রিক', 'biometric'), 'fields' => array($mobile, $nid_any)),
+            array('match' => array('কল লিস্ট', 'call list'), 'fields' => array($mobile, $duration)),
+
+            /* ---------------- লোকেশন / IMEI ---------------- */
+            array('match' => array('location', 'লোকেশন'), 'fields' => array($mobile)),
+            array('match' => array('imei'), 'fields' => array($imei, $mobile_opt)),
+            array('match' => array('এনআইডি টু', 'nid to', 'আইডি টু'), 'fields' => array($nid)),
+
+            /* ---------------- টিন / লাইসেন্স ---------------- */
+            array('match' => array('জিরো রিটার্ন', 'zero return'), 'fields' => array($tin, $name, $mobile)),
+            array('match' => array('টিন'), 'fields' => array($tin, $name, $mobile, $pdf)),
+            array('match' => array('ট্রেড লাইসেন্স', 'trade license'), 'fields' => array($license, $name, $mobile, $address, $pdf)),
+            array('match' => array('ড্রাইভিং', 'driving license'), 'fields' => array($license, $dob, $photo)),
+
+            /* ---------------- ভূমি ---------------- */
+            array('match' => array('ভূমি', 'খতিয়ান', 'মৌজা', 'খাজনা'), 'fields' => array($land, $area, $name, $mobile)),
+
+            /* ---------------- আবেদন / অন্যান্য ---------------- */
+            array('match' => array('জিডি', 'gd '), 'fields' => array($nid, $details)),
+            array('match' => array('আবেদন', 'apply'), 'fields' => array($name, $mobile, $address, $photo, $pdf)),
+            array('match' => array('clone', 'death', 'cv make', 'সনদ'), 'fields' => array($name, $mobile, $details, $pdf)),
         );
     }
 }
 
+if (!function_exists('soko_service_presets')) {
+    /** Backward compatible helper: keyword => fields map. */
+    function soko_service_presets()
+    {
+        $map = array();
+        foreach (soko_field_rules() as $rule) {
+            foreach ($rule['match'] as $keyword) {
+                $map[$keyword] = $rule['fields'];
+            }
+        }
+        return $map;
+    }
+}
+
 if (!function_exists('soko_match_preset')) {
+    /**
+     * Rules are checked top to bottom and the FIRST hit wins, so the most
+     * specific service (e.g. "জন্ম নিবন্ধন দিয়ে NID") must be listed before
+     * the generic one ("জন্ম নিবন্ধন").
+     */
     function soko_match_preset($service_name)
     {
-        $service_name = (string)$service_name;
-        foreach (soko_service_presets() as $keyword => $fields) {
-            if (strpos($service_name, $keyword) !== false) {
-                return $fields;
+        $haystack = strtolower((string)$service_name);
+        if ($haystack === '') {
+            return null;
+        }
+        foreach (soko_field_rules() as $rule) {
+            foreach ($rule['match'] as $keyword) {
+                $needle = strtolower($keyword);
+                if ($needle !== '' && strpos($haystack, $needle) !== false) {
+                    return $rule['fields'];
+                }
             }
         }
         return null;
+    }
+}
+
+if (!function_exists('soko_service_link')) {
+    /**
+     * Where a "service" link should go. Found service -> its own order page,
+     * unknown name -> services list with the search box pre-filled.
+     */
+    function soko_service_link($conn, $label)
+    {
+        $label = trim((string)$label);
+        if ($label === '') {
+            return 'services.php';
+        }
+
+        $stmt = $conn->prepare("SELECT id FROM custom_services WHERE service_name = ? ORDER BY id ASC LIMIT 1");
+        if ($stmt) {
+            $stmt->bind_param("s", $label);
+            $stmt->execute();
+            $res = $stmt->get_result();
+            if ($res && $res->num_rows > 0) {
+                $row = $res->fetch_assoc();
+                $stmt->close();
+                return 'service_order.php?id=' . (int)$row['id'];
+            }
+            $stmt->close();
+        }
+
+        $like = '%' . $label . '%';
+        $stmt = $conn->prepare("SELECT id FROM custom_services WHERE service_name LIKE ? ORDER BY id ASC LIMIT 1");
+        if ($stmt) {
+            $stmt->bind_param("s", $like);
+            $stmt->execute();
+            $res = $stmt->get_result();
+            if ($res && $res->num_rows > 0) {
+                $row = $res->fetch_assoc();
+                $stmt->close();
+                return 'service_order.php?id=' . (int)$row['id'];
+            }
+            $stmt->close();
+        }
+
+        $words = preg_split('/\s+/', $label);
+        $longest = '';
+        foreach ($words as $word) {
+            $word = trim($word);
+            if (strlen($word) > strlen($longest)) {
+                $longest = $word;
+            }
+        }
+        if (strlen($longest) > 3) {
+            $like2 = '%' . $longest . '%';
+            $stmt = $conn->prepare("SELECT id FROM custom_services WHERE service_name LIKE ? ORDER BY id ASC LIMIT 1");
+            if ($stmt) {
+                $stmt->bind_param("s", $like2);
+                $stmt->execute();
+                $res = $stmt->get_result();
+                if ($res && $res->num_rows > 0) {
+                    $row = $res->fetch_assoc();
+                    $stmt->close();
+                    return 'service_order.php?id=' . (int)$row['id'];
+                }
+                $stmt->close();
+            }
+        }
+
+        return 'services.php?q=' . urlencode($label);
     }
 }
 
