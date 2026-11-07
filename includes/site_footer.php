@@ -4,12 +4,15 @@ require_once __DIR__ . '/site_icons.php';
 if (defined('SOKO_FOOTER_RENDERED')) return;
 define('SOKO_FOOTER_RENDERED', true);
 $ss_page = basename($_SERVER['SCRIPT_NAME'] ?? '');
+// Public/auth pages retain support, menu and notices, but no fixed bottom bar.
+$ss_show_navigation = !in_array($ss_page, ['login.php', 'register_user.php', 'index.php'], true);
 $ss_active = in_array($ss_page, ['dashboard.php', 'index.php']) ? 'home' : (in_array($ss_page, ['profile.php', 'login.php', 'register_user.php']) ? 'user' : (strpos($ss_page, 'recharge') !== false || strpos($ss_page, 'payment_') === 0 ? 'wallet' : 'grid'));
 $ss_links = [
     ['home', '/dashboard.php', 'হোম'], ['grid', '/services.php', 'সেবা'],
     ['wallet', '/recharge.php', 'ওয়ালেট'], ['user', '/profile.php', 'প্রোফাইল'],
 ];
 ?>
+<?php if ($ss_show_navigation): ?>
 <nav class="ss-footer" aria-label="প্রধান নেভিগেশন" data-site-shell>
     <div class="ss-footer-inner">
         <?php foreach ($ss_links as $ss_i => $ss_link): ?>
@@ -18,6 +21,7 @@ $ss_links = [
         <?php endforeach; ?>
     </div>
 </nav>
+<?php endif; ?>
 <div class="ss-support" id="ss-support" data-site-shell>
     <div class="ss-support-panel" id="ss-support-panel" hidden>
         <strong>সাপোর্ট ও সহায়তা</strong>
@@ -37,6 +41,7 @@ $ss_links = [
         <?php endforeach; ?>
     </section>
 </div>
+<?php if ($ss_show_navigation): ?>
 <div class="ss-overlay ss-modal" id="ss-auto" hidden data-site-shell>
     <section class="ss-modal-card" role="dialog" aria-modal="true" aria-labelledby="ss-auto-title" tabindex="-1">
         <div class="ss-dialog-title"><strong id="ss-auto-title">২৪/৭ অটো সার্ভিসসমূহ</strong><button type="button" class="ss-square" data-ss-close aria-label="বন্ধ করুন"><?php echo soko_icon('close'); ?></button></div>
@@ -45,6 +50,7 @@ $ss_links = [
         <?php endforeach; ?>
     </section>
 </div>
+<?php endif; ?>
 <div class="ss-overlay ss-modal" id="ss-notice" hidden data-site-shell>
     <section class="ss-modal-card" role="dialog" aria-modal="true" aria-labelledby="ss-notice-title" tabindex="-1">
         <div class="ss-dialog-title"><strong id="ss-notice-title">জরুরী নোটিশ</strong><button type="button" class="ss-square" data-ss-close aria-label="বন্ধ করুন"><?php echo soko_icon('close'); ?></button></div>

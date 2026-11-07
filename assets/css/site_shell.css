@@ -1,7 +1,8 @@
 @font-face { font-family: 'SokolBangla'; src: url('/fonts/Bangla.ttf') format('truetype'); font-style: normal; font-weight: 100 900; font-display: swap; }
 @font-face { font-family: 'Nikosh'; src: url('/fonts/Bangla.ttf') format('truetype'); font-style: normal; font-weight: 100 900; font-display: swap; }
 /* Namespaced: works with legacy Bootstrap and newer Tailwind pages alike. */
-body { padding-bottom: calc(90px + env(safe-area-inset-bottom)) !important; }
+body:not(.ss-public-page) { padding-bottom: calc(90px + env(safe-area-inset-bottom)) !important; }
+body.ss-public-page { padding-bottom: env(safe-area-inset-bottom, 0px) !important; }
 [data-site-shell], [data-site-shell] * { box-sizing: border-box; font-family: 'SokolBangla', Arial, sans-serif !important; }
 [data-site-shell] { font-family: 'SokolBangla', Arial, sans-serif; font-size: 14px; line-height: 1.45; letter-spacing: normal; text-align: left; }
 [data-site-shell] a { text-decoration: none; }
@@ -32,6 +33,7 @@ body { padding-bottom: calc(90px + env(safe-area-inset-bottom)) !important; }
 .ss-center { display: flex; align-items: center; justify-content: center; flex: 0 0 58px; height: 58px; background: #0f172a; color: #fbbf24; border: 3px solid white; border-radius: 50%; margin-top: -24px !important; box-shadow: 0 7px 20px #0f172a30; }
 .ss-center .ss-icon { width: 26px; height: 26px; fill: currentColor; }
 .ss-support { position: fixed; bottom: calc(98px + env(safe-area-inset-bottom)); right: 20px; z-index: 90; width: 58px; height: 58px; }
+.ss-public-page .ss-support { bottom: calc(20px + env(safe-area-inset-bottom)); }
 .ss-support-toggle { width: 58px; height: 58px; border: 2px solid white; border-radius: 50%; background: #0b9444; color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 22px #08733735; touch-action: none; }
 .ss-support-toggle .ss-icon { width: 27px; height: 27px; }
 .ss-support-panel { position: absolute; bottom: 68px; right: 0; width: min(270px, calc(100vw - 24px)); background: white; padding: 12px; border: 1px solid #dfe9e3; border-radius: 17px; box-shadow: 0 7px 35px #0f172a26; color: #16472c; }

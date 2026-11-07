@@ -1,0 +1,36 @@
+/* Compact authentication cards; no viewport-height centering or footer spacer. */
+body.ss-auth-page {
+    display: block;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+.ss-auth-page .auth-container {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 12px auto;
+    padding: 0 12px;
+}
+.ss-auth-page .login-card,
+.ss-auth-page .register-card { width: 100%; }
+.ss-login-page .card-top-header { padding: 18px 20px 10px; }
+.ss-login-page .logo-avatar-wrap { width: 76px; height: 76px; margin-bottom: 8px; }
+.ss-login-page .card-top-header h2 { font-size: 25px; }
+.ss-login-page .card-body-content { padding: 10px 20px 16px; }
+.ss-login-page .form-group-custom { margin-bottom: 12px; }
+.ss-login-page .input-wrapper input { height: 48px; }
+.ss-login-page .utility-row { margin: 10px 0 14px; }
+.ss-login-page .divider-wrapper { margin: 14px 0; }
+.ss-login-page .register-footer { margin-top: 14px; }
+.ss-login-page .footer-features-bar { padding: 10px 14px; }
+/* Keep the registration message beside its logo, not absolutely over it. */
+.ss-register-page .card-top-header { gap: 12px; min-height: 0; padding: 12px 16px; }
+.ss-register-page .logo-avatar-wrap { flex: 0 0 68px; width: 68px; height: 68px; }
+.ss-register-page .top-info-badge { position: static; max-width: 190px; }
+@media (max-width: 390px) {
+    .ss-auth-page .auth-container { margin: 10px auto; padding: 0 10px; }
+    .ss-login-page .card-top-header { padding: 14px 16px 8px; }
+    .ss-login-page .logo-avatar-wrap { width: 68px; height: 68px; }
+    .ss-login-page .card-body-content { padding: 8px 16px 14px; }
+    .ss-login-page .card-top-header h2 { font-size: 23px; }
+}

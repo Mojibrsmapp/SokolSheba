@@ -421,9 +421,9 @@ if ($settings_result && mysqli_num_rows($settings_result) > 0) {
             font-weight: 600 !important;
         }
     </style>
-<style>body{display:block!important;padding:0!important}.auth-container{margin:24px auto!important;padding:0 12px}</style>
+<link rel="stylesheet" href="/assets/css/auth_layout.css">
 </head>
-<body>
+<body class="ss-public-page ss-auth-page ss-register-page">
 <?php include __DIR__ . '/includes/site_header.php'; ?>
 
     <div class="auth-container">

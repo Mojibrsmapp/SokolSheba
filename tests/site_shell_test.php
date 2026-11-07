@@ -27,7 +27,10 @@ class ShellTestConnection {
 $mode = $argv[1] ?? 'defaults';
 $conn = new ShellTestConnection($mode);
 $_SESSION = ['user_token' => 'fixture-token'];
-$_SERVER['SCRIPT_NAME'] = '/profile.php';
+$page = $argv[2] ?? 'profile.php';
+$public_page = in_array($page, ['login.php', 'register_user.php', 'index.php'], true);
+if ($public_page) $_SESSION = [];
+$_SERVER['SCRIPT_NAME'] = '/' . $page;
 $balance = '100.00';
 check(soko_safe_url('javascript:alert(1)') === '#', 'Reject javascript URLs');
 check(soko_safe_url('//evil.example/logo.png') === '#', 'Reject protocol-relative URLs');
@@ -52,15 +55,17 @@ include dirname(__DIR__) . '/includes/site_footer.php';
 include dirname(__DIR__) . '/includes/site_footer.php';
 $html = ob_get_clean();
 check(substr_count($html, '<header class="ss-header"') === 1, 'Exactly one shared header');
-check(substr_count($html, '<nav class="ss-footer"') === 1, 'Exactly one shared footer');
+check(substr_count($html, '<nav class="ss-footer"') === ($public_page ? 0 : 1), 'Bottom navigation only on customer pages');
+check(substr_count($html, 'id="ss-auto"') === ($public_page ? 0 : 1), 'Auto popup only when bottom navigation is present');
 check(substr_count($html, 'id="ss-support-toggle"') === 1, 'Exactly one support widget');
-check(strpos($html, 'class="ss-active" aria-current="page"') !== false, 'Current page highlighted');
+if (!$public_page) check(strpos($html, 'class="ss-active" aria-current="page"') !== false, 'Current page highlighted');
+check(strpos($html, 'id="ss-menu"') !== false && strpos($html, 'id="ss-notice"') !== false, 'Menu and notices remain available');
 check(strpos($html, 'javascript:') === false, 'Unsafe support URL never rendered');
 check(strpos($html, '<script>alert') === false, 'Notices escaped');
 check($conn->queries === 1, 'One branding query per request');
 if ($mode === 'custom') check(strpos($html, 'mailto:help@example.com') !== false, 'Custom support email');
 if (getenv('SOKO_RENDER_FIXTURE')) {
-    echo '<!doctype html><html lang="bn"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><body style="margin:0;background:#f4f7f6">', $html, '<main style="padding:24px;min-height:1200px"><h1>প্রোফাইল</h1><p>সকল সেবা</p></main></body></html>';
+    echo '<!doctype html><html lang="bn"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><body class="', $public_page ? 'ss-public-page' : '', '" style="margin:0;background:#f4f7f6">', $html, '<main style="padding:24px;min-height:1200px"><h1>প্রোফাইল</h1><p>সকল সেবা</p></main></body></html>';
 } else {
-    echo "PASS: site shell ($mode)\n";
+    echo "PASS: site shell ($mode, $page)\n";
 }
