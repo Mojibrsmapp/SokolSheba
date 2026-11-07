@@ -77,9 +77,24 @@ $default_color = ['bg' => '#0B7A3B', 'icon' => 'fa-layer-group', 'soft' => '#E7F
 $all_cats = array_keys($services_by_cat);
 $active_cat = isset($_GET['cat']) ? trim($_GET['cat']) : '';
 if ($active_cat !== '' && !in_array($active_cat, $all_cats, true)) {
+    // হুবহু না মিললে (যেমন স্পেস/এনকোডিং পার্থক্য) নরম মিল খোঁজা হয়
     $active_cat = '';
+    $needle = isset($_GET['cat']) ? trim($_GET['cat']) : '';
+    if ($needle !== '') {
+        foreach ($all_cats as $c) {
+            if (trim($c) === $needle || strpos($c, $needle) !== false || strpos($needle, $c) !== false) {
+                $active_cat = $c;
+                break;
+            }
+        }
+    }
 }
-$hero_cat = $active_cat !== '' ? $active_cat : (!empty($all_cats) ? $all_cats[0] : 'সকল সেবা');
+$is_cat_page = ($active_cat !== '' && isset($services_by_cat[$active_cat]));
+if ($is_cat_page) {
+    // এই পেজে শুধু ওই ক্যাটাগরির সেবাগুলোই থাকবে
+    $services_by_cat = array($active_cat => $services_by_cat[$active_cat]);
+}
+$hero_cat = $is_cat_page ? $active_cat : (!empty($all_cats) ? $all_cats[0] : 'সকল সেবা');
 $hero_meta = $category_colors[$hero_cat] ?? $default_color;
 
 $hero_copy = [
@@ -104,7 +119,7 @@ $search_q = isset($_GET['q']) ? trim($_GET['q']) : '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>সকল সেবাসমূহ - সকল সেবা</title>
+    <title><?php echo $is_cat_page ? htmlspecialchars($hero_cat) . ' - ' : 'সকল সেবাসমূহ - '; ?>সকল সেবা</title>
 
     <link rel="shortcut icon" href="assets/logo.jpg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -277,7 +292,7 @@ $search_q = isset($_GET['q']) ? trim($_GET['q']) : '';
     <div class="crumb-in">
         <a href="dashboard.php" class="back" aria-label="পিছনে"><i class="fa-solid fa-arrow-left"></i></a>
         <b><?php echo htmlspecialchars($hero_cat); ?></b>
-        <a href="services.php" class="crumb-chip"><i class="fa-solid fa-layer-group"></i> সকল সেবা</a>
+        <a href="services.php" class="crumb-chip"><i class="fa-solid fa-layer-group"></i> <?php echo $is_cat_page ? 'সব ক্যাটাগরি' : 'সকল সেবা'; ?></a>
     </div>
 </div>
 
@@ -315,7 +330,9 @@ $search_q = isset($_GET['q']) ? trim($_GET['q']) : '';
             <i class="fa-solid fa-magnifying-glass"></i>
             <input type="text" id="serviceSearchInput" value="<?php echo htmlspecialchars($search_q); ?>" placeholder="<?php echo htmlspecialchars($hero_cat); ?> খুঁজুন...">
         </div>
-        <button type="button" class="filter-btn" id="filterBtn"><i class="fa-solid fa-sliders"></i> ফিল্টার</button>
+        <?php if (!$is_cat_page): ?>
+            <button type="button" class="filter-btn" id="filterBtn"><i class="fa-solid fa-sliders"></i> ফিল্টার</button>
+        <?php endif; ?>
     </div>
 
     <!-- category tabs (ফিল্টার বাটনে খোলে) -->
