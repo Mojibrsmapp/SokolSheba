@@ -2,6 +2,7 @@
 ob_start();
 session_start();
 include_once("includes/configuration.php");
+include_once("includes/payment_flow.php");
 
 if (!isset($_SESSION['user_token'])) {
     header("Location: index.php");
@@ -216,15 +217,44 @@ if ($h_stmt) {
         }
 
         .method-tile {
-            border: 2px solid #E5E7EB;
-            border-radius: 16px;
-            padding: 11px 13px;
+            position: relative;
+            border: 1.6px solid #E5E7EB;
+            border-radius: 14px;
+            padding: 13px 10px 10px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.18s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-height: 82px;
+            background: #FFFFFF;
+        }
+        .method-tile .mt-logo {
+            height: 34px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            background: #FAFAFA;
+            justify-content: center;
+        }
+        .method-tile .mt-logo img {
+            max-height: 34px;
+            max-width: 92px;
+            object-fit: contain;
+            display: block;
+        }
+        .method-tile .mt-name {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748B;
+            letter-spacing: .2px;
+        }
+        .method-tile.selected .mt-name { color: #07612E; }
+        .method-tile .radio-dot {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            margin: 0;
         }
         .method-tile:hover {
             border-color: #107C41;
@@ -340,29 +370,53 @@ if ($h_stmt) {
                             <div class="grid grid-cols-2 gap-2.5">
                                 <?php if (isset($gateway_numbers['bkash'])): ?>
                                 <div class="method-tile <?php echo ($first_available_method === 'bkash') ? 'selected' : ''; ?>" onclick="chooseMethod('bkash', 'bKash')">
-                                    <span class="text-sm font-black text-pink-600">বিকাশ</span>
+                                    <?php $rc_logo = function_exists('soko_pay_method_logo') ? soko_pay_method_logo('bkash') : ''; ?>
                                     <div class="radio-dot"></div>
+                                    <?php if ($rc_logo !== ''): ?>
+                                        <span class="mt-logo"><img src="<?php echo htmlspecialchars($rc_logo); ?>" alt="bKash"></span>
+                                    <?php else: ?>
+                                        <span class="mt-name" style="font-size:15px;font-weight:800">বিকাশ</span>
+                                    <?php endif; ?>
+                                    <span class="mt-name">bKash</span>
                                 </div>
                                 <?php endif; ?>
 
                                 <?php if (isset($gateway_numbers['nagad'])): ?>
                                 <div class="method-tile <?php echo ($first_available_method === 'nagad') ? 'selected' : ''; ?>" onclick="chooseMethod('nagad', 'নগদ')">
-                                    <span class="text-sm font-black text-orange-600">নগদ</span>
+                                    <?php $rc_logo = function_exists('soko_pay_method_logo') ? soko_pay_method_logo('nagad') : ''; ?>
                                     <div class="radio-dot"></div>
+                                    <?php if ($rc_logo !== ''): ?>
+                                        <span class="mt-logo"><img src="<?php echo htmlspecialchars($rc_logo); ?>" alt="Nagad"></span>
+                                    <?php else: ?>
+                                        <span class="mt-name" style="font-size:15px;font-weight:800">নগদ</span>
+                                    <?php endif; ?>
+                                    <span class="mt-name">Nagad</span>
                                 </div>
                                 <?php endif; ?>
 
                                 <?php if (isset($gateway_numbers['rocket'])): ?>
                                 <div class="method-tile <?php echo ($first_available_method === 'rocket') ? 'selected' : ''; ?>" onclick="chooseMethod('rocket', 'রকেট')">
-                                    <span class="text-sm font-black text-purple-600">রকেট</span>
+                                    <?php $rc_logo = function_exists('soko_pay_method_logo') ? soko_pay_method_logo('rocket') : ''; ?>
                                     <div class="radio-dot"></div>
+                                    <?php if ($rc_logo !== ''): ?>
+                                        <span class="mt-logo"><img src="<?php echo htmlspecialchars($rc_logo); ?>" alt="Rocket"></span>
+                                    <?php else: ?>
+                                        <span class="mt-name" style="font-size:15px;font-weight:800">রকেট</span>
+                                    <?php endif; ?>
+                                    <span class="mt-name">Rocket</span>
                                 </div>
                                 <?php endif; ?>
 
                                 <?php if (isset($gateway_numbers['upay'])): ?>
                                 <div class="method-tile <?php echo ($first_available_method === 'upay') ? 'selected' : ''; ?>" onclick="chooseMethod('upay', 'উপায়')">
-                                    <span class="text-sm font-black text-amber-500">উপায়</span>
+                                    <?php $rc_logo = function_exists('soko_pay_method_logo') ? soko_pay_method_logo('upay') : ''; ?>
                                     <div class="radio-dot"></div>
+                                    <?php if ($rc_logo !== ''): ?>
+                                        <span class="mt-logo"><img src="<?php echo htmlspecialchars($rc_logo); ?>" alt="Upay"></span>
+                                    <?php else: ?>
+                                        <span class="mt-name" style="font-size:15px;font-weight:800">উপায়</span>
+                                    <?php endif; ?>
+                                    <span class="mt-name">Upay</span>
                                 </div>
                                 <?php endif; ?>
                             </div>
