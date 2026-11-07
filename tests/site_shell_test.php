@@ -55,6 +55,7 @@ include dirname(__DIR__) . '/includes/site_footer.php';
 include dirname(__DIR__) . '/includes/site_footer.php';
 $html = ob_get_clean();
 check(substr_count($html, '<header class="ss-header"') === 1, 'Exactly one shared header');
+check(substr_count($html, '/assets/css/site_typography.css') === 1, 'Shared customer font stylesheet loaded once');
 check(substr_count($html, '<nav class="ss-footer"') === ($public_page ? 0 : 1), 'Bottom navigation only on customer pages');
 check(substr_count($html, 'id="ss-auto"') === ($public_page ? 0 : 1), 'Auto popup only when bottom navigation is present');
 check(substr_count($html, 'id="ss-support-toggle"') === 1, 'Exactly one support widget');

@@ -53,3 +53,15 @@ During this update, dashboard/services/profile were rendered with fixture databa
 ### Public-page spacing follow-up
 
 Login, registration and guest `index.php` were fixture-rendered and checked at 320, 360, 390, 565, 768, 1366 and 1920 px (21 combinations). Checks cover omitted bottom navigation/auto popup, zero reserved footer padding, no horizontal overflow, single-row header, compact card spacing, reachable lower form links, password visibility toggle, and retained support/menu/notices. Database authentication and registration were not exercised by these visual fixtures.
+
+### Unified customer typography
+
+All customer-facing pages that use the shared header (including the public landing page, login/registration, legacy forms and screen receipts) now use `SokolBangla`, the same self-hosted `fonts/Bangla.ttf` font previously used by the landing-page Nikosh alias and shared header. `assets/css/site_typography.css` is the single source for this font and its CSS variable. Screen text, forms, tables, menus and dynamically inserted dialogs share the family; existing font sizes/weights remain unchanged. Font Awesome, MDI, Themify, Feather, Glyphicons and Material icon fonts are excluded from the text override. Admin pages and generated card/document templates are not changed, and screen-only font overrides do not apply to receipt printing. No SQL migration is required.
+
+Typography regression checks (requires Node.js and Playwright with Chromium):
+
+```sh
+node tests/typography_browser_test.cjs
+```
+
+The test uses the actual inline styles from all 45 customer layout files at 320, 768 and 1366 px (135 cases), checks computed fonts for forms/tables/text, preserves icon families and explicit sizes/weights, loads the local font, and checks dynamic dialogs and print isolation. It runs entirely with fixtures; no live database is used. Set `NODE_PATH` if Playwright is installed outside this repository, and optionally `CHROMIUM_PATH` to a preinstalled browser.
