@@ -386,54 +386,7 @@ if ($h_stmt) {
 
         </div>
 
-        <div class="bg-white rounded-3xl p-6 border border-[#DFEBE1] shadow-sm">
-            <h5 class="font-bold text-[#078B38] text-sm mb-3.5 flex items-center gap-2">
-                <i class="fa-solid fa-clock-rotate-left"></i> আপনার সাম্প্রতিক টেক্সট অর্ডারসমূহ
-            </h5>
 
-            <div class="overflow-x-auto rounded-xl border border-[#DFEBE1]">
-                <table class="w-full text-left text-xs">
-                    <thead style="background-color: var(--footer-color);" class="text-white">
-                        <tr>
-                            <th class="p-3">#</th>
-                            <th class="p-3">সেবার ধরন</th>
-                            <th class="p-3">প্রদত্ত তথ্য</th>
-                            <th class="p-3">স্ট্যাটাস</th>
-                            <th class="p-3">ফলাফল</th>
-                            <th class="p-3">চার্জ</th>
-                            <th class="p-3">সময়</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        <?php if (empty($recent_orders)): ?>
-                            <tr><td colspan="7" class="p-6 text-center text-slate-400">কোনো অর্ডারের রেকর্ড পাওয়া যায়নি।</td></tr>
-                        <?php else: ?>
-                            <?php $sl = 1; foreach ($recent_orders as $ord): ?>
-                            <tr class="hover:bg-slate-50">
-                                <td class="p-3 font-bold"><?php echo $sl++; ?></td>
-                                <td class="p-3 font-bold text-slate-800"><?php echo htmlspecialchars($ord['order_type']); ?></td>
-                                <td class="p-3 text-slate-600 max-w-xs truncate"><?php echo htmlspecialchars($ord['input_data']); ?></td>
-                                <td class="p-3">
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold <?php echo ($ord['status'] === 'success') ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'; ?>">
-                                        <?php echo htmlspecialchars($ord['status']); ?>
-                                    </span>
-                                </td>
-                                <td class="p-3">
-                                    <?php if (!empty($ord['result_file'])): ?>
-                                        <a href="<?php echo htmlspecialchars($ord['result_file']); ?>" target="_blank" class="text-[#078B38] font-bold hover:underline">ডাউনলোড</a>
-                                    <?php else: ?>
-                                        <span class="text-slate-400"><?php echo htmlspecialchars($ord['result_text'] ?? 'অপেক্ষমান'); ?></span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="p-3 font-bold text-[#078B38]">৳ <?php echo number_format($ord['price'], 2); ?></td>
-                                <td class="p-3 text-slate-400 text-[11px]"><?php echo date('d M Y, h:i A', strtotime($ord['created_at'])); ?></td>
-                            </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
     </div>
 

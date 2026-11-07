@@ -9,7 +9,7 @@ const { chromium } = require('playwright');
 const root = path.resolve(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const styles = source => [...source.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)].map(match => match[1]).join('\n');
-const hasCustomerLayout = source => source.includes('includes/site_header.php') || /include(?:_once)?\s*\(?\s*['"]header\.php['"]/.test(source);
+const hasCustomerLayout = source => source.includes('includes/site_header.php') || /include(?:_once)?\s*\(?\s*(?:__DIR__\s*\.\s*)?['"]\/?header\.php['"]/.test(source);
 const pages = fs.readdirSync(root).filter(file => file.endsWith('.php') && hasCustomerLayout(read(file)));
 const icons = [
     ['fas fa-wallet', 'Font Awesome 6 Free'], ['fa-brands fa-whatsapp', 'Font Awesome 6 Brands'],

@@ -1,106 +1,36 @@
-<?php include_once("header.php");?>
-<div class="row">
-  <div class="col-md-12">
-    <div class="card mb-4">
-     <?php
-        include 'includes/marquee.php';
-        $id =2;
-        $marquee = new Marquee($conn, $id);
-        $marquee->display();
-      ?>
-    </div>
-  </div>
+<?php
+include_once __DIR__ . '/header.php';
+require_once __DIR__ . '/includes/customer_history.php';
+$history_page = max(1, min(100000, (int)($_GET['history_page'] ?? 1)));
+soko_render_order_history(soko_customer_orders($conn, $_SESSION['user_token'], [], $history_page), $history_page);
 
-<link rel="stylesheet" href="assets/vendors/datatables.net-bs4/datatable.css">
-
-<div class="container my-2 overflow-auto">
- <div class="card px-3 py-5"> 
-<table id="myTable" class="   table table-striped table-hover">
-<thead>
-            <tr>
-                <th>#</th>
-                <th>কাজের ধরন</th>
-                <th>পূর্ববর্তী ব্যাল্যন্স</th>
-                <th>কাজের রেইট</th>
-                 <th>পরর্বতী ব্যাল্যন্স</th>
-                <th>কাজের সময়</th>
-            </tr>
-        </thead>
-        <tbody>
-        <?php 
-// Suspicious code removed
-        $sql = "SELECT * from history_work where email = '$user' ORDER BY `history_work`.`id` DESC";
-        $result = $conn->query($sql);
-        $cnt = 1;
-        if ($result->num_rows > 0) {
-            // output data of each row
-            while($row = $result->fetch_assoc()) {
-              $id = $row["id"];
-              $orderType =  $row["order_type"];
-              $price =  $row["price"];
-              $beforeBalance = $row["current_balance"];
-              $afterBalance = $row["balance_after_cut"];
-              $oderTime = $row["order_time"];
-      
-              
-           ?>
-        <tr>
-            <td><?php echo $cnt;?></td>
-            <td><?php echo $orderType;?></td>
-            <td><?php echo intval($beforeBalance);?></td>
-            <td><?php echo intval($price);?></td>
-            <td><?php echo intval($afterBalance);?></td>
-          	<td><?php echo $oderTime;?></td>
-           
-        </tr>
-        <?php
-         $cnt = $cnt + 1;
-    }
-            
-        } 
-      ?>
-       </tbody>
-    </table>
-</div>
-</div>
-
-
-  
-
-<?php include_once("footer.php");?>
-
-<script>
-    $(document).ready(function () {
-      
-       $('.nav-item').removeClass('active');
-       $('.work_history').addClass('active');
-      
-        $('#myTable').DataTable({
-            "info": false,
-            "ordering": false,
-            "language": {
-                "search": '<i class="fa-solid fa-magnifying-glass"></i>',
-                'searchPlaceholder': "search here..."
-            }
-        });
-    });
-
-function confirmDelete(id) {
-    // SweetAlert confirmation dialog
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "Do you really want to delete this item?",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // If confirmed, redirect to delete_card.php with the id
-            window.location.href = 'pages/delete_card.php?id=' + id;
-        }
-    });
+// Retain the legacy balance ledger separately; do not confuse it with results.
+$ledger = [];
+$ledger_error = false;
+try {
+    $ledger_stmt = $conn->prepare('SELECT h.* FROM history_work h INNER JOIN users u ON h.email = u.email WHERE u.token = ? ORDER BY h.id DESC LIMIT 50');
+    if (!$ledger_stmt) throw new RuntimeException('Ledger unavailable');
+    $ledger_stmt->bind_param('s', $_SESSION['user_token']);
+    if (!$ledger_stmt->execute()) { $ledger_stmt->close(); throw new RuntimeException('Ledger unavailable'); }
+    $ledger_result = $ledger_stmt->get_result();
+    if ($ledger_result) while ($entry = $ledger_result->fetch_assoc()) $ledger[] = $entry;
+    $ledger_stmt->close();
+} catch (Throwable $error) {
+    $ledger_error = true;
+    error_log('Customer balance history could not be loaded.');
 }
-</script>
+?>
+<section class="ss-order-history">
+    <h2>ব্যালেন্স লেনদেনের হিস্টোরি</h2>
+    <p>সর্বশেষ ৫০টি লেনদেন। সেবার ফলাফল উপরের অর্ডার হিস্টোরিতে দেখুন।</p>
+    <div class="ss-table-scroll" tabindex="0" role="region" aria-label="ব্যালেন্স লেনদেন">
+        <table class="table"><thead><tr><th>কাজের ধরন</th><th>পূর্বের ব্যালেন্স</th><th>চার্জ</th><th>পরের ব্যালেন্স</th><th>সময়</th></tr></thead><tbody>
+        <?php foreach ($ledger as $entry): ?>
+            <tr><td><?php echo soko_h($entry['order_type']); ?></td><td>৳ <?php echo number_format((float)$entry['current_balance'], 2); ?></td><td>৳ <?php echo number_format((float)$entry['price'], 2); ?></td><td>৳ <?php echo number_format((float)$entry['balance_after_cut'], 2); ?></td><td><?php echo soko_h($entry['order_time']); ?></td></tr>
+        <?php endforeach; ?>
+        <?php if ($ledger_error): ?><tr><td colspan="5" role="status">লেনদেন লোড করা যায়নি। আবার চেষ্টা করুন।</td></tr>
+        <?php elseif (!$ledger): ?><tr><td colspan="5">এখনও কোনো লেনদেন নেই।</td></tr><?php endif; ?>
+        </tbody></table>
+    </div>
+</section>
+<?php include_once __DIR__ . '/footer.php'; ?>

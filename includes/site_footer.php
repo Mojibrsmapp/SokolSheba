@@ -4,6 +4,7 @@ require_once __DIR__ . '/site_icons.php';
 if (defined('SOKO_FOOTER_RENDERED')) return;
 define('SOKO_FOOTER_RENDERED', true);
 $ss_page = basename($_SERVER['SCRIPT_NAME'] ?? '');
+include __DIR__ . '/page_history.php';
 // Public/auth pages retain support, menu and notices, but no fixed bottom bar.
 $ss_show_navigation = !in_array($ss_page, ['login.php', 'register_user.php', 'index.php'], true);
 $ss_active = in_array($ss_page, ['dashboard.php', 'index.php']) ? 'home' : (in_array($ss_page, ['profile.php', 'login.php', 'register_user.php']) ? 'user' : (strpos($ss_page, 'recharge') !== false || strpos($ss_page, 'payment_') === 0 ? 'wallet' : 'grid'));
@@ -35,10 +36,30 @@ $ss_links = [
 </div>
 <div class="ss-overlay" id="ss-menu" hidden data-site-shell>
     <section class="ss-drawer" role="dialog" aria-modal="true" aria-labelledby="ss-menu-title" tabindex="-1">
-        <div class="ss-dialog-title"><strong id="ss-menu-title"><?php echo soko_e(soko_brand('site_name')); ?> মেনু</strong><button type="button" class="ss-square" data-ss-close aria-label="বন্ধ করুন"><?php echo soko_icon('close'); ?></button></div>
-        <?php foreach ([['/dashboard.php','হোম ড্যাশবোর্ড'],['/services.php','সকল সেবা'],['/serverCopy.php','অটো সার্ভার কপি'],['/sign_order.php?type=10_12_17','সাইন কপি অর্ডার'],['/auto_tin.php','অটো টিন সার্টিফিকেট'],['/numbertobio.php','সিম বায়োমেট্রিক'],['/location_service.php','লোকেশন সেবা'],['/mfs_service.php','বিকাশ-নগদ-রকেট'],['/recharge.php','ব্যালেন্স রিচার্জ'],['/work_history.php','অর্ডার হিস্টোরি'],['/profile.php','আমার প্রোফাইল'],['/support.php','সাপোর্ট'],['/logout.php','লগআউট']] as $ss_item): ?>
-        <a href="<?php echo $ss_item[0]; ?>"><?php echo $ss_item[1]; ?></a>
+        <div class="ss-drawer-brand">
+            <img src="<?php echo soko_e(soko_brand('nav_logo')); ?>" alt="">
+            <div><strong id="ss-menu-title"><?php echo soko_e(soko_brand('site_name')); ?></strong><small><?php echo soko_e(soko_brand('site_tagline')); ?></small></div>
+            <button type="button" class="ss-square" data-ss-close aria-label="মেনু বন্ধ করুন"><?php echo soko_icon('close'); ?></button>
+        </div>
+        <?php $ss_menu_groups = [
+            'শুরু করুন' => [['/dashboard.php','হোম ড্যাশবোর্ড','home'],['/services.php','সকল সেবা','grid'],['/auto_service.php','অটো সার্ভিস','bolt']],
+            'আপনার সেবা' => [['/serverCopy.php','অটো সার্ভার কপি','file'],['/sign_order.php?type=10_12_17','সাইন কপি অর্ডার','file'],['/auto_tin.php','অটো টিন সার্টিফিকেট','file'],['/services.php?cat=জন্ম নিবন্ধন সেবা','জন্ম নিবন্ধন সেবা','file']],
+            'আরও সেবা' => [['/numbertobio.php','সিম বায়োমেট্রিক','grid'],['/location_service.php','লোকেশন সেবা','grid'],['/mfs_service.php','বিকাশ-নগদ-রকেট','wallet']],
+            'আমার অ্যাকাউন্ট' => [['/recharge.php','ওয়ালেট / রিচার্জ','wallet'],['/work_history.php','অর্ডার হিস্টোরি ও রেজাল্ট','history'],['/profile.php','আমার প্রোফাইল','user'],['/support.php','সাপোর্ট ও সহায়তা','support'],['/logout.php','লগআউট','logout']],
+        ]; ?>
+        <div class="ss-drawer-links">
+        <?php foreach ($ss_menu_groups as $ss_group_title => $ss_group_links): ?>
+            <div class="ss-menu-group"><p><?php echo soko_e($ss_group_title); ?></p>
+            <?php foreach ($ss_group_links as $ss_item):
+                $ss_menu_active = basename(parse_url($ss_item[0], PHP_URL_PATH)) === $ss_page && strpos($ss_item[0], '?') === false;
+            ?>
+                <a href="<?php echo soko_e($ss_item[0]); ?>"<?php echo $ss_menu_active ? ' class="ss-menu-active" aria-current="page"' : ''; ?>>
+                    <span class="ss-menu-icon"><?php echo soko_icon($ss_item[2]); ?></span><span><?php echo soko_e($ss_item[1]); ?></span><span class="ss-menu-arrow" aria-hidden="true">›</span>
+                </a>
+            <?php endforeach; ?>
+            </div>
         <?php endforeach; ?>
+        </div>
     </section>
 </div>
 <?php if ($ss_show_navigation): ?>

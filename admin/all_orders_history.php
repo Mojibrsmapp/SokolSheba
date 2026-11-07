@@ -358,6 +358,7 @@ $deposits_list = $conn->query("SELECT d.*, u.name as user_name, u.email as user_
                 <div class="mb-4">
                     <label class="block text-xs font-bold text-slate-600 mb-1">ফলাফল / টেক্সট নোট</label>
                     <textarea name="result_text" id="modalResultText" rows="2" class="w-full border rounded-xl p-2.5 text-xs" placeholder="যেমন: ডেলিভারি সম্পন্ন হয়েছে অথবা বাতিল করার কারণ"></textarea>
+                <p class="text-xs text-slate-500 mt-2">জন্ম নিবন্ধনের অর্ডারে কর্তৃপক্ষের ইস্যু করা নম্বর, আবেদন আইডি বা নির্দেশনা এখানে দিন; সনদ থাকলে রেজাল্ট ফাইলও যুক্ত করুন। ব্যবহারকারী তার হিস্টোরিতে টেক্সট ও ফাইল দুটোই পাবেন।</p>
                 </div>
 
                 <div class="mb-4">

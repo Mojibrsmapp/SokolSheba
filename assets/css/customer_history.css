@@ -1,0 +1,19 @@
+.ss-order-history { box-sizing:border-box; width:calc(100% - 24px); max-width:1120px; margin:24px auto; padding:20px; border:1px solid #dce9e1; border-radius:22px; background:#fff; color:#334155; }
+.ss-history-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+.ss-history-heading h2 { margin:0; font-size:20px; font-weight:800; color:#124d2b; }
+.ss-history-heading p,.ss-history-empty { color:#64748b; margin:4px 0; font-size:14px; }
+.ss-history-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.ss-history-order { min-width:0; border:1px solid #e2e8f0; background:#fbfdfc; border-radius:16px; padding:16px; overflow-wrap:anywhere; }
+.ss-order-top,.ss-order-meta { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; font-size:12px; color:#64748b; }
+.ss-order-state { border-radius:20px; padding:4px 10px; font-weight:700; }
+.ss-state-success { color:#08763a; background:#dcfce7; }.ss-state-cancel { color:#b91c1c; background:#fee2e2; }.ss-state-pending { color:#92400e; background:#fef3c7; }
+.ss-history-order h3 { margin:12px 0 8px; font-size:17px; font-weight:700; color:#164e32; }
+.ss-order-result { margin:14px 0; padding:12px; background:#eef8f2; border:1px solid #d9ede1; border-radius:12px; overflow-wrap:anywhere; font-size:14px; }
+.ss-order-result strong { display:block; color:#0b6a37; margin-bottom:6px; }.ss-order-result p { margin:6px 0; }
+.ss-history-link { display:inline-block; color:#08743c!important; font-weight:700; font-size:13px; text-decoration:none; padding:6px 0; overflow-wrap:anywhere; }
+.ss-history-link:hover { text-decoration:underline; }.ss-history-link:focus-visible { outline:3px solid #0ea5e9; outline-offset:3px; }
+.ss-history-pagination { display:flex; justify-content:space-between; gap:16px; margin-top:16px; }
+@media(max-width:600px) { .ss-history-grid{grid-template-columns:minmax(0,1fr)} .ss-order-history{padding:14px;margin:18px auto} .ss-history-heading h2{font-size:18px} }
+@media print { .ss-order-history { display:none!important; } }
+.ss-table-scroll { max-width:100%; overflow-x:auto; }
+.ss-table-scroll table { min-width:540px; }

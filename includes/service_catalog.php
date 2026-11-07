@@ -204,6 +204,17 @@ if (!function_exists('soko_field')) {
     }
 }
 
+function soko_is_new_birth_application($service_name) {
+    $name = strtolower((string)$service_name);
+    $birth = strpos($name, 'জন্ম') !== false || strpos($name, 'birth') !== false;
+    if (!$birth) return false;
+    foreach (['সংশোধন', 'correction', 'দিয়ে', 'দিয়ে', 'যাচাই', 'verify'] as $existing) {
+        if (strpos($name, $existing) !== false) return false;
+    }
+    return strpos($name, 'নতুন') !== false || preg_match('/\bnew\b/', $name)
+        || strpos($name, 'registration application') !== false;
+}
+
 if (!function_exists('soko_field_rules')) {
     /**
      * Ordered rules: the FIRST matching keyword wins, so every single service
@@ -318,6 +329,15 @@ if (!function_exists('soko_match_preset')) {
         $haystack = strtolower((string)$service_name);
         if ($haystack === '') {
             return null;
+        }
+        // A first registration cannot require an already-issued BRN.
+        if (soko_is_new_birth_application($service_name)) {
+            return [
+                soko_field('name', 'নাম', 'text', 1, 'আবেদনকারীর নাম লিখুন', 'fa-user', ''),
+                soko_field('dob', 'জন্ম তারিখ', 'date', 1, '', 'fa-calendar-days', ''),
+                soko_field('mobile', 'মোবাইল নম্বর', 'tel', 1, 'যোগাযোগের মোবাইল নম্বর', 'fa-phone', ''),
+                soko_field('address', 'পূর্ণ ঠিকানা', 'textarea', 1, 'গ্রাম/বাসা, ইউনিয়ন, উপজেলা, জেলা লিখুন', 'fa-location-dot', ''),
+            ];
         }
         foreach (soko_field_rules() as $rule) {
             foreach ($rule['match'] as $keyword) {

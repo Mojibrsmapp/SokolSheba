@@ -13,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_order'])) {$ord
         if (in_array($ext, $allowed)) {$newFilename = "res_" . $order_id . "_" . time() . "." . $ext;
             $targetPath = $upDir .$newFilename;
             if (move_uploaded_file($_FILES["result_file"]["tmp_name"], $targetPath)) {
-                $result_file_path =$targetPath;
+                $result_file_path = "admin/" . $targetPath;
             }
         }
     }
@@ -284,7 +284,7 @@ if ($c_res &&$c_res->num_rows > 0) {
                             </td>
                             <td>
                                 <?php if (!empty($row['result_file'])): ?>
-                                    <a href="<?php echo htmlspecialchars($row['result_file']); ?>" target="_blank" class="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1">
+                                    <a href="<?php echo htmlspecialchars((strpos($row['result_file'], 'admin/') === 0 ? '../' : '') . $row['result_file']); ?>" target="_blank" class="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1">
                                         <i class="fa-solid fa-file-arrow-down"></i> ফাইল
                                     </a>
                                 <?php elseif (!empty($row['result_text'])): ?>
@@ -349,6 +349,7 @@ if ($c_res &&$c_res->num_rows > 0) {
             <div class="mb-4">
                 <label class="block text-xs font-bold text-slate-600 mb-1">রেজাল্ট টেক্সট / লিংক (ঐচ্ছিক)</label>
                 <textarea name="result_text" id="modalResultText" rows="3" class="w-full border border-slate-300 rounded-xl p-2.5 text-xs outline-none focus:border-indigo-500" placeholder="ফলাফল টেক্সট বা ডাউনলোড লিংক দিন..."></textarea>
+                <p class="text-xs text-slate-500 mt-2">জন্ম নিবন্ধনের অর্ডারে কর্তৃপক্ষের ইস্যু করা নম্বর, আবেদন আইডি বা নির্দেশনা এখানে দিন; সনদ থাকলে রেজাল্ট ফাইলও যুক্ত করুন। ব্যবহারকারী তার হিস্টোরিতে টেক্সট ও ফাইল দুটোই পাবেন।</p>
             </div>
 
             <div class="flex items-center justify-end gap-2">
