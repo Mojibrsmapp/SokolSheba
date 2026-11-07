@@ -96,7 +96,8 @@ a{text-decoration:none;color:inherit}
 .amount-box b{display:block;font-size:22px;color:var(--green-dark);font-weight:700}
 
 .mfs-line{display:flex;align-items:center;gap:11px;border:1px solid var(--line);border-radius:11px;padding:10px 12px}
-.mfs-line .ml-logo{width:56px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;background:#FDF1F6;flex:0 0 56px}
+.mfs-line .ml-logo{width:56px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;background:#FDF1F6;flex:0 0 56px;overflow:hidden;padding:3px}
+.mfs-line .ml-logo img{max-width:100%;max-height:100%;object-fit:contain}
 .mfs-line .ml-txt b{display:block;font-size:14px}
 .mfs-line .ml-txt small{display:block;font-size:12px;color:var(--muted)}
 .mfs-line .ml-num{margin-left:auto;font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
@@ -221,7 +222,14 @@ a{text-decoration:none;color:inherit}
     </div>
     <div class="card-body">
       <div class="mfs-line">
-        <span class="ml-logo <?php echo soko_h($method['css']); ?>"><?php echo soko_h($method['name']); ?></span>
+        <?php $proc_logo = function_exists('soko_pay_method_logo') ? soko_pay_method_logo(isset($payment['method']) ? $payment['method'] : '') : ''; ?>
+        <span class="ml-logo <?php echo soko_h($method['css']); ?>">
+          <?php if ($proc_logo !== ''): ?>
+            <img src="<?php echo soko_h($proc_logo); ?>" alt="<?php echo soko_h($method['name']); ?>">
+          <?php else: ?>
+            <?php echo soko_h($method['name']); ?>
+          <?php endif; ?>
+        </span>
         <span class="ml-txt">
           <b>আপনি <?php echo soko_h($method['name']); ?> এর মাধ্যমে পেমেন্ট করছেন</b>
           <small>TrxID: <?php echo soko_h($trx); ?></small>

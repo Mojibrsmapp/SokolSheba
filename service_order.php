@@ -9,6 +9,7 @@
 session_start();
 include_once("includes/configuration.php");
 include_once("includes/service_catalog.php");
+include_once("includes/payment_flow.php");
 
 $user = soko_current_user($conn);
 if (!$user) {
@@ -351,7 +352,8 @@ button{font-family:inherit}
 .pay-opt .po-main small{display:block;font-size:11.8px;color:var(--muted)}
 .pay-opt .po-ic{color:#7E9587;font-size:15px}
 .logos{display:flex;align-items:center;gap:9px;margin-top:6px;flex-wrap:wrap}
-.logo-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:1px 6px;border-radius:5px;background:#F6F9F7}
+.logo-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 6px;border-radius:6px;background:#F6F9F7}
+.logo-chip img{height:15px;width:auto;max-width:52px;object-fit:contain;display:block}
 .logo-chip.bk{color:#E2136E}
 .logo-chip.ng{color:#F58220}
 .logo-chip.rk{color:#8C3494}
@@ -617,9 +619,14 @@ button{font-family:inherit}
             <span class="po-main">
               <b>মোবাইল ব্যাংকিং</b>
               <span class="logos">
-                <span class="logo-chip bk"><i class="fa-solid fa-bolt"></i> বিকাশ</span>
-                <span class="logo-chip ng">নগদ</span>
-                <span class="logo-chip rk">রকেট</span>
+                <?php foreach (array('bkash', 'nagad', 'rocket') as $chip_key): ?>
+                  <?php $chip_logo = function_exists('soko_pay_method_logo') ? soko_pay_method_logo($chip_key) : ''; ?>
+                  <?php if ($chip_logo !== ''): ?>
+                    <span class="logo-chip <?php echo $chip_key === 'bkash' ? 'bk' : ($chip_key === 'nagad' ? 'ng' : 'rk'); ?>">
+                      <img src="<?php echo soko_h($chip_logo); ?>" alt="<?php echo soko_h($chip_key); ?>">
+                    </span>
+                  <?php endif; ?>
+                <?php endforeach; ?>
               </span>
             </span>
             <i class="fa-solid fa-mobile-screen-button po-ic"></i>
