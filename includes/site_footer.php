@@ -73,9 +73,9 @@ $ss_links = [
 </div>
 <?php endif; ?>
 <div class="ss-overlay ss-modal" id="ss-notice" hidden data-site-shell>
-    <section class="ss-modal-card" role="dialog" aria-modal="true" aria-labelledby="ss-notice-title" tabindex="-1">
-        <div class="ss-dialog-title"><strong id="ss-notice-title">জরুরী নোটিশ</strong><button type="button" class="ss-square" data-ss-close aria-label="বন্ধ করুন"><?php echo soko_icon('close'); ?></button></div>
-        <p class="ss-notice-text"><?php echo nl2br(soko_e(soko_brand('site_notice'))); ?></p>
+    <section class="ss-modal-card ss-notice-card" role="dialog" aria-modal="true" aria-labelledby="ss-notice-title" tabindex="-1">
+        <div class="ss-notice-heading"><span class="ss-notice-symbol"><?php echo soko_icon('bell'); ?></span><div><small><?php echo soko_e(soko_brand('site_name')); ?> • আপডেট</small><strong id="ss-notice-title">নোটিশ বোর্ড</strong></div><button type="button" class="ss-square" data-ss-close aria-label="নোটিশ বন্ধ করুন"><?php echo soko_icon('close'); ?></button></div>
+        <div class="ss-notice-body"><p class="ss-notice-text"><?php echo nl2br(soko_e(soko_brand('site_notice'))); ?></p><button type="button" class="ss-notice-dismiss" data-ss-close>বুঝেছি, ধন্যবাদ</button></div>
     </section>
 </div>
 <script src="/assets/js/site_shell.js" defer></script>

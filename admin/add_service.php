@@ -1,5 +1,6 @@
 <?php 
 include_once("header.php");
+require_once __DIR__ . '/../includes/service_catalog.php';
 
 $save_msg = "";
 $save_error = "";
@@ -22,23 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_service'])) {
     $description = trim($_POST['description'] ?? '');
     $access_link = trim($_POST['access_link'] ?? '');
 
-    $field_titles = $_POST['field_title'] ?? [];
-    $field_types = $_POST['field_type'] ?? [];
-    $field_required = $_POST['field_required'] ?? [];
-
-    $fields_array = [];
-    if (!empty($field_titles)) {
-        for ($i = 0; $i < count($field_titles); $i++) {
-            $t = trim($field_titles[$i]);
-            if (!empty($t)) {
-                $fields_array[] = [
-                    'title' => $t,
-                    'type' => $field_types[$i] ?? 'text',
-                    'required' => isset($field_required[$i]) ? 1 : 0
-                ];
-            }
-        }
-    }
+    $fields_array = soko_admin_form_fields($_POST);
     $custom_fields_json = json_encode($fields_array, JSON_UNESCAPED_UNICODE);
 
     $service_image_path = null;
@@ -123,10 +108,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_service'])) {
         padding: 12px;
         margin-bottom: 10px;
         display: grid;
-        grid-template-columns: 2fr 1.5fr auto auto;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
         align-items: center;
     }
+    .dynamic-field-row > input, .dynamic-field-row > select { min-width:0; }
+    @media(max-width:600px) { .dynamic-field-row { grid-template-columns:minmax(0,1fr); } }
     .btn-gradient {
         background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
         color: #ffffff;
@@ -266,7 +253,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_service'])) {
                         <h6 class="text-xs font-extrabold text-indigo-950 flex items-center gap-1.5">
                             <i class="fa-solid fa-file-pen text-indigo-600"></i> 📝 ফর্ম ফিল্ড (কাস্টম সার্ভিসের জন্য)
                         </h6>
-                        <p class="text-[11px] text-slate-500">ইউজার সাবমিট করার সময় যেসব তথ্য ইনপুট দিবে</p>
+                        <p class="text-[11px] text-slate-500">এখানের ফিল্ড ব্যবহারকারীর অর্ডার ফর্মে দেখাবে। খালি থাকলে সেবার ডিফল্ট ফিল্ড দেখাবে। NID আবেদনে জন্ম নিবন্ধন PDF আবশ্যক। আলাদা API/অটো পেজের নিজস্ব ফর্ম অপরিবর্তিত থাকবে; এই ফর্ম ব্যবহার করতে অটো এক্সেস লিংক ফাঁকা রাখুন।</p>
                     </div>
                     <button type="button" onclick="addFormField()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-xl shadow-sm transition">
                         + ফিল্ড যোগ করুন
@@ -293,16 +280,19 @@ function addFormField() {
     row.className = 'dynamic-field-row';
     row.id = 'fieldRow_' + fieldCount;
     row.innerHTML = `
-        <input type="text" name="field_title[]" placeholder="ফিল্ডের শিরোনাম (যেমন: জন্মতারিখ / NID)" class="form-control-custom" required>
-        <select name="field_type[]" class="form-control-custom">
+        <input type="text" name="field_title[${fieldCount}]" placeholder="ফিল্ডের শিরোনাম (যেমন: জন্মতারিখ / NID)" class="form-control-custom" required>
+        <select name="field_type[${fieldCount}]" class="form-control-custom">
             <option value="text">টেক্সট ইনপুট (Text)</option>
             <option value="date">জন্মতারিখ (Date)</option>
             <option value="number">নাম্বার (Number)</option>
+            <option value="tel">মোবাইল নম্বর (Tel)</option>
             <option value="file">ফাইল আপলোড (File)</option>
             <option value="textarea">বড় বিবরণ (Textarea)</option>
         </select>
+        <input type="text" name="field_placeholder[${fieldCount}]" placeholder="ইনপুটের নির্দেশনা / Placeholder" class="form-control-custom">
+        <input type="text" name="field_accept[${fieldCount}]" placeholder="ফাইল: .pdf অথবা image/*,.pdf" class="form-control-custom">
         <label class="flex items-center gap-1 text-xs text-slate-600 cursor-pointer select-none">
-            <input type="checkbox" name="field_required[]" value="1" checked class="accent-indigo-600">
+            <input type="checkbox" name="field_required[${fieldCount}]" value="1" checked class="accent-indigo-600">
             <span>বাধ্যতামূলক</span>
         </label>
         <button type="button" onclick="removeFormField('fieldRow_${fieldCount}')" class="text-rose-500 hover:text-rose-700 p-1">

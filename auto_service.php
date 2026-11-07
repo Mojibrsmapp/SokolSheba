@@ -1,6 +1,7 @@
 <?php
 session_start();
 include_once("includes/configuration.php");
+require_once __DIR__ . '/includes/service_catalog.php';
 
 if (!isset($_SESSION['user_token'])) {
     header('Location: index.php');
@@ -31,19 +32,7 @@ if (!$userFound) {
 $query = "
     SELECT service.`id`, service.`service_name`, service.`category`, service.`price`,
            service.`description`, service.`access_link`, service.`status`, service.`service_type`,
-           COALESCE(
-               service.`custom_fields`,
-               (
-                   SELECT previous.`custom_fields`
-                   FROM `custom_services` AS previous
-                   WHERE previous.`category` = service.`category`
-                     AND previous.`service_name` = service.`service_name`
-                     AND previous.`custom_fields` IS NOT NULL
-                     AND previous.`custom_fields` <> ''
-                   ORDER BY previous.`id` DESC
-                   LIMIT 1
-               )
-           ) AS `custom_fields`,
+           service.`custom_fields`,
            service.`is_pinned`
     FROM `custom_services` AS service
     ORDER BY service.`category`, service.`is_pinned` DESC, service.`service_name`
@@ -90,13 +79,7 @@ while ($row = $result->fetch_assoc()) {
         }
     }
 
-    $fieldDefinitions = array();
-    if (!empty($row['custom_fields'])) {
-        $decodedFields = json_decode($row['custom_fields'], true);
-        if (json_last_error() === JSON_ERROR_NONE && is_array($decodedFields)) {
-            $fieldDefinitions = $decodedFields;
-        }
-    }
+    $fieldDefinitions = soko_resolve_fields($row);
 
     $accessLink = trim((string)$row['access_link']);
     $linkParts = parse_url($accessLink);
@@ -120,7 +103,7 @@ while ($row = $result->fetch_assoc()) {
         'status' => strtolower(trim((string)$row['status'])),
         'type' => (string)$row['service_type'],
         'is_pinned' => (int)$row['is_pinned'],
-        'link' => $isLocalLink ? $accessLink : 'order_file.php',
+        'link' => $isLocalLink && !in_array(basename($linkParts['path']), ['order_file.php','order_service.php','service_order.php'], true) ? $accessLink : 'service_order.php?id=' . (int)$row['id'],
         'restricted' => $isRestricted
     );
 

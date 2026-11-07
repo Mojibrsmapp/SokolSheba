@@ -6,12 +6,13 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
+const { execFileSync } = require('node:child_process');
 const { chromium } = require('playwright');
 const root = path.resolve(__dirname, '..');
 const fixtureDir = process.env.SOKO_UI_FIXTURE_DIR;
 const pages = ['service_order', 'recharge', 'services', 'auto_tin', 'numbertobio',
     'mfs_service', 'location_service', 'imei_service', 'call_sms_list',
-    'order_file', 'order_text', 'order_service', 'auto_service'];
+    'order_file', 'order_text', 'order_service', 'auto_service', 'nid_application', 'passport_application', 'mfs_info', 'admin_custom'];
 const contentTypes = { '.css': 'text/css', '.js': 'application/javascript',
     '.html': 'text/html', '.png': 'image/png', '.jpg': 'image/jpeg',
     '.ttf': 'font/ttf', '.woff2': 'font/woff2', '.woff': 'font/woff', '.svg': 'image/svg+xml' };
@@ -20,7 +21,7 @@ async function main() {
     assert(fixtureDir, 'Set SOKO_UI_FIXTURE_DIR to rendered HTML and compiled tailwind.css');
     const server = http.createServer((request, response) => {
         const name = new URL(request.url, 'http://localhost').pathname;
-        const fixture = [...pages.map(page => `/${page}.html`), '/tailwind.css'].includes(name);
+        const fixture = [...pages.map(page => `/${page}.html`), '/admin_add.html', '/admin_edit.html', '/tailwind.css'].includes(name);
         const file = path.join(fixture ? fixtureDir : root, name);
         if (!fs.existsSync(file) || fs.statSync(file).isDirectory()) {
             response.writeHead(404); response.end(); return;
@@ -71,8 +72,46 @@ async function main() {
             }
             if (name === 'service_order') {
                 assert.equal(await page.locator('#f_brn').count(), 0, 'New birth asks for existing BRN');
-                assert.equal(await page.locator('.hero-media').isVisible(), false, 'New birth must not display a fake NID');
+                assert.equal(await page.locator('.nid-mock').count(), 0, 'Never display the unrelated mock NID');
+                assert(await page.locator('#f_father_name').getAttribute('required') !== null, 'Father name is required');
+                assert.equal(await page.locator('.hero-feats .feat').count(), 3);
             }
+            if (name === 'nid_application') {
+                assert.equal(await page.locator('#f_birth_pdf[required]').count(), 1);
+                assert.match(await page.locator('#f_birth_pdf').getAttribute('accept'), /pdf/);
+                assert.equal(await page.locator('#f_nid').count(), 0);
+                await page.locator('#f_name').fill('পরীক্ষার আবেদনকারী');
+                await page.locator('#f_dob').fill('2000-01-01');
+                await page.locator('#f_mobile').fill('01712345678');
+                await page.locator('#f_address').fill('গ্রাম, থানা, জেলা');
+                assert.equal(await page.locator('#orderForm').evaluate(form => form.reportValidity()), false, 'Missing PDF fails native validation');
+                assert.equal(await page.evaluate(() => document.activeElement.id), 'f_birth_pdf', 'Required file is focusable');
+                assert.equal(await page.locator('#orderBtn').isDisabled(), false, 'Invalid submission must not lock button');
+                await page.locator('#f_birth_pdf').setInputFiles({name:'birth.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF-1.4 browser fixture')});
+                assert.equal(await page.locator('#orderForm').evaluate(form => form.checkValidity()), true, 'Complete required form is valid');
+            }
+            if (name === 'passport_application') {
+                assert.equal(await page.locator('#f_nid[required]').count(), 1);
+                assert.equal(await page.locator('#f_passport').count(), 0);
+            }
+            if (name === 'mfs_info') assert.equal(await page.locator('#f_trx').count(), 0);
+            if (name === 'admin_custom') {
+                assert.equal(await page.locator('#f_custom_0').getAttribute('placeholder'), 'এখানে লিখুন');
+                assert.equal(await page.locator('#f_custom_0').getAttribute('required'), null);
+            }
+            if (['service_order','nid_application','passport_application','mfs_info','admin_custom'].includes(name)) {
+                for (const input of await page.locator('#orderForm [aria-required="true"]').all()) {
+                    const id = await input.getAttribute('id');
+                    assert.match(await page.locator('label.flabel[for="'+id+'"]').textContent(), /\*/);
+                }
+                assert.equal(await page.locator('.nid-mock').count(), 0);
+            }
+            const announcement = page.locator('.ss-announcement-inner');
+            await announcement.click();
+            assert(await page.locator('#ss-notice').isVisible(), 'Notice strip opens full notice');
+            await page.locator('.ss-notice-dismiss').click();
+            assert(!await page.locator('#ss-notice').isVisible(), 'Notice closes');
+            assert(await announcement.evaluate(element => element === document.activeElement), 'Notice focus restored');
             const openMenu = page.locator('[data-ss-open="ss-menu"]');
             await openMenu.click();
             assert(await page.locator('#ss-menu').isVisible(), 'Drawer did not open');
@@ -93,7 +132,53 @@ async function main() {
             page.off('pageerror', onError);
             count++;
         }
-        console.log(`PASS: ${pages.length} actual templates, ${count} viewport cases; layout, histories, drawer keyboard/focus/scroll`);
+        for (const admin of ['admin_add','admin_edit']) for (const width of [320,390,1366]) {
+            await page.setViewportSize({width,height:900});
+            await page.goto(`http://127.0.0.1:${server.address().port}/${admin}.html`, {waitUntil:'networkidle'});
+            if (admin === 'admin_add') {
+                await page.locator('input[name="service_name"]').fill('পরীক্ষার কাস্টম সেবা');
+                await page.evaluate(() => { addFormField(); addFormField(); addFormField(); });
+                await page.locator('input[name="field_title[1]"]').fill('মুছব');
+                await page.locator('input[name="field_title[2]"]').fill('ঐচ্ছিক নোট');
+                await page.locator('select[name="field_type[2]"]').selectOption('textarea');
+                await page.locator('input[name="field_required[2]"]').uncheck();
+                await page.locator('input[name="field_title[3]"]').fill('প্রমাণপত্র');
+                await page.locator('select[name="field_type[3]"]').selectOption('file');
+                await page.locator('input[name="field_accept[3]"]').fill('.pdf');
+                await page.evaluate(() => { removeFormField('fieldRow_1'); addFormField(); });
+                await page.locator('input[name="field_title[4]"]').fill('যোগাযোগ');
+            } else {
+                await page.locator('input[name="field_title[0]"]').fill('পরিবর্তিত নিজের নাম');
+                await page.locator('input[name="field_placeholder[0]"]').fill('সরকারি বানান লিখুন');
+                await page.locator('input[name="field_required[1]"]').uncheck();
+                await page.evaluate(() => { addFormField(); addFormField(); removeFormField('fieldRow_'+(fieldCount-1)); });
+                const last = page.locator('.dynamic-field-row').last();
+                await last.locator('input[name^="field_title"]').fill('অতিরিক্ত নোট');
+                await last.locator('input[type="checkbox"]').uncheck();
+            }
+            assert(await page.evaluate(() => document.documentElement.scrollWidth) <= width+1, `${admin}@${width}: editor overflow`);
+            const payload = await page.evaluate(() => {
+                const result={};
+                for(const [key,value] of new FormData(document.querySelector('form'))) {
+                    const match=key.match(/^(field_[a-z]+)\[(\d+)\]$/);
+                    if(match) { result[match[1]] ||= {}; result[match[1]][match[2]]=value; }
+                    else if(key==='service_name') result[key]=value;
+                }
+                return result;
+            });
+            const output=execFileSync(process.env.PHP_BIN || 'php', [path.join(root,'tests/admin_fields_roundtrip.php'),JSON.stringify(payload)], {cwd:root,encoding:'utf8'});
+            const fields=JSON.parse(output);
+            if(admin==='admin_add') {
+                assert.deepEqual(fields.map(f=>f.required), [0,1,1]);
+                assert.equal(fields[0].type,'textarea'); assert.equal(fields[1].accept,'.pdf');
+            } else {
+                assert.equal(fields.find(f=>f.key==='name').title,'পরিবর্তিত নিজের নাম');
+                assert.equal(fields.find(f=>f.key==='name').placeholder,'সরকারি বানান লিখুন');
+                assert.equal(fields.find(f=>f.key==='father_name').required,0);
+                assert.equal(fields.find(f=>f.title==='অতিরিক্ত নোট').required,0);
+            }
+        }
+        console.log(`PASS: ${pages.length} page/variant previews, ${count} viewport cases; layout, fields, notices, histories and drawer; 6 admin editor/roundtrip cases`);
     } finally {
         if (browser) await browser.close();
         await new Promise(resolve => server.close(resolve));

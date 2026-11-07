@@ -62,52 +62,18 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
     $submitted = array();
     $uploaded_files = array();
 
-    foreach ($fields as $field) {
-        $key = $field['key'];
-        $type = $field['type'];
-        $label = $field['title'];
-        $is_required = false; // all fields are optional by design
-
-        if ($type === 'file') {
-            $file_key = 'file_' . $key;
-            $has_file = isset($_FILES[$file_key]) && isset($_FILES[$file_key]['error']) && $_FILES[$file_key]['error'] !== UPLOAD_ERR_NO_FILE;
-
-            if (!$has_file) {
-                if ($is_required) {
-                    $errors[] = $label . ' আপলোড করা আবশ্যক।';
-                }
-                continue;
-            }
-
-            $upload = soko_handle_upload($_FILES[$file_key], (int)$user['id'], $key);
-            if ($upload['error'] !== '') {
-                $errors[] = $label . ': ' . $upload['error'];
-                continue;
-            }
-            $uploaded_files[] = $upload['path'];
-            $submitted[$label] = basename($upload['path']);
-            continue;
-        }
-
-        if ($type === 'textarea') {
-            $value = isset($_POST['field_' . $key]) ? trim($_POST['field_' . $key]) : '';
-        } elseif ($type === 'date') {
-            $value = isset($_POST['field_' . $key]) ? trim($_POST['field_' . $key]) : '';
-        } else {
-            $value = isset($_POST['field_' . $key]) ? trim($_POST['field_' . $key]) : '';
-        }
-
-        $old_values[$key] = $value;
-
-        if ($value === '') {
-            if ($is_required) {
-                $errors[] = $label . ' পূরণ করা আবশ্যক।';
-            }
-            $submitted[$label] = '';
-            continue;
-        }
-
-        $submitted[$label] = $value;
+    $validation = soko_validate_order_fields($fields, $_POST, $_FILES);
+    $errors = array_merge($errors, $validation['errors']);
+    $old_values = $validation['old_values'];
+    $submitted = $validation['values'];
+    if (!$errors) foreach ($fields as $field) {
+        if ($field['type'] !== 'file') continue;
+        $file = $_FILES['file_' . $field['key']] ?? null;
+        if (!$file || ($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) continue;
+        $upload = soko_handle_upload($file, (int)$user['id'], $field['key'], $field['accept'] ?? '');
+        if ($upload['error'] !== '') { $errors[] = $field['title'] . ': ' . $upload['error']; break; }
+        $uploaded_files[] = $upload['path'];
+        $submitted[$field['title']] = $upload['path'];
     }
 
     if ($payment_method === 'wallet' && $wallet_balance < $total_payable) {
@@ -181,6 +147,9 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
             }
         }
     }
+    if ($errors) foreach ($uploaded_files as $path) {
+        if (preg_match('~^uploads/orders/[a-zA-Z0-9_.-]+$~', $path)) @unlink(__DIR__ . '/' . $path);
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -249,40 +218,23 @@ button{font-family:inherit}
 .crumb-inner{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:12px 16px;font-size:17px;font-weight:700}
 .crumb-inner .back{color:#fff;font-size:18px;margin-right:4px}
 .crumb-inner .sep{opacity:.7;font-size:13px}
-.crumb-inner .now{color:#fff}
+.crumb-inner .now{color:#fff;min-width:0;overflow-wrap:anywhere}.crumb-inner{flex-wrap:wrap}
 
 /* ---------------- shell ---------------- */
 .shell{max-width:1080px;margin:0 auto;padding:16px}
 
 /* ---------------- hero ---------------- */
-.hero{background:#fff;border:1px solid var(--green-line);border-radius:var(--radius);padding:14px;display:flex;gap:18px;align-items:center;position:relative;box-shadow:0 4px 16px rgba(11,122,59,.05)}
-.hero-media{flex:0 0 250px}
-.nid-mock{width:250px;height:158px;border-radius:12px;background:linear-gradient(135deg,#0E8C4B 0%,#0B7A3B 45%,#0A6A34 100%);position:relative;overflow:hidden;box-shadow:0 8px 20px rgba(11,122,59,.28);padding:10px 11px;color:#fff}
-.nid-mock:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 82% 12%,rgba(255,255,255,.22),transparent 55%)}
-.nid-mock .gov{display:flex;align-items:center;gap:7px;position:relative;z-index:1}
-.nid-mock .gov img{width:24px;height:24px;border-radius:50%;background:#fff}
-.nid-mock .gov b{font-size:9px;font-weight:700;line-height:1.25;display:block}
-.nid-mock .gov small{font-size:6.4px;opacity:.85;display:block;letter-spacing:.2px}
-.nid-mock .row{display:flex;gap:9px;margin-top:9px;position:relative;z-index:1}
-.nid-mock .photo{width:52px;height:62px;border-radius:6px;background:rgba(0,0,0,.34);border:1px solid rgba(255,255,255,.45);display:flex;align-items:center;justify-content:center;font-size:20px;color:rgba(255,255,255,.75)}
-.nid-mock .lines{flex:1;display:flex;flex-direction:column;gap:5px;justify-content:center}
-.nid-mock .lines span{display:block;height:5px;border-radius:3px;background:rgba(255,255,255,.55)}
-.nid-mock .lines span:nth-child(1){width:78%}
-.nid-mock .lines span:nth-child(2){width:56%}
-.nid-mock .lines span:nth-child(3){width:66%}
-.nid-mock .lines span:nth-child(4){width:44%}
-.nid-mock .chip{position:absolute;right:12px;bottom:40px;width:26px;height:20px;border-radius:4px;background:linear-gradient(135deg,#F7D774,#C9A227);z-index:1}
-.nid-mock .barcode{position:absolute;left:11px;right:11px;bottom:8px;height:12px;border-radius:2px;background:repeating-linear-gradient(90deg,#fff 0 2px,transparent 2px 4px,#fff 4px 5px,transparent 5px 8px);opacity:.75;z-index:1}
-
+.hero{background:#fff;border:1px solid var(--green-line);border-radius:var(--radius);padding:18px;display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:16px;align-items:center;position:relative;box-shadow:0 4px 16px rgba(11,122,59,.05)}
+.hero-media{width:64px;height:64px;border-radius:20px;background:#e7f6ec;color:#08743a;display:flex;align-items:center;justify-content:center;flex-shrink:0}.hero-media .ss-icon{width:34px;height:34px}
 .hero-body{flex:1;min-width:0}
 .hero-title-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .hero-title-row h1{font-size:28px;font-weight:700;letter-spacing:-.4px}
 .badge-cat{background:var(--green);color:#fff;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px}
 .hero-desc{color:var(--muted);font-size:14.5px;margin-top:6px;max-width:52ch}
-.hero-feats{display:flex;align-items:center;gap:14px;margin-top:14px;flex-wrap:wrap}
-.feat{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.25}
-.feat i{width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;flex:0 0 30px}
-.feat-sep{width:1px;height:30px;background:var(--line)}
+.hero-feats{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;border-top:1px solid var(--line);padding-top:14px}
+.feat{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink);line-height:1.5;min-width:0}
+.feat .ss-icon{width:30px;height:30px;box-sizing:content-box;padding:8px;border-radius:50%;background:var(--green);color:#fff;flex-shrink:0}
+.feat-sep{display:none}
 .hero-price{display:flex;flex-direction:column;align-items:flex-end;gap:8px;align-self:flex-start}
 .price-tag{background:var(--green);color:#fff;font-size:22px;font-weight:700;padding:6px 16px;border-radius:12px;min-width:104px;text-align:center}
 .price-note{background:var(--green-soft);color:var(--green-dark);font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px}
@@ -322,7 +274,7 @@ button{font-family:inherit}
 .upload i.up-ic{font-size:24px;color:#7EA890;display:block;margin-bottom:5px}
 .upload b{display:block;font-size:14px;font-weight:600;color:var(--ink)}
 .upload small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
-.upload input[type=file]{display:none}
+.upload{position:relative}.upload input[type=file]{position:absolute;left:12px;bottom:12px;width:1px;height:1px;opacity:0}.upload:focus-within{outline:3px solid #0ea5e9;outline-offset:2px}.sr-only{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
 .upload .picked{display:none;margin-top:7px;font-size:12px;font-weight:600;color:var(--green-dark);background:var(--green-soft);border-radius:8px;padding:5px 9px;word-break:break-all}
 .upload.has-file .picked{display:block}
 .tip{margin-top:4px;background:#F2F8F4;border:1px solid #E4F0E7;border-radius:12px;padding:12px 13px;display:flex;gap:10px}
@@ -378,14 +330,16 @@ button{font-family:inherit}
 
 @media (max-width:900px){
   .grid{grid-template-columns:1fr}
-  .hero{flex-wrap:wrap;gap:12px}
-  .hero-media{flex:1 1 100%;display:flex;justify-content:center}
-  .nid-mock{width:100%;max-width:320px;height:auto;aspect-ratio:250/158}
-  .hero-price{position:static;align-self:stretch;flex-direction:row;align-items:center;gap:8px}
+  .hero{display:grid;grid-template-columns:48px minmax(0,1fr);gap:12px;align-items:start}
+  .hero-media{width:48px;height:48px;border-radius:14px}
+  .hero-price{grid-column:1/-1;position:static;align-self:stretch;flex-direction:row;align-items:center;gap:8px}
   .hero-price .price-tag{min-width:80px}
   .hero-body{width:100%}
+  .hero-feats{gap:6px}
+  .feat{gap:5px;font-size:11.5px}
+  .feat .ss-icon{width:17px;height:17px;padding:6px}
   .card-head{flex-wrap:wrap}
-  .hero-title-row h1{font-size:23px;overflow-wrap:anywhere;line-height:1.45}
+  .hero-title-row h1{font-size:21px;overflow-wrap:anywhere;line-height:1.45}
   .hero-desc{padding-right:0}
   .steps:before{top:26px;left:12%;right:12%}
   .step .dot{width:30px;height:30px;font-size:13px}
@@ -403,7 +357,6 @@ button{font-family:inherit}
   .bottom-nav{display:none}
   body{padding-bottom:24px}
 }
-.hero--birth .hero-media{display:none}
 @media print{
   .topbar,.crumb,.bottom-nav,.btn-order,.drawer,.hero-price{display:none!important}
   body{background:#fff;padding:0}
@@ -444,24 +397,8 @@ button{font-family:inherit}
     </div>
   <?php endif; ?>
 
-  <section class="hero<?php echo soko_is_new_birth_application($service_title) ? ' hero--birth' : ''; ?>">
-    <div class="hero-media">
-      <div class="nid-mock">
-        <div class="gov">
-          <img src="assets/birth-card-files/bd_logo.png" alt="">
-          <span>
-            <b><?php echo soko_is_new_birth_application($service_title) ? 'জন্ম নিবন্ধন আবেদন' : 'সেবার আবেদন'; ?></b>
-            <small>Government of the People's Republic of Bangladesh</small>
-          </span>
-        </div>
-        <div class="row">
-          <div class="photo"><i class="fa-solid fa-user"></i></div>
-          <div class="lines"><span></span><span></span><span></span><span></span></div>
-        </div>
-        <div class="chip"></div>
-        <div class="barcode"></div>
-      </div>
-    </div>
+  <section class="hero">
+    <div class="hero-media" aria-hidden="true"><?php echo soko_icon(soko_application_kind($service_title) === 'passport' ? 'passport' : (soko_is_mfs_info($service_title) ? 'wallet' : 'file')); ?></div>
 
     <div class="hero-body">
       <div class="hero-title-row">
@@ -469,19 +406,20 @@ button{font-family:inherit}
         <span class="badge-cat"><?php echo soko_h($category); ?></span>
       </div>
       <p class="hero-desc"><?php echo soko_h($service_desc); ?></p>
-      <div class="hero-feats">
-        <div class="feat"><i class="fa-solid fa-shield-halved"></i><span>নির্ভরযোগ্য<br>সেবা</span></div>
-        <div class="feat-sep"></div>
-        <div class="feat"><i class="fa-solid fa-bolt"></i><span>দ্রুত<br>প্রসেস</span></div>
-        <div class="feat-sep"></div>
-        <div class="feat"><i class="fa-solid fa-headset"></i><span>২৪/৭<br>সাপোর্ট</span></div>
-      </div>
+
     </div>
 
     <div class="hero-price">
       <span class="price-tag"><?php echo soko_money($price); ?></span>
       <span class="price-note">বেসিক চার্জ</span>
     </div>
+      <div class="hero-feats">
+        <div class="feat"><?php echo soko_icon('file'); ?><span>নির্ভরযোগ্য<br>সেবা</span></div>
+        <div class="feat-sep"></div>
+        <div class="feat"><?php echo soko_icon('bolt'); ?><span>দ্রুত<br>প্রসেস</span></div>
+        <div class="feat-sep"></div>
+        <div class="feat"><?php echo soko_icon('support'); ?><span>২৪/৭<br>সাপোর্ট</span></div>
+      </div>
   </section>
 
   <ol class="steps">
@@ -498,7 +436,7 @@ button{font-family:inherit}
     <a class="ss-history-link" href="#service-history">হিস্টোরি ও রেজাল্ট দেখুন ↓</a>
   </div>
   <?php endif; ?>
-  <form method="post" action="service_order.php?id=<?php echo (int)$service['id']; ?>" enctype="multipart/form-data" id="orderForm" novalidate>
+  <form method="post" action="service_order.php?id=<?php echo (int)$service['id']; ?>" enctype="multipart/form-data" id="orderForm">
     <input type="hidden" name="place_order" value="1">
     <div class="grid">
 
@@ -507,7 +445,7 @@ button{font-family:inherit}
         <div class="card-head">
           <span class="ch-ic"><i class="fa-solid fa-user"></i></span>
           <h2>ব্যক্তিগত তথ্য</h2>
-          <span class="req-note" style="color:#0B7A3B;background:#EAF6EE;border-radius:99px;padding:3px 9px;font-weight:600">সব ঘর ঐচ্ছিক</span>
+          <span class="req-note" style="color:#0B7A3B;background:#EAF6EE;border-radius:99px;padding:3px 9px;font-weight:600">* চিহ্নিত ঘর আবশ্যক</span>
         </div>
         <div class="card-body">
           <?php foreach ($fields as $field): ?>
@@ -516,7 +454,8 @@ button{font-family:inherit}
               $type = $field['type'];
               $input_id = 'f_' . $key;
               $current = isset($old_values[$key]) ? $old_values[$key] : '';
-              $star = ''; // সব ফিল্ড ঐচ্ছিক
+              $required_attr = !empty($field['required']) ? 'required aria-required="true"' : '';
+              $star = !empty($field['required']) ? '<span class="star" aria-hidden="true"> *</span><span class="sr-only"> (আবশ্যক)</span>' : '';
             ?>
 
             <?php if ($type === 'file'): ?>
@@ -524,17 +463,17 @@ button{font-family:inherit}
                 <label class="flabel" for="<?php echo soko_h($input_id); ?>"><?php echo soko_h($field['title']); ?><?php echo $star; ?></label>
                 <label class="upload" for="<?php echo soko_h($input_id); ?>">
                   <i class="fa-solid fa-cloud-arrow-up up-ic"></i>
-                  <b>ছবি আপলোড করুন</b>
-                  <small>(JPG, PNG অথবা PDF — সর্বোচ্চ ৫MB)</small>
+                  <b>ফাইল নির্বাচন করুন</b>
+                  <small><?php echo soko_h($field['accept'] ?: 'JPG, PNG, WEBP অথবা PDF'); ?> — সর্বোচ্চ ৫MB</small>
                   <span class="picked">কোনো ফাইল নির্বাচন করা হয়নি</span>
-                  <input type="file" id="<?php echo soko_h($input_id); ?>" name="file_<?php echo soko_h($key); ?>" accept="<?php echo soko_h($field['accept']); ?>" data-pick="1">
+                  <input type="file" id="<?php echo soko_h($input_id); ?>" name="file_<?php echo soko_h($key); ?>" accept="<?php echo soko_h($field['accept']); ?>" data-pick="1" <?php echo $required_attr; ?>>
                 </label>
               </div>
 
             <?php elseif ($type === 'textarea'): ?>
               <div class="field">
                 <label class="flabel" for="<?php echo soko_h($input_id); ?>"><?php echo soko_h($field['title']); ?><?php echo $star; ?></label>
-                <textarea class="textarea" id="<?php echo soko_h($input_id); ?>" name="field_<?php echo soko_h($key); ?>" placeholder="<?php echo soko_h($field['placeholder']); ?>" ><?php echo soko_h($current); ?></textarea>
+                <textarea class="textarea" id="<?php echo soko_h($input_id); ?>" name="field_<?php echo soko_h($key); ?>" placeholder="<?php echo soko_h($field['placeholder']); ?>" <?php echo $required_attr; ?>><?php echo soko_h($current); ?></textarea>
               </div>
 
             <?php else: ?>
@@ -543,12 +482,13 @@ button{font-family:inherit}
                 <div class="inp">
                   <i class="fa-solid <?php echo soko_h($field['icon']); ?>"></i>
                   <input
-                    type="<?php echo $type === 'tel' ? 'tel' : ($type === 'date' ? 'date' : 'text'); ?>"
+                    type="<?php echo in_array($type, ['tel','date','number'], true) ? $type : 'text'; ?>"
                     id="<?php echo soko_h($input_id); ?>"
                     name="field_<?php echo soko_h($key); ?>"
                     value="<?php echo soko_h($current); ?>"
                     placeholder="<?php echo soko_h($field['placeholder']); ?>"
                     <?php echo $type === 'tel' ? 'inputmode="numeric" maxlength="14"' : ''; ?>
+                    <?php echo $required_attr; ?>
                     >
                 </div>
               </div>

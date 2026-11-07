@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/service_form.php';
 /**
  * Sokol Sheba — shared helpers for the service order flow.
  *
@@ -247,7 +248,6 @@ if (!function_exists('soko_field_rules')) {
         $details = soko_field('details', 'বিস্তারিত তথ্য', 'textarea', 1, 'প্রয়োজনীয় সব তথ্য বিস্তারিতভাবে লিখুন', 'fa-pen', '');
         $area = soko_field('area', 'এলাকা / ওয়ার্ড', 'textarea', 1, 'জেলা, উপজেলা, ইউনিয়ন ও ওয়ার্ড নং লিখুন', 'fa-map-location-dot', '');
         $land = soko_field('land', 'দাগ / খতিয়ান নম্বর', 'text', 1, 'দাগ ও খতিয়ান নম্বর লিখুন', 'fa-file-contract', '');
-        $trx = soko_field('trx', 'ট্রানজেকশন আইডি (TrxID)', 'text', 0, 'যেমন: 9F3A7B6C2D (ঐচ্ছিক)', 'fa-receipt', '');
 
         return array(
             /* ---------------- NID সেবা ---------------- */
@@ -275,7 +275,7 @@ if (!function_exists('soko_field_rules')) {
             array('match' => array('জন্ম নিবন্ধন', 'জন্মনিবন্ধন', 'birth'), 'fields' => array($brn, $name, $dob, $mobile)),
 
             /* ---------------- মোবাইল ব্যাংকিং ---------------- */
-            array('match' => array('ইনফো', 'info'), 'fields' => array($mobile, $trx)),
+            array('match' => array('ইনফো', 'info'), 'fields' => array($mobile)),
 
             /* ---------------- সিম / বায়োমেট্রিক ---------------- */
             array('match' => array('সিম বাতিল', 'sim cancel'), 'fields' => array($nid, $mobile, $reason)),
@@ -330,14 +330,24 @@ if (!function_exists('soko_match_preset')) {
         if ($haystack === '') {
             return null;
         }
-        // A first registration cannot require an already-issued BRN.
-        if (soko_is_new_birth_application($service_name)) {
-            return [
-                soko_field('name', 'নাম', 'text', 1, 'আবেদনকারীর নাম লিখুন', 'fa-user', ''),
-                soko_field('dob', 'জন্ম তারিখ', 'date', 1, '', 'fa-calendar-days', ''),
-                soko_field('mobile', 'মোবাইল নম্বর', 'tel', 1, 'যোগাযোগের মোবাইল নম্বর', 'fa-phone', ''),
-                soko_field('address', 'পূর্ণ ঠিকানা', 'textarea', 1, 'গ্রাম/বাসা, ইউনিয়ন, উপজেলা, জেলা লিখুন', 'fa-location-dot', ''),
-            ];
+        $kind = soko_application_kind($service_name);
+        if ($kind === 'birth') {
+            $fields = [];
+            foreach (['name'=>'নিজ নাম','father_name'=>'পিতার নাম','mother_name'=>'মাতার নাম','village'=>'গ্রাম / বাসা / রোড','thana'=>'থানা / উপজেলা','district'=>'জেলা','division'=>'বিভাগ'] as $key=>$title) {
+                $fields[] = soko_field($key, $title, 'text', 1, $title . ' লিখুন', 'fa-pen', '');
+            }
+            $fields[] = soko_field('dob', 'জন্ম তারিখ', 'date', 1, '', 'fa-calendar-days', '');
+            $fields[] = soko_field('mobile', 'মোবাইল নম্বর', 'tel', 1, 'যোগাযোগের মোবাইল নম্বর', 'fa-phone', '');
+            return $fields;
+        }
+        if ($kind === 'nid' || $kind === 'passport') {
+            $fields = [soko_field('name','নিজ নাম','text',1,'পূর্ণ নাম লিখুন','fa-user',''),
+                soko_field('dob','জন্ম তারিখ','date',1,'','fa-calendar-days',''),
+                soko_field('mobile','মোবাইল নম্বর','tel',1,'মোবাইল নম্বর লিখুন','fa-phone',''),
+                soko_field('address','পূর্ণ ঠিকানা','textarea',1,'গ্রাম/বাসা, থানা, জেলা, বিভাগ লিখুন','fa-location-dot','')];
+            if ($kind === 'nid') $fields[] = soko_field('birth_pdf','জন্ম নিবন্ধনের PDF','file',1,'জন্ম নিবন্ধনের PDF দিন','fa-file-pdf','.pdf,application/pdf');
+            else array_unshift($fields, soko_field('nid','NID নম্বর','text',1,'১০ / ১৩ / ১৭ ডিজিটের NID নম্বর','fa-id-card',''));
+            return $fields;
         }
         foreach (soko_field_rules() as $rule) {
             foreach ($rule['match'] as $keyword) {
@@ -421,17 +431,13 @@ if (!function_exists('soko_service_link')) {
 if (!function_exists('soko_resolve_fields')) {
     /**
      * Returns the field list for one service:
-     *   1. built in preset (per service type), otherwise
-     *   2. the JSON stored in custom_services.custom_fields, otherwise
+     *   1. administrator-defined custom fields, otherwise
+     *   2. built-in defaults for the service type, otherwise
      *   3. one free text field.
      */
     function soko_resolve_fields($service)
     {
         $preset = soko_match_preset(isset($service['service_name']) ? $service['service_name'] : '');
-        if (is_array($preset) && count($preset) > 0) {
-            return $preset;
-        }
-
         $db_fields = array();
         if (!empty($service['custom_fields'])) {
             $decoded = json_decode($service['custom_fields'], true);
@@ -452,10 +458,10 @@ if (!function_exists('soko_resolve_fields')) {
                 continue;
             }
             $type = isset($raw['type']) ? strtolower(trim((string)$raw['type'])) : 'text';
-            if ($type === 'number' || $type === 'phone' || $type === 'mobile') {
+            if ($type === 'phone' || $type === 'mobile') {
                 $type = 'tel';
             }
-            if ($type !== 'text' && $type !== 'tel' && $type !== 'date' && $type !== 'textarea' && $type !== 'file') {
+            if ($type !== 'number' && $type !== 'text' && $type !== 'tel' && $type !== 'date' && $type !== 'textarea' && $type !== 'file') {
                 $type = 'text';
             }
             $required = 0;
@@ -476,15 +482,19 @@ if (!function_exists('soko_resolve_fields')) {
             } elseif ($type === 'textarea') {
                 $icon = 'fa-align-left';
             }
-            $fields[] = soko_field('field_' . $index, $title, $type, $required, $placeholder, $icon, $type === 'file' ? '' : '');
+            $key = isset($raw['key']) && preg_match('/^[a-z][a-z0-9_]*$/', (string)$raw['key']) ? $raw['key'] : soko_field_semantic_key($title);
+            if ($key === '' || in_array($key, array_column($fields, 'key'), true)) $key = 'custom_' . $index;
+            $accept = $type === 'file' ? (string)($raw['accept'] ?? '') : '';
+            $fields[] = soko_field($key, $title, $type, $required, $placeholder, $icon, $accept);
             $index++;
         }
 
+        if (count($fields) === 0 && is_array($preset)) $fields = $preset;
         if (count($fields) === 0) {
             $fields[] = soko_field('field_0', 'প্রয়োজনীয় তথ্য', 'textarea', 1, 'অর্ডারের জন্য প্রয়োজনীয় তথ্য লিখুন', 'fa-pen', '');
         }
 
-        return $fields;
+        return soko_application_contracts($fields, $service['service_name'] ?? '');
     }
 }
 
@@ -676,7 +686,7 @@ if (!function_exists('soko_handle_upload')) {
      * Stores one uploaded file inside uploads/orders and returns the relative path.
      * Returns array('path' => '...' , 'error' => '').
      */
-    function soko_handle_upload($file, $user_id, $field_key)
+    function soko_handle_upload($file, $user_id, $field_key, $accept = '')
     {
         $result = array('path' => '', 'error' => '');
 
@@ -699,6 +709,9 @@ if (!function_exists('soko_handle_upload')) {
             $result['error'] = 'শুধুমাত্র JPG, PNG, WEBP অথবা PDF আপলোড করুন';
             return $result;
         }
+
+        $validation_error = soko_order_upload_error($file, $accept);
+        if ($validation_error !== '') { $result['error'] = $validation_error; return $result; }
 
         $upload_dir = __DIR__ . '/../uploads/orders/';
         if (!is_dir($upload_dir)) {
