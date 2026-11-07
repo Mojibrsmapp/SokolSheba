@@ -71,6 +71,8 @@ if ($state === 'wallet') {
     $paid_at = $order['created_at'];
 }
 
+$method_logo = ($state === 'wallet') ? '' : (function_exists('soko_pay_method_logo') && $payment ? soko_pay_method_logo($payment['method']) : '');
+
 $is_paid = ($state === 'wallet' || $state === 'verified');
 
 if ($state === 'pending') {
@@ -184,6 +186,8 @@ table.kv tr.total td.v{font-size:22px;color:var(--green-dark);font-weight:700}
 /* method card */
 .mcard{border:1.5px solid #E2EFE6;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 4px 14px rgba(11,122,59,.06)}
 .mcard-head{color:#fff;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:14.5px}
+.mcard-head.has-logo{background:#fff;border-bottom:1px solid #EEF6F1;padding:9px 12px}
+.mcard-head.has-logo img{height:24px;width:auto;max-width:110px;object-fit:contain}
 .mcard-head .glyph{font-size:12px;opacity:.9}
 .mcard-body{padding:12px}
 .mcard-body .mc-check{width:38px;height:38px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;margin:0 auto 6px}
@@ -351,7 +355,11 @@ table.kv tr.total td.v{font-size:22px;color:var(--green-dark);font-weight:700}
                   if ($method_css === 'mk-upay') { $ink = 'ink-upay'; }
                   if ($method_css === 'mk-wallet') { $ink = 'ink-wallet'; }
                 ?>
-                <span class="wordmark <?php echo soko_h($ink); ?>"><i class="fa-solid fa-bolt"></i> <?php echo soko_h($method_name); ?></span>
+                <?php if ($method_logo !== ''): ?>
+                  <img src="<?php echo soko_h($method_logo); ?>" alt="<?php echo soko_h($method_name); ?>" style="height:22px;width:auto;max-width:96px;object-fit:contain;vertical-align:middle">
+                <?php else: ?>
+                  <span class="wordmark <?php echo soko_h($ink); ?>"><i class="fa-solid fa-bolt"></i> <?php echo soko_h($method_name); ?></span>
+                <?php endif; ?>
               </td>
             </tr>
             <tr><td class="k">পেমেন্ট নম্বর</td><td class="v"><?php echo soko_h($payer_number !== '' ? soko_bn_digits($payer_number) : '—'); ?></td></tr>
@@ -362,9 +370,13 @@ table.kv tr.total td.v{font-size:22px;color:var(--green-dark);font-weight:700}
         </div>
         <div class="seg-side">
           <div class="mcard">
-            <div class="mcard-head <?php echo soko_h($method_css); ?>">
-              <span><?php echo soko_h($method_name); ?></span>
-              <span class="glyph"><i class="fa-solid fa-bolt"></i></span>
+            <div class="mcard-head <?php echo $method_logo !== '' ? 'has-logo' : soko_h($method_css); ?>">
+              <?php if ($method_logo !== ''): ?>
+                <img src="<?php echo soko_h($method_logo); ?>" alt="<?php echo soko_h($method_name); ?>">
+              <?php else: ?>
+                <span><?php echo soko_h($method_name); ?></span>
+              <?php endif; ?>
+              <span class="glyph" style="<?php echo $method_logo !== '' ? 'color:' . soko_h($method_css === 'mk-nagad' ? '#F58220' : ($method_css === 'mk-rocket' ? '#8C3494' : ($method_css === 'mk-upay' ? '#1C4E9E' : '#E2136E'))) : ''; ?>"><i class="fa-solid fa-circle-check"></i></span>
             </div>
             <div class="mcard-body">
               <div class="mc-check"><i class="fa-solid <?php echo $is_paid ? 'fa-check' : 'fa-clock'; ?>"></i></div>

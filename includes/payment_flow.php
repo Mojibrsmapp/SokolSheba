@@ -33,12 +33,20 @@ if (!function_exists('soko_pay_ensure_table')) {
             `admin_note` varchar(255) DEFAULT NULL,
             `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
             `verified_at` datetime DEFAULT NULL,
+            `slip_file` varchar(255) DEFAULT NULL,
             PRIMARY KEY (`id`),
             UNIQUE KEY `uniq_trx` (`trx_id`),
             KEY `idx_order` (`order_id`),
             KEY `idx_status` (`status`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
         @$conn->query($sql);
+
+        /* পুরনো ডাটাবেজে slip_file কলাম না থাকলে যোগ করে নেয় */
+        $has_slip = @$conn->query("SHOW COLUMNS FROM `order_payments` LIKE 'slip_file'");
+        if (!$has_slip || $has_slip->num_rows === 0) {
+            @$conn->query("ALTER TABLE `order_payments` ADD COLUMN `slip_file` varchar(255) DEFAULT NULL");
+        }
+
         $done = true;
     }
 }
@@ -48,10 +56,10 @@ if (!function_exists('soko_pay_methods')) {
     function soko_pay_methods()
     {
         return array(
-            'bkash' => array('name' => 'বিকাশ', 'english' => 'bKash', 'css' => 'mk-bkash', 'color' => '#E2136E'),
-            'nagad' => array('name' => 'নগদ', 'english' => 'Nagad', 'css' => 'mk-nagad', 'color' => '#F58220'),
-            'rocket' => array('name' => 'রকেট', 'english' => 'Rocket', 'css' => 'mk-rocket', 'color' => '#8C3494'),
-            'upay' => array('name' => 'উপায়', 'english' => 'Upay', 'css' => 'mk-upay', 'color' => '#F5A623'),
+            'bkash' => array('name' => 'বিকাশ', 'english' => 'bKash', 'css' => 'mk-bkash', 'color' => '#E2136E', 'logo' => 'assets/images/payments/bkash.png'),
+            'nagad' => array('name' => 'নগদ', 'english' => 'Nagad', 'css' => 'mk-nagad', 'color' => '#F58220', 'logo' => 'assets/images/payments/nagad.png'),
+            'rocket' => array('name' => 'রকেট', 'english' => 'Rocket', 'css' => 'mk-rocket', 'color' => '#8C3494', 'logo' => 'assets/images/payments/rocket.png'),
+            'upay' => array('name' => 'উপায়', 'english' => 'Upay', 'css' => 'mk-upay', 'color' => '#F5A623', 'logo' => 'assets/images/payments/upay.png'),
         );
     }
 }
@@ -64,7 +72,24 @@ if (!function_exists('soko_pay_method_meta')) {
         if (isset($methods[$key])) {
             return $methods[$key];
         }
-        return array('name' => 'মোবাইল ব্যাংকিং', 'english' => 'Mobile Banking', 'css' => 'mk-bkash', 'color' => '#0B7A3B');
+        return array('name' => 'মোবাইল ব্যাংকিং', 'english' => 'Mobile Banking', 'css' => 'mk-bkash', 'color' => '#0B7A3B', 'logo' => 'assets/images/payments/bkash.png');
+    }
+}
+
+if (!function_exists('soko_pay_method_logo')) {
+    /** Payment logo path (assets/images/payments/*.png) — না থাকলে খালি স্ট্রিং। */
+    function soko_pay_method_logo($method)
+    {
+        $methods = soko_pay_methods();
+        $key = strtolower(trim((string)$method));
+        if (!isset($methods[$key]['logo'])) {
+            return '';
+        }
+        $relative = $methods[$key]['logo'];
+        if (!file_exists(__DIR__ . '/../' . $relative)) {
+            return '';
+        }
+        return $relative;
     }
 }
 
@@ -137,7 +162,7 @@ if (!function_exists('soko_pay_create')) {
      * Stores one "send money" claim. Returns:
      *   ['ok' => true, 'payment_id' => n]  or  ['ok' => false, 'error' => '...']
      */
-    function soko_pay_create($conn, $order_id, $user_id, $method, $sender_number, $trx_id, $amount)
+    function soko_pay_create($conn, $order_id, $user_id, $method, $sender_number, $trx_id, $amount, $slip_file = '')
     {
         soko_pay_ensure_table($conn);
 
@@ -147,9 +172,10 @@ if (!function_exists('soko_pay_create')) {
             return array('ok' => false, 'error' => 'পেমেন্ট পদ্ধতি নির্বাচন করুন।');
         }
 
+        /* নম্বর ঐচ্ছিক — দিলে তবেই ফরম্যাট দেখা হয় */
         $sender_digits = preg_replace('/[^0-9]/', '', $sender_number);
-        if (strlen($sender_digits) !== 11) {
-            return array('ok' => false, 'error' => 'যে নম্বর থেকে টাকা পাঠিয়েছেন সেটি ১১ ডিজিটের হতে হবে।');
+        if ($sender_digits !== '' && strlen($sender_digits) !== 11) {
+            return array('ok' => false, 'error' => 'যে নম্বর থেকে টাকা পাঠিয়েছেন সেটি ১১ ডিজিটের হতে হবে (না দিলে খালি রাখুন)।');
         }
 
         $trx_id = strtoupper(trim(preg_replace('/[^A-Za-z0-9]/', '', $trx_id)));
@@ -165,11 +191,12 @@ if (!function_exists('soko_pay_create')) {
         $user_id = (int)$user_id;
         $amount = (float)$amount;
 
-        $stmt = $conn->prepare("INSERT INTO order_payments (order_id, user_id, method, sender_number, trx_id, amount, status) VALUES (?, ?, ?, ?, ?, ?, 'pending')");
+        $slip_file = trim((string)$slip_file);
+        $stmt = $conn->prepare("INSERT INTO order_payments (order_id, user_id, method, sender_number, trx_id, amount, slip_file, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')");
         if (!$stmt) {
             return array('ok' => false, 'error' => 'পেমেন্ট তথ্য সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।');
         }
-        $stmt->bind_param("iisssd", $order_id, $user_id, $method, $sender_digits, $trx_id, $amount);
+        $stmt->bind_param("iisssds", $order_id, $user_id, $method, $sender_digits, $trx_id, $amount, $slip_file);
         $ok = $stmt->execute();
         $errno = $conn->errno;
         $insert_id = $conn->insert_id;

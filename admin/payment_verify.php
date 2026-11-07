@@ -175,9 +175,24 @@ if ($res) {
                     <div style="font-weight:700"><?php echo htmlspecialchars((string)$p['service_name']); ?></div>
                     <div style="font-size:11px;color:#64748B">অর্ডার #<?php echo (int)$p['order_id']; ?></div>
                   </td>
-                  <td><span class="pv-mk <?php echo htmlspecialchars($mk); ?>"><?php echo htmlspecialchars($meta['name']); ?></span></td>
-                  <td class="pv-mono"><?php echo htmlspecialchars((string)$p['sender_number']); ?></td>
-                  <td class="pv-mono"><?php echo htmlspecialchars((string)$p['trx_id']); ?></td>
+                  <td>
+                    <?php $pv_logo = function_exists('soko_pay_method_logo') ? soko_pay_method_logo($mk) : ''; ?>
+                    <?php if ($pv_logo !== ''): ?>
+                      <img src="../<?php echo htmlspecialchars($pv_logo); ?>" alt="<?php echo htmlspecialchars($meta['name']); ?>" style="height:20px;width:auto;max-width:74px;object-fit:contain">
+                    <?php else: ?>
+                      <span class="pv-mk <?php echo htmlspecialchars($mk); ?>"><?php echo htmlspecialchars($meta['name']); ?></span>
+                    <?php endif; ?>
+                  </td>
+                  <td class="pv-mono"><?php $pv_sender = trim((string)$p['sender_number']); echo $pv_sender !== '' ? htmlspecialchars($pv_sender) : '<span style="color:#94A3B8">—</span>'; ?></td>
+                  <td class="pv-mono">
+                    <?php echo htmlspecialchars((string)$p['trx_id']); ?>
+                    <?php
+                      $pv_slip = isset($p['slip_file']) ? trim((string)$p['slip_file']) : '';
+                      if ($pv_slip !== ''):
+                    ?>
+                      <a href="../<?php echo htmlspecialchars($pv_slip); ?>" target="_blank" title="পেমেন্টের স্ক্রিনশট" style="display:inline-block;margin-left:5px;color:#0B7A3B"><i class="fa-solid fa-image"></i></a>
+                    <?php endif; ?>
+                  </td>
                   <td style="font-weight:700">৳ <?php echo number_format((float)$p['amount'], 0); ?></td>
                   <td style="font-size:11.5px;color:#64748B"><?php echo htmlspecialchars((string)$p['created_at']); ?></td>
                   <td><span class="pv-badge <?php echo $badge; ?>"><?php echo $status_bn; ?></span></td>

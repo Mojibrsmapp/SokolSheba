@@ -55,8 +55,18 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
         $errors[] = 'পেমেন্ট সম্পন্ন করার পর "পেমেন্টের তথ্য যাচাই করেছি" বক্সে টিক দিন।';
     }
 
+    $slip_path = '';
+    if (isset($_FILES['slip']) && is_array($_FILES['slip']) && $_FILES['slip']['error'] !== UPLOAD_ERR_NO_FILE) {
+        $upload = soko_handle_upload($_FILES['slip'], (int)$user['id'], 'slip');
+        if ($upload['error'] !== '') {
+            $errors[] = 'স্ক্রিনশট: ' . $upload['error'];
+        } else {
+            $slip_path = $upload['path'];
+        }
+    }
+
     if (count($errors) === 0) {
-        $result = soko_pay_create($conn, (int)$order['id'], (int)$user['id'], $selected_method, $sender_number, $trx_id, $amount);
+        $result = soko_pay_create($conn, (int)$order['id'], (int)$user['id'], $selected_method, $sender_number, $trx_id, $amount, $slip_path);
         if ($result['ok']) {
             header("Location: payment_processing.php?order=" . (int)$order['id']);
             exit;
@@ -159,7 +169,18 @@ button{font-family:inherit}
 .pay-card.is-on .tick{background:var(--green);border-color:var(--green);color:#fff}
 .pay-card .mark{height:44px;display:flex;align-items:center;justify-content:center;gap:4px;font-weight:800;font-size:19px;letter-spacing:-.3px}
 .pay-card .mark .glyph{font-size:15px}
+.pay-card .mark img{max-height:40px;max-width:96px;object-fit:contain}
+.pay-card .mk-name{letter-spacing:.2px}
 .pay-card .mk-name{display:block;font-size:12.8px;font-weight:600;color:var(--ink);margin-top:4px}
+.field .opt-tag{font-size:10.5px;font-weight:700;color:#0B7A3B;background:#EAF6EE;border-radius:99px;padding:2px 7px;vertical-align:middle}
+.slip-up{display:flex;flex-direction:column;align-items:center;gap:2px;border:1.6px dashed #C9DED2;border-radius:12px;padding:14px 10px;background:#FAFDFB;cursor:pointer;text-align:center;transition:.15s}
+.slip-up:hover{border-color:#0B7A3B;background:#F4FBF6}
+.slip-up i{font-size:20px;color:#0B7A3B}
+.slip-up b{font-size:13px;color:#123225}
+.slip-up small{font-size:11px;color:#5E7466}
+.slip-up .slip-picked{font-size:11px;color:#8AA396;margin-top:2px;word-break:break-all}
+.slip-up.has-file{border-color:#0B7A3B;border-style:solid;background:#EFF8F2}
+.slip-up.has-file .slip-picked{color:#0B7A3B;font-weight:600}
 .mk-bkash{color:#E2136E}
 .mk-nagad{color:#F58220}
 .mk-rocket{color:#8C3494}
@@ -264,7 +285,7 @@ button{font-family:inherit}
     </div>
   <?php endif; ?>
 
-  <form method="post" action="payment_gateway.php?order=<?php echo (int)$order['id']; ?>" id="payForm">
+  <form method="post" action="payment_gateway.php?order=<?php echo (int)$order['id']; ?>" id="payForm" enctype="multipart/form-data">
     <input type="hidden" name="pay_now" value="1">
     <section class="card">
       <div class="card-head">
@@ -314,8 +335,12 @@ button{font-family:inherit}
               <input type="radio" name="method" value="<?php echo soko_h($key); ?>" <?php echo $key === $selected_method ? 'checked' : ''; ?>>
               <span class="tick"><i class="fa-solid fa-check"></i></span>
               <span class="mark <?php echo soko_h($meta['css']); ?>">
-                <span class="glyph"><i class="fa-solid fa-bolt"></i></span>
-                <?php echo soko_h($meta['name']); ?>
+                <?php $logo = soko_pay_method_logo($key); ?>
+                <?php if ($logo !== ''): ?>
+                  <img src="<?php echo soko_h($logo); ?>" alt="<?php echo soko_h($meta['english']); ?>">
+                <?php else: ?>
+                  <span class="glyph"><i class="fa-solid fa-bolt"></i></span><?php echo soko_h($meta['name']); ?>
+                <?php endif; ?>
               </span>
               <span class="mk-name"><?php echo soko_h($meta['english']); ?></span>
             </label>
@@ -323,12 +348,24 @@ button{font-family:inherit}
         </div>
 
         <div class="field">
-          <label for="senderNumber">আপনার <span id="senderMethodLabel"><?php echo soko_h($active_meta['name']); ?></span> নম্বর <span class="star">*</span></label>
+          <label for="senderNumber">আপনার <span id="senderMethodLabel"><?php echo soko_h($active_meta['name']); ?></span> নম্বর <span class="opt-tag">ঐচ্ছিক</span></label>
           <div class="inp">
             <i class="fa-solid fa-mobile-screen"></i>
-            <input type="tel" id="senderNumber" name="sender_number" value="<?php echo soko_h($sender_number); ?>" placeholder="01XXXXXXXXX" maxlength="14" inputmode="numeric" required>
+            <input type="tel" id="senderNumber" name="sender_number" value="<?php echo soko_h($sender_number); ?>" placeholder="01XXXXXXXXX" maxlength="14" inputmode="numeric">
           </div>
-          <div class="hint">যে নম্বর থেকে টাকা পাঠিয়েছেন সেই নম্বরটিই দিন।</div>
+          <div class="hint">যে নম্বর থেকে টাকা পাঠিয়েছেন সেই নম্বরটি দিতে পারেন — না দিলেও চলবে।</div>
+        </div>
+
+        <div class="field">
+          <label for="slipFile">পেমেন্টের স্ক্রিনশট <span class="opt-tag">ঐচ্ছিক</span></label>
+          <label class="slip-up" for="slipFile">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <b>স্ক্রিনশট / স্লিপ আপলোড করুন</b>
+            <small>JPG, PNG অথবা PDF — সর্বোচ্চ ৫MB</small>
+            <span class="slip-picked" id="slipPicked">কোনো ফাইল নির্বাচন করা হয়নি</span>
+            <input type="file" id="slipFile" name="slip" accept="image/*,application/pdf" data-slip="1">
+          </label>
+          <div class="hint">পেমেন্টের স্ক্রিনশট দিলে অ্যাডমিন দ্রুত যাচাই করতে পারবে (ঐচ্ছিক)।</div>
         </div>
 
         <div class="field">
@@ -421,6 +458,21 @@ button{font-family:inherit}
       var old = copyBtn.innerHTML;
       copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> কপি হয়েছে';
       setTimeout(function () { copyBtn.innerHTML = old; }, 1600);
+    });
+  }
+
+  var slip = document.getElementById('slipFile');
+  if (slip) {
+    slip.addEventListener('change', function () {
+      var wrap = slip.closest('.slip-up');
+      var badge = document.getElementById('slipPicked');
+      if (slip.files && slip.files.length > 0) {
+        badge.textContent = slip.files[0].name + ' (' + Math.round(slip.files[0].size / 1024) + ' KB)';
+        wrap.classList.add('has-file');
+      } else {
+        badge.textContent = 'কোনো ফাইল নির্বাচন করা হয়নি';
+        wrap.classList.remove('has-file');
+      }
     });
   }
 
