@@ -139,7 +139,7 @@ $search_q = isset($_GET['q']) ? trim($_GET['q']) : '';
 
         /* ---------- top bar ---------- */
         .topbar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:60}
-        .topbar-in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:9px;padding:8px 12px}
+        .topbar-in{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:9px;padding:8px 12px}
         .brand{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
         .brand img{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--green);flex:0 0 38px;background:#fff}
         .brand b{display:block;font-size:19px;font-weight:700;color:var(--green);line-height:1.1;letter-spacing:-.3px}
@@ -160,37 +160,39 @@ $search_q = isset($_GET['q']) ? trim($_GET['q']) : '';
 
         /* ---------- breadcrumb ---------- */
         .crumb{background:var(--green);color:#fff}
-        .crumb-in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:9px;padding:10px 14px}
+        .crumb-in{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:9px;padding:10px 14px}
         .crumb-in .back{font-size:16px;line-height:1}
         .crumb-in b{font-size:17px;font-weight:700}
         .crumb-chip{margin-left:auto;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.5);color:#fff;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:9px;display:flex;align-items:center;gap:5px}
 
         /* ---------- shell ---------- */
-        .shell{max-width:760px;margin:0 auto;padding:11px 12px 6px}
+        .shell{max-width:1080px;margin:0 auto;padding:11px 12px 6px}
 
         /* ---------- hero ---------- */
-        .hero{position:relative;overflow:hidden;border-radius:var(--radius);color:#fff;padding:14px;display:flex;align-items:center;gap:10px;background:linear-gradient(120deg,#0E8C4B 0%,#0B7A3B 52%,#075F2D 100%);box-shadow:0 6px 18px rgba(11,122,59,.16)}
-        .hero:after{content:"";position:absolute;right:-40px;top:-52px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.08)}
+        .hero{position:relative;overflow:hidden;border-radius:16px;color:#fff;padding:13px;display:flex;align-items:center;gap:12px;background:linear-gradient(115deg,#0E8C4B 0%,#0B7A3B 48%,#096B35 100%);box-shadow:0 8px 20px rgba(11,122,59,.16);min-height:96px}
+        .hero .memorial{position:absolute;right:-6px;bottom:0;height:96%;width:auto;opacity:.34;pointer-events:none;z-index:0}
+        .hero .memorial svg{height:100%;width:auto;display:block}
         .hero-txt{flex:1;min-width:0;position:relative;z-index:1}
-        .hero h1{font-size:17px;font-weight:700;line-height:1.3}
-        .hero p{font-size:11.3px;opacity:.94;margin-top:3px;line-height:1.45}
+        .hero h1{font-size:16.5px;font-weight:700;line-height:1.28;letter-spacing:-.2px}
+        .hero p{font-size:11.2px;opacity:.95;margin-top:3px;line-height:1.45}
         .hero-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
-        .hero-chips span{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.34);border-radius:20px;padding:2px 8px;font-size:9.6px;font-weight:600}
-        .hero-chips i{font-size:9px}
-        .hero-art{flex:0 0 96px;position:relative;z-index:1}
-        .id-card{background:linear-gradient(160deg,#fff,#F1F7F3);color:#123225;border-radius:9px;padding:7px;box-shadow:0 6px 14px rgba(0,0,0,.18);transform:rotate(-4deg)}
-        .id-card .ic-top{display:flex;align-items:center;gap:4px;margin-bottom:5px}
-        .id-card .ic-flag{width:14px;height:9px;border-radius:2px;background:#006A4E;position:relative;flex:0 0 14px}
-        .id-card .ic-flag:after{content:"";position:absolute;left:4px;top:2.5px;width:4.5px;height:4.5px;border-radius:50%;background:#F42A41}
-        .id-card .ic-top b{font-size:6.2px;line-height:1.15;font-weight:700}
-        .id-card .ic-body{display:flex;gap:4px}
-        .id-card .ic-photo{width:24px;height:29px;border-radius:3px;background:#DCE7E1;flex:0 0 24px;position:relative;overflow:hidden}
-        .id-card .ic-photo:after{content:"";position:absolute;left:6px;top:6px;width:12px;height:12px;border-radius:50%;background:#B9CEC3}
-        .id-card .ic-lines{flex:1;display:flex;flex-direction:column;gap:2.5px;justify-content:center}
-        .id-card .ic-lines i{display:block;height:2.6px;border-radius:2px;background:#D3E2D9}
+        .hero-chips span{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.36);border-radius:20px;padding:2px 8px;font-size:9.5px;font-weight:600;white-space:nowrap}
+        .hero-chips i{font-size:8.5px}
+        .hero-art{flex:0 0 84px;position:relative;z-index:1}
+        .id-card{background:linear-gradient(160deg,#FFFFFF,#EDF6F1);color:#123225;border-radius:8px;padding:6px;box-shadow:0 8px 16px rgba(0,0,0,.22);transform:rotate(-5deg)}
+        .id-card .ic-top{display:flex;align-items:center;gap:3px;margin-bottom:4px}
+        .id-card .ic-flag{width:12px;height:8px;border-radius:2px;background:#006A4E;position:relative;flex:0 0 12px}
+        .id-card .ic-flag:after{content:"";position:absolute;left:3.5px;top:2px;width:4px;height:4px;border-radius:50%;background:#F42A41}
+        .id-card .ic-top b{font-size:5.6px;line-height:1.15;font-weight:700;color:#0B5C31}
+        .id-card .ic-body{display:flex;gap:3.5px}
+        .id-card .ic-photo{width:21px;height:26px;border-radius:3px;background:#DCE7E1;flex:0 0 21px;position:relative;overflow:hidden}
+        .id-card .ic-photo:after{content:"";position:absolute;left:5px;top:5px;width:11px;height:11px;border-radius:50%;background:#B9CEC3}
+        .id-card .ic-photo:before{content:"";position:absolute;left:2px;bottom:-4px;width:17px;height:12px;border-radius:50% 50% 0 0;background:#B9CEC3}
+        .id-card .ic-lines{flex:1;display:flex;flex-direction:column;gap:2.2px;justify-content:center}
+        .id-card .ic-lines i{display:block;height:2.4px;border-radius:2px;background:#D3E2D9}
         .id-card .ic-lines i:nth-child(2){width:78%}
         .id-card .ic-lines i:nth-child(3){width:60%}
-        .id-card .ic-bottom{margin-top:5px;height:2.6px;border-radius:2px;background:#E3EDE7}
+        .id-card .ic-bottom{margin-top:4px;height:2.4px;border-radius:2px;background:#E3EDE7}
 
         /* ---------- search ---------- */
         .search-row{display:flex;align-items:center;gap:7px;margin-top:11px}
@@ -217,6 +219,25 @@ $search_q = isset($_GET['q']) ? trim($_GET['q']) : '';
         .cat-block{margin-bottom:14px}
         .cat-title{display:none}
         .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+        @media (min-width:720px){
+            .grid{grid-template-columns:repeat(3,1fr);gap:11px}
+            .hero{padding:18px 20px;min-height:118px}
+            .hero h1{font-size:20px}
+            .hero p{font-size:12.5px;max-width:520px}
+            .hero-art{flex:0 0 104px}
+            .hero .memorial{height:104%;right:4px;opacity:.4}
+            .sc-ic{width:36px;height:36px;flex:0 0 36px;font-size:15px}
+            .sc-txt h4{font-size:13.5px}
+            .sc-txt p{font-size:10.8px}
+            .price{font-size:11.5px;padding:4px 10px}
+            .order-btn{font-size:11px;padding:6px 12px}
+            .sec-head h2{font-size:16px}
+            .search input{font-size:13.5px}
+        }
+        @media (min-width:1040px){
+            .grid{grid-template-columns:repeat(4,1fr)}
+            .shell{padding:16px 18px 8px}
+        }
         .service-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px;display:flex;flex-direction:column;justify-content:space-between;gap:9px;transition:.15s}
         .service-card:hover{border-color:#B7D9C4;box-shadow:0 5px 14px rgba(11,122,59,.08)}
         .sc-top{display:flex;gap:7px;align-items:flex-start}
@@ -241,7 +262,7 @@ $search_q = isset($_GET['q']) ? trim($_GET['q']) : '';
 
         /* ---------- bottom nav ---------- */
         .bnav{position:fixed;left:0;right:0;bottom:0;z-index:70;background:#fff;border-top:1px solid var(--line);box-shadow:0 -4px 16px rgba(0,0,0,.05)}
-        .bnav-in{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-around;padding:7px 6px 9px;position:relative}
+        .bnav-in{max-width:1080px;margin:0 auto;display:flex;align-items:center;justify-content:space-around;padding:7px 6px 9px;position:relative}
         .bnav a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;font-weight:600;color:#7C8F84;flex:1}
         .bnav a i{font-size:15px}
         .bnav a.is-on{color:var(--green-d);font-weight:700}
@@ -300,15 +321,20 @@ $search_q = isset($_GET['q']) ? trim($_GET['q']) : '';
 
     <!-- ================= hero ================= -->
     <section class="hero">
-        <div class="hero-txt">
-            <h1 id="heroTitle"><?php echo htmlspecialchars($hero_h1); ?></h1>
-            <p id="heroSub"><?php echo htmlspecialchars($hero_sub); ?></p>
-            <div class="hero-chips">
-                <span><i class="fa-solid fa-circle-check"></i> সঠিক সেবা</span>
-                <span><i class="fa-solid fa-circle-check"></i> নির্ভরযোগ্য লেনদেন</span>
-                <span><i class="fa-solid fa-circle-check"></i> বিশ্বস্ত সেবা</span>
-            </div>
-        </div>
+        <span class="memorial" aria-hidden="true">
+            <svg viewBox="0 0 140 104" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g fill="rgba(255,255,255,.62)">
+                    <polygon points="14,92 22,44 30,92"/>
+                    <polygon points="33,92 43,30 53,92"/>
+                    <polygon points="56,92 68,18 80,92"/>
+                    <polygon points="83,92 93,30 103,92"/>
+                    <polygon points="106,92 114,44 122,92"/>
+                </g>
+                <rect x="8" y="92" width="124" height="4" rx="2" fill="rgba(255,255,255,.55)"/>
+                <rect x="18" y="97" width="104" height="3" rx="1.5" fill="rgba(255,255,255,.32)"/>
+            </svg>
+        </span>
+
         <div class="hero-art" aria-hidden="true">
             <div class="id-card">
                 <div class="ic-top">
@@ -320,6 +346,16 @@ $search_q = isset($_GET['q']) ? trim($_GET['q']) : '';
                     <span class="ic-lines"><i></i><i></i><i></i></span>
                 </div>
                 <div class="ic-bottom"></div>
+            </div>
+        </div>
+
+        <div class="hero-txt">
+            <h1 id="heroTitle"><?php echo htmlspecialchars($hero_h1); ?></h1>
+            <p id="heroSub"><?php echo htmlspecialchars($hero_sub); ?></p>
+            <div class="hero-chips">
+                <span><i class="fa-solid fa-circle-check"></i> সঠিক সেবা</span>
+                <span><i class="fa-solid fa-circle-check"></i> নির্ভরযোগ্য লেনদেন</span>
+                <span><i class="fa-solid fa-circle-check"></i> বিশ্বস্ত সেবা</span>
             </div>
         </div>
     </section>
@@ -383,7 +419,7 @@ $search_q = isset($_GET['q']) ? trim($_GET['q']) : '';
                                 </div>
                                 <div class="sc-bottom">
                                     <span class="price"><i class="fa-solid fa-bangladeshi-taka-sign"></i> <?php echo (int)$srv['price']; ?></span>
-                                    <a href="<?php echo htmlspecialchars($srv_link); ?>" class="order-btn">অর্ডার করুন <i class="fa-solid fa-arrow-right"></i></a>
+                                    <a href="<?php echo htmlspecialchars($srv_link); ?>" class="order-btn"><i class="fa-solid fa-cart-shopping"></i> অর্ডার করুন</a>
                                 </div>
                             </div>
                         <?php endforeach; ?>
