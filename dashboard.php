@@ -376,7 +376,7 @@ if (is_dir($slider_path)) {
             <!-- 1. NID Seba -->
             <div class="category-box">
                 <div>
-                    <div class="category-header bg-[#107C41]">
+                    <div class="category-header bg-[#107C41] cursor-pointer" onclick="location.href='services.php?cat=NID%20%E0%A6%B8%E0%A7%87%E0%A6%AC%E0%A6%BE'">
                         <span class="flex items-center gap-1.5 truncate">
                             <i class="fa-solid fa-id-card text-xs"></i> NID সেবা
                         </span>
@@ -391,14 +391,14 @@ if (is_dir($slider_path)) {
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
-                    <a href="services.php" class="text-[11px] font-bold text-[#107C41] hover:underline">আরও দেখুন...</a>
+                    <a href="services.php?cat=NID%20%E0%A6%B8%E0%A7%87%E0%A6%AC%E0%A6%BE" class="text-[11px] font-bold text-[#107C41] hover:underline">আরও দেখুন...</a>
                 </div>
             </div>
 
             <!-- 2. Passport Seba -->
             <div class="category-box">
                 <div>
-                    <div class="category-header bg-[#0078D4]">
+                    <div class="category-header bg-[#0078D4] cursor-pointer" onclick="location.href='services.php?cat=%E0%A6%AA%E0%A6%BE%E0%A6%B8%E0%A6%AA%E0%A7%8B%E0%A6%B0%E0%A7%8D%E0%A6%9F%20%E0%A6%B8%E0%A7%87%E0%A6%AC%E0%A6%BE'">
                         <span class="flex items-center gap-1.5 truncate">
                             <i class="fa-solid fa-passport text-xs"></i> পাসপোর্ট সেবা
                         </span>
@@ -413,14 +413,14 @@ if (is_dir($slider_path)) {
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
-                    <a href="services.php" class="text-[11px] font-bold text-[#0078D4] hover:underline">আরও দেখুন...</a>
+                    <a href="services.php?cat=%E0%A6%AA%E0%A6%BE%E0%A6%B8%E0%A6%AA%E0%A7%8B%E0%A6%B0%E0%A7%8D%E0%A6%9F%20%E0%A6%B8%E0%A7%87%E0%A6%AC%E0%A6%BE" class="text-[11px] font-bold text-[#0078D4] hover:underline">আরও দেখুন...</a>
                 </div>
             </div>
 
             <!-- 3. Jonmo Nibondhon Seba -->
             <div class="category-box">
                 <div>
-                    <div class="category-header bg-[#7B1FA2]">
+                    <div class="category-header bg-[#7B1FA2] cursor-pointer" onclick="location.href='services.php?cat=%E0%A6%9C%E0%A6%A8%E0%A7%8D%E0%A6%AE%20%E0%A6%A8%E0%A6%BF%E0%A6%AC%E0%A6%A8%E0%A7%8D%E0%A6%A7%E0%A6%A8%20%E0%A6%B8%E0%A7%87%E0%A6%AC%E0%A6%BE'">
                         <span class="flex items-center gap-1.5 truncate">
                             <i class="fa-solid fa-file-lines text-xs"></i> জন্ম নিবন্ধন সেবা
                         </span>
@@ -435,14 +435,14 @@ if (is_dir($slider_path)) {
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
-                    <a href="services.php" class="text-[11px] font-bold text-[#7B1FA2] hover:underline">আরও দেখুন...</a>
+                    <a href="services.php?cat=%E0%A6%9C%E0%A6%A8%E0%A7%8D%E0%A6%AE%20%E0%A6%A8%E0%A6%BF%E0%A6%AC%E0%A6%A8%E0%A7%8D%E0%A6%A7%E0%A6%A8%20%E0%A6%B8%E0%A7%87%E0%A6%AC%E0%A6%BE" class="text-[11px] font-bold text-[#7B1FA2] hover:underline">আরও দেখুন...</a>
                 </div>
             </div>
 
             <!-- 4. bKash Nagad Rocket -->
             <div class="category-box">
                 <div>
-                    <div class="category-header bg-[#D81B60]">
+                    <div class="category-header bg-[#D81B60] cursor-pointer" onclick="location.href='services.php?cat=%E0%A6%AC%E0%A6%BF%E0%A6%95%E0%A6%BE%E0%A6%B6%20%E0%A6%A8%E0%A6%97%E0%A6%A6%20%E0%A6%B0%E0%A6%95%E0%A7%87%E0%A6%9F'">
                         <span class="flex items-center gap-1.5 truncate">
                             <i class="fa-solid fa-mobile-retro text-xs"></i> বিকাশ-নগদ-রকেট
                         </span>
@@ -457,14 +457,14 @@ if (is_dir($slider_path)) {
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
-                    <a href="mfs_service.php" class="text-[11px] font-bold text-[#D81B60] hover:underline">আরও দেখুন...</a>
+                    <a href="services.php?cat=%E0%A6%AC%E0%A6%BF%E0%A6%95%E0%A6%BE%E0%A6%B6%20%E0%A6%A8%E0%A6%97%E0%A6%A6%20%E0%A6%B0%E0%A6%95%E0%A7%87%E0%A6%9F" class="text-[11px] font-bold text-[#D81B60] hover:underline">আরও দেখুন...</a>
                 </div>
             </div>
 
             <!-- 5. Sim Biometric -->
             <div class="category-box">
                 <div>
-                    <div class="category-header bg-[#E65100]">
+                    <div class="category-header bg-[#E65100] cursor-pointer" onclick="location.href='services.php?cat=%E0%A6%B8%E0%A6%BF%E0%A6%AE%20%E0%A6%AC%E0%A6%BE%E0%A6%AF%E0%A6%BC%E0%A7%8B%E0%A6%AE%E0%A7%87%E0%A6%9F%E0%A7%8D%E0%A6%B0%E0%A6%BF%E0%A6%95'">
                         <span class="flex items-center gap-1.5 truncate">
                             <i class="fa-solid fa-sim-card text-xs"></i> সিম বায়োমেট্রিক
                         </span>
@@ -479,14 +479,14 @@ if (is_dir($slider_path)) {
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
-                    <a href="numbertobio.php" class="text-[11px] font-bold text-[#E65100] hover:underline">আরও দেখুন...</a>
+                    <a href="services.php?cat=%E0%A6%B8%E0%A6%BF%E0%A6%AE%20%E0%A6%AC%E0%A6%BE%E0%A6%AF%E0%A6%BC%E0%A7%8B%E0%A6%AE%E0%A7%87%E0%A6%9F%E0%A7%8D%E0%A6%B0%E0%A6%BF%E0%A6%95" class="text-[11px] font-bold text-[#E65100] hover:underline">আরও দেখুন...</a>
                 </div>
             </div>
 
             <!-- 6. Location Track -->
             <div class="category-box">
                 <div>
-                    <div class="category-header bg-[#00897B]">
+                    <div class="category-header bg-[#00897B] cursor-pointer" onclick="location.href='services.php?cat=%E0%A6%B2%E0%A7%8B%E0%A6%95%E0%A7%87%E0%A6%B6%E0%A6%A8%20%E0%A6%9F%E0%A7%8D%E0%A6%B0%E0%A7%8D%E0%A6%AF%E0%A6%BE%E0%A6%95'">
                         <span class="flex items-center gap-1.5 truncate">
                             <i class="fa-solid fa-location-dot text-xs"></i> লোকেশন ট্র্যাক
                         </span>
@@ -501,14 +501,14 @@ if (is_dir($slider_path)) {
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
-                    <a href="location_service.php" class="text-[11px] font-bold text-[#00897B] hover:underline">আরও দেখুন...</a>
+                    <a href="services.php?cat=%E0%A6%B2%E0%A7%8B%E0%A6%95%E0%A7%87%E0%A6%B6%E0%A6%A8%20%E0%A6%9F%E0%A7%8D%E0%A6%B0%E0%A7%8D%E0%A6%AF%E0%A6%BE%E0%A6%95" class="text-[11px] font-bold text-[#00897B] hover:underline">আরও দেখুন...</a>
                 </div>
             </div>
 
             <!-- 7. TIN Certificate -->
             <div class="category-box">
                 <div>
-                    <div class="category-header bg-[#F57F17]">
+                    <div class="category-header bg-[#F57F17] cursor-pointer" onclick="location.href='services.php?cat=%E0%A6%9F%E0%A6%BF%E0%A6%A8%20%E0%A6%B8%E0%A6%BE%E0%A6%B0%E0%A7%8D%E0%A6%9F%E0%A6%BF%E0%A6%AB%E0%A6%BF%E0%A6%95%E0%A7%87%E0%A6%9F'">
                         <span class="flex items-center gap-1.5 truncate">
                             <i class="fa-solid fa-file-invoice text-xs"></i> টিন সার্টিফিকেট
                         </span>
@@ -523,14 +523,14 @@ if (is_dir($slider_path)) {
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
-                    <a href="auto_tin.php" class="text-[11px] font-bold text-[#F57F17] hover:underline">আরও দেখুন...</a>
+                    <a href="services.php?cat=%E0%A6%9F%E0%A6%BF%E0%A6%A8%20%E0%A6%B8%E0%A6%BE%E0%A6%B0%E0%A7%8D%E0%A6%9F%E0%A6%BF%E0%A6%AB%E0%A6%BF%E0%A6%95%E0%A7%87%E0%A6%9F" class="text-[11px] font-bold text-[#F57F17] hover:underline">আরও দেখুন...</a>
                 </div>
             </div>
 
             <!-- 8. Trade License -->
             <div class="category-box">
                 <div>
-                    <div class="category-header bg-[#5E35B1]">
+                    <div class="category-header bg-[#5E35B1] cursor-pointer" onclick="location.href='services.php?cat=%E0%A6%9F%E0%A7%8D%E0%A6%B0%E0%A7%87%E0%A6%A1%20%E0%A6%B2%E0%A6%BE%E0%A6%87%E0%A6%B8%E0%A7%87%E0%A6%A8%E0%A7%8D%E0%A6%B8'">
                         <span class="flex items-center gap-1.5 truncate">
                             <i class="fa-solid fa-store text-xs"></i> ট্রেড লাইসেন্স
                         </span>
@@ -545,14 +545,14 @@ if (is_dir($slider_path)) {
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
-                    <a href="services.php" class="text-[11px] font-bold text-[#5E35B1] hover:underline">আরও দেখুন...</a>
+                    <a href="services.php?cat=%E0%A6%9F%E0%A7%8D%E0%A6%B0%E0%A7%87%E0%A6%A1%20%E0%A6%B2%E0%A6%BE%E0%A6%87%E0%A6%B8%E0%A7%87%E0%A6%A8%E0%A7%8D%E0%A6%B8" class="text-[11px] font-bold text-[#5E35B1] hover:underline">আরও দেখুন...</a>
                 </div>
             </div>
 
             <!-- 9. Bhumi Seba -->
             <div class="category-box">
                 <div>
-                    <div class="category-header bg-[#0288D1]">
+                    <div class="category-header bg-[#0288D1] cursor-pointer" onclick="location.href='services.php?cat=%E0%A6%AD%E0%A7%82%E0%A6%AE%E0%A6%BF%20%E0%A6%B8%E0%A7%87%E0%A6%AC%E0%A6%BE'">
                         <span class="flex items-center gap-1.5 truncate">
                             <i class="fa-solid fa-mountain-sun text-xs"></i> ভূমি সেবা
                         </span>
@@ -567,14 +567,14 @@ if (is_dir($slider_path)) {
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
-                    <a href="services.php" class="text-[11px] font-bold text-[#0288D1] hover:underline">আরও দেখুন...</a>
+                    <a href="services.php?cat=%E0%A6%AD%E0%A7%82%E0%A6%AE%E0%A6%BF%20%E0%A6%B8%E0%A7%87%E0%A6%AC%E0%A6%BE" class="text-[11px] font-bold text-[#0288D1] hover:underline">আরও দেখুন...</a>
                 </div>
             </div>
 
             <!-- 10. Abedon Seba -->
             <div class="category-box">
                 <div>
-                    <div class="category-header bg-[#C2185B]">
+                    <div class="category-header bg-[#C2185B] cursor-pointer" onclick="location.href='services.php?cat=%E0%A6%86%E0%A6%AC%E0%A7%87%E0%A6%A6%E0%A6%A8%20%E0%A6%B8%E0%A7%87%E0%A6%AC%E0%A6%BE'">
                         <span class="flex items-center gap-1.5 truncate">
                             <i class="fa-solid fa-file-signature text-xs"></i> আবেদন সেবা
                         </span>
@@ -589,7 +589,7 @@ if (is_dir($slider_path)) {
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
-                    <a href="services.php" class="text-[11px] font-bold text-[#C2185B] hover:underline">আরও দেখুন...</a>
+                    <a href="services.php?cat=%E0%A6%86%E0%A6%AC%E0%A7%87%E0%A6%A6%E0%A6%A8%20%E0%A6%B8%E0%A7%87%E0%A6%AC%E0%A6%BE" class="text-[11px] font-bold text-[#C2185B] hover:underline">আরও দেখুন...</a>
                 </div>
             </div>
 
