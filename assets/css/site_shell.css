@@ -1,10 +1,8 @@
-@font-face { font-family: 'SokolBangla'; src: url('/fonts/Bangla.ttf') format('truetype'); font-style: normal; font-weight: 100 900; font-display: swap; }
-@font-face { font-family: 'Nikosh'; src: url('/fonts/Bangla.ttf') format('truetype'); font-style: normal; font-weight: 100 900; font-display: swap; }
 /* Namespaced: works with legacy Bootstrap and newer Tailwind pages alike. */
 body:not(.ss-public-page) { padding-bottom: calc(90px + env(safe-area-inset-bottom)) !important; }
 body.ss-public-page { padding-bottom: env(safe-area-inset-bottom, 0px) !important; }
-[data-site-shell], [data-site-shell] * { box-sizing: border-box; font-family: 'SokolBangla', Arial, sans-serif !important; }
-[data-site-shell] { font-family: 'SokolBangla', Arial, sans-serif; font-size: 14px; line-height: 1.45; letter-spacing: normal; text-align: left; }
+[data-site-shell], [data-site-shell] * { box-sizing: border-box; }
+[data-site-shell] { font-family: var(--ss-font-family); font-size: 14px; line-height: 1.45; letter-spacing: normal; text-align: left; }
 [data-site-shell] a { text-decoration: none; }
 [data-site-shell] button { cursor: pointer; font: inherit; margin: 0; }
 [data-site-shell] button:focus-visible, [data-site-shell] a:focus-visible { outline: 3px solid #0ea5e9; outline-offset: 3px; }

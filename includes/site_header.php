@@ -16,7 +16,8 @@ if ($ss_logged_in && $ss_balance === null) {
     }
 }
 ?>
-<link rel="stylesheet" href="/assets/css/site_shell.css">
+<link rel="stylesheet" href="/assets/css/site_typography.css?v=1">
+<link rel="stylesheet" href="/assets/css/site_shell.css?v=2">
 <header class="ss-header" data-site-shell>
     <div class="ss-header-inner">
         <a class="ss-brand" href="<?php echo $ss_logged_in ? '/dashboard.php' : '/index.php'; ?>">

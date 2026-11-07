@@ -1,0 +1,40 @@
+/* Same local Bangla font already used by the public landing page and header.
+   Self-hosted so the customer UI does not depend on an external font CDN. */
+@font-face {
+    font-family: 'SokolBangla';
+    src: url('/fonts/Bangla.ttf') format('truetype');
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+}
+/* Preserve the existing alias for pages/print styles that refer to Nikosh. */
+@font-face {
+    font-family: 'Nikosh';
+    src: url('/fonts/Bangla.ttf') format('truetype');
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+}
+:root { --ss-font-family: 'SokolBangla', Arial, sans-serif; }
+
+/* Customer screen UI only. Document generators do not load this stylesheet;
+   receipt print styles retain their own typography. Do not reset font sizes,
+   weights, line heights or the dedicated fonts used to draw icon glyphs. */
+@media screen {
+    html body,
+    body :not(
+        .fa, .fas, .far, .fal, .fad, .fab, .fat, .fass, .fasr, .fasl,
+        [class^="fa-"], [class*=" fa-"],
+        .mdi, [class^="mdi-"], [class*=" mdi-"],
+        .ti, [class^="ti-"], [class*=" ti-"],
+        .glyphicon, [class^="glyphicon-"], [class*=" glyphicon-"],
+        .feather, [data-feather], [class^="icon-"], [class*=" icon-"],
+        .typcn, [class^="typcn-"], [class*=" typcn-"],
+        .material-icons, .material-icons-outlined, .material-icons-round,
+        .material-icons-sharp, .material-icons-two-tone,
+        .material-symbols-outlined, .material-symbols-rounded, .material-symbols-sharp,
+        svg, svg *
+    ) {
+        font-family: var(--ss-font-family) !important;
+    }
+}
