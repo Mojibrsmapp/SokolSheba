@@ -2,23 +2,16 @@
 session_start();
 include_once("includes/configuration.php");
 
-$settings_data = [];
-$q_set = $conn->query("SELECT setting_key, setting_value FROM site_settings");
-if ($q_set) {
-    while ($rs = $q_set->fetch_assoc()) {
-        $settings_data[$rs['setting_key']] = $rs['setting_value'];
-    }
-}
-$support_num = !empty($settings_data['support_whatsapp_num']) ? $settings_data['support_whatsapp_num'] : '01964706489';
-$whatsapp_link = !empty($settings_data['whatsapp_group']) ? $settings_data['whatsapp_group'] : 'https://wa.me/88' . preg_replace('/[^0-9]/', '', $support_num);
-$telegram_link = !empty($settings_data['telegram_link']) ? $settings_data['telegram_link'] : 'https://t.me/Sheba_kit';
+$support_num = soko_brand('support_whatsapp_num') ?: '01849207118';
+$whatsapp_link = soko_whatsapp_url();
+$telegram_link = soko_safe_url(soko_brand('telegram_link') ?: 'https://t.me/Sheba_kit');
 ?>
 <!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>কাস্টমার সার্ভিস ও হেল্প - সকল সেবা</title>
+    <title>কাস্টমার সার্ভিস ও হেল্প - <?php echo soko_e(soko_brand('site_name')); ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Nikosh&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -30,12 +23,7 @@ $telegram_link = !empty($settings_data['telegram_link']) ? $settings_data['teleg
 </head>
 <body class="pb-16">
 
-    <header class="bg-white sticky top-0 z-50 border-b border-slate-200 px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <a href="dashboard.php" class="text-slate-700 text-lg"><i class="fa-solid fa-arrow-left"></i></a>
-            <h1 class="text-base font-extrabold text-slate-800">কাস্টমার সার্ভিস</h1>
-        </div>
-    </header>
+    <?php include __DIR__ . '/includes/site_header.php'; ?>
 
     <main class="max-w-xl mx-auto px-4 py-6 space-y-6">
         <div class="text-center space-y-2">
@@ -83,5 +71,6 @@ $telegram_link = !empty($settings_data['telegram_link']) ? $settings_data['teleg
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<?php include __DIR__ . '/includes/site_footer.php'; ?>
 </body>
 </html>

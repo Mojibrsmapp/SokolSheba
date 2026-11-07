@@ -4,7 +4,7 @@ include_once("includes/configuration.php");
 
 if (isset($_SESSION['user_token'])) {
     $token_user = $_SESSION['user_token'];
-    
+
     $stmt = $conn->prepare("SELECT id, balance, email, name, token, mobile FROM users WHERE token = ?");
     if ($stmt) {
         $stmt->bind_param("s", $token_user);
@@ -175,14 +175,14 @@ if ($h_stmt) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>( Location ) লোকেশন ট্র্যাকিং সার্ভিস - Sokol Kaj</title>
-    
+
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" href="/assets/logo.jpg">
-    
+    <link rel="shortcut icon" href="<?php echo soko_e(soko_brand('site_favicon')); ?>">
+
     <style>
         * {
             margin: 0;
@@ -451,31 +451,12 @@ if ($h_stmt) {
 </head>
 <body>
 
-    <header class="top-navbar">
-        <div class="flex items-center gap-3">
-            <button type="button" id="openDrawerBtn" class="text-slate-700 text-xl px-1 hover:text-indigo-600">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-            <a href="dashboard.php" class="flex items-center">
-                <img src="/assets/logo_nav.png" alt="Sokol Kaj Logo" class="header-logo">
-            </a>
-        </div>
-
-        <div class="flex items-center gap-2 sm:gap-3">
-            <div class="balance-badge-top" onclick="location.href='recharge.php'">
-                <i class="fa-solid fa-wallet text-xs"></i>
-                <span id="headerBal"><?php echo htmlspecialchars($balance); ?> tk</span>
-            </div>
-            <a href="profile.php">
-                <img src="/assets/logo.jpg" alt="Profile" class="user-avatar-top">
-            </a>
-        </div>
-    </header>
+    <?php include __DIR__ . '/includes/site_header.php'; ?>
 
     <div class="page-container">
 
         <div class="order-card">
-            
+
             <div class="flex items-center justify-between border-b pb-3 mb-4">
                 <a href="dashboard.php" class="text-xs font-bold text-slate-500 hover:text-blue-600 flex items-center gap-1.5 transition">
                     <i class="fa-solid fa-arrow-left"></i> ব্যাকে যান
@@ -498,9 +479,9 @@ if ($h_stmt) {
                          data-price="<?php echo intval($srv_opt['price']); ?>"
                          data-name="<?php echo htmlspecialchars($srv_opt['service_name']); ?>"
                          onclick="selectPackage(this, <?php echo $srv_opt['id']; ?>)">
-                        
+
                         <div class="radio-circle-box <?php echo $is_selected ? 'radio-circle-teal' : 'radio-circle-default'; ?>"></div>
-                        
+
                         <div class="flex-1 text-sm font-bold <?php echo $is_selected ? 'text-teal-600' : 'text-slate-800'; ?> radio-label">
                             <?php echo htmlspecialchars($srv_opt['service_name']); ?> (<?php echo intval($srv_opt['price']); ?>tk)
                             <?php if (!$is_active): ?>
@@ -595,34 +576,6 @@ if ($h_stmt) {
 
     </div>
 
-    <div class="fab-group">
-        <a href="<?php echo htmlspecialchars(get_site_setting($conn, "whatsapp_group", "#")); ?>" target="_blank" class="fab-join-btn">
-            <i class="fa-brands fa-whatsapp text-lg"></i>
-            <span>Join Group</span>
-        </a>
-    </div>
-
-    <div class="drawer-overlay" id="drawerOverlay"></div>
-    <div class="drawer-menu" id="drawerMenu">
-        <div class="drawer-header">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-grid-2"></i>
-                <h5 class="font-bold text-sm">সকল সার্ভিস তালিকা</h5>
-            </div>
-            <button id="closeDrawerBtn" class="text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div class="drawer-body">
-            <a href="dashboard.php" class="drawer-link"><i class="fa-solid fa-house text-indigo-500"></i> হোম ড্যাশবোর্ড</a>
-            <a href="serverCopy.php" class="drawer-link"><i class="fa-solid fa-server text-sky-500"></i> অটো সার্ভার কপি</a>
-            <a href="numbertobio.php" class="drawer-link"><i class="fa-solid fa-sim-card text-rose-500"></i> নাম্বার টু বায়োমেট্রিক</a>
-            <a href="call_sms_list.php" class="drawer-link"><i class="fa-solid fa-phone-volume text-pink-500"></i> কল ও এসএমএস হিস্ট্রি</a>
-            <a href="location_service.php" class="drawer-link"><i class="fa-solid fa-location-dot text-indigo-500"></i> লোকেশন ট্র্যাকিং</a>
-            <a href="recharge.php" class="drawer-link"><i class="fa-solid fa-wallet text-emerald-600"></i> ব্যালেন্স রিচার্জ</a>
-            <a href="work_history.php" class="drawer-link"><i class="fa-solid fa-clock-rotate-left text-violet-500"></i> অর্ডার হিস্টোরি</a>
-            <a href="profile.php" class="drawer-link"><i class="fa-solid fa-user-gear text-slate-600"></i> আমার প্রোফাইল</a>
-            <a href="logout.php" class="drawer-link text-red-600"><i class="fa-solid fa-arrow-right-from-bracket text-red-600"></i> লগআউট</a>
-        </div>
-    </div>
 
     <script>
         let selectedServiceId = <?php echo $selected_id; ?>;
@@ -698,5 +651,6 @@ if ($h_stmt) {
         $(document).ready(function() {$('#targetPhoneNumber').focus();
         });
     </script>
+<?php include __DIR__ . '/includes/site_footer.php'; ?>
 </body>
 </html>

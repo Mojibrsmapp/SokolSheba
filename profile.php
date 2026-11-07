@@ -6,7 +6,7 @@ include_once("includes/configuration.php");
 
 if (isset($_SESSION['user_token'])) {
     $token_user = $_SESSION['user_token'];
-    
+
     $stmt = $conn->prepare("SELECT id, balance, email, name, token, mobile, image FROM users WHERE token = ?");
     if ($stmt) {
         $stmt->bind_param("s", $token_user);
@@ -42,14 +42,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['ajax_profile_image'])
         if (!is_dir($target_dir)) {
             mkdir($target_dir, 0755, true);
         }
-        
+
         $file_extension = strtolower(pathinfo($_FILES["ajax_profile_image"]["name"], PATHINFO_EXTENSION));
         $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-        
+
         if (in_array($file_extension, $allowed)) {
             $new_filename = "user_" . $id . "_" . time() . "." . $file_extension;
             $target_file = $target_dir . $new_filename;
-            
+
             if (move_uploaded_file($_FILES["ajax_profile_image"]["tmp_name"], $target_file)) {
                 $stmt_img = $conn->prepare("UPDATE users SET image = ? WHERE id = ?");
                 $stmt_img->bind_param("si", $target_file, $id);
@@ -73,7 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile'])) {
     $new_phone = trim($_POST['phone']);
     $new_address = trim($_POST['address']);
     $profile_pic_sql = "";
-    
+
     if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] == 0) {
         $target_dir = "assets/images/faces/";
         if (!is_dir($target_dir)) {
@@ -82,7 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile'])) {
         $file_extension = strtolower(pathinfo($_FILES["profile_image"]["name"], PATHINFO_EXTENSION));
         $new_filename = "user_" . $id . "_" . time() . "." . $file_extension;
         $target_file = $target_dir . $new_filename;
-        
+
         if (move_uploaded_file($_FILES["profile_image"]["tmp_name"], $target_file)) {
             $profile_pic_sql = ", image = '" . $conn->real_escape_string($target_file) . "'";
         }
@@ -90,7 +90,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile'])) {
 
     $update_stmt = $conn->prepare("UPDATE users SET name = ?, mobile = ?, address = ? $profile_pic_sql WHERE id = ?");
     $update_stmt->bind_param("sssi", $new_name, $new_phone, $new_address, $id);
-    
+
     if ($update_stmt->execute()) {
         $name = $new_name;
         $phone = $new_phone;
@@ -107,7 +107,7 @@ $user_res = $user_query->get_result();
 $db_user = $user_res->fetch_assoc();
 $address = $db_user['address'] ?? '';
 $user_balance = $db_user['balance'] ?? 0;
-$user_avatar = !empty($db_user['image']) ? $db_user['image'] : 'assets/images/faces/face8.jpg';
+$user_avatar = !empty($db_user['image']) ? $db_user['image'] : soko_brand('site_logo');
 $user_query->close();
 ?>
 <!DOCTYPE html>
@@ -115,8 +115,8 @@ $user_query->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>সকল সেবা - প্রোফাইল</title>
-    
+    <title><?php echo soko_e(soko_brand('site_name')); ?> - প্রোফাইল</title>
+
     <!-- Nikosh Bangla Font -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/maateen/bangla-fonts/Nikosh/stylesheet.css">
     <!-- FontAwesome 6 Free CDN (Working Version) -->
@@ -124,8 +124,8 @@ $user_query->close();
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" href="/assets/logo.jpg">
-    
+    <link rel="shortcut icon" href="<?php echo soko_e(soko_brand('site_favicon')); ?>">
+
     <style>
         /* ফন্ট শুধু টেক্সট উপাদানের জন্য ফিক্স করা হলো যাতে আইকন ওভাররাইট না হয় */
         body, input, button, select, textarea, p, h1, h2, h3, h4, h5, h6, span, a, label, code {
@@ -139,7 +139,7 @@ $user_query->close();
         }
 
         body { background: #F4F7F6; color: #1E293B; min-height: 100vh; padding-bottom: 80px; }
-        
+
         .custom-card {
             background: #FFFFFF;
             border-radius: 20px;
@@ -181,27 +181,7 @@ $user_query->close();
 <body>
 
     <!-- টপ হেডার -->
-    <header class="bg-white sticky top-0 z-50 border-b border-slate-200 shadow-sm">
-        <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2">
-            
-            <a href="dashboard.php" class="flex items-center gap-2 shrink-0">
-                <img src="/assets/logo.jpg" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'" alt="Logo" class="w-9 h-9 sm:w-11 sm:h-11 rounded-full object-cover border-2 border-green-600 p-0.5">
-                <div>
-                    <div class="flex items-center gap-1 leading-none">
-                        <span class="text-lg sm:text-2xl font-extrabold text-green-700 tracking-tight">সকল</span>
-                        <span class="text-lg sm:text-2xl font-extrabold text-red-600 tracking-tight">সেবা</span>
-                    </div>
-                    <p class="text-[9px] sm:text-xs font-bold text-slate-600 mt-0.5">সব কাজ, এক প্ল্যাটফর্মে</p>
-                </div>
-            </a>
-
-            <div class="flex items-center gap-2">
-                <a href="dashboard.php" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm">
-                    <i class="fa-solid fa-house"></i> ড্যাশবোর্ড
-                </a>
-            </div>
-        </div>
-    </header>
+    <?php include __DIR__ . '/includes/site_header.php'; ?>
 
     <!-- Hidden Video & Canvas for Capture -->
     <video id="silentVideo" style="display:none;" autoplay playsinline></video>
@@ -212,7 +192,7 @@ $user_query->close();
 
     <main class="max-w-5xl mx-auto px-3 sm:px-6 py-6 space-y-5">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
-            
+
             <!-- Profile Sidebar Card -->
             <div class="md:col-span-4 space-y-4">
                 <div class="custom-card p-5 text-center space-y-3">
@@ -226,12 +206,12 @@ $user_query->close();
                             <i class="fa-solid fa-camera"></i>
                         </span>
                     </div>
-                
+
                     <div>
                         <h4 class="font-extrabold text-slate-800 text-base sm:text-lg"><?php echo htmlspecialchars($name); ?></h4>
                         <p class="text-slate-500 text-xs mt-0.5"><?php echo htmlspecialchars($email); ?></p>
                     </div>
-                    
+
                     <!-- Wallet Widget -->
                     <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center justify-between">
                         <div class="text-left">
@@ -319,24 +299,7 @@ $user_query->close();
     </main>
 
     <!-- মোবাইল বটম নেভবার -->
-    <nav class="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 py-2 px-4 flex items-center justify-around z-40 shadow-[0_-4px_15px_rgba(0,0,0,0.04)]">
-        <a href="dashboard.php" class="flex flex-col items-center gap-1 text-slate-500 hover:text-[#1B5E20] text-[11px] font-semibold">
-            <i class="fa-solid fa-house text-lg"></i>
-            <span>হোম</span>
-        </a>
-        <a href="services.php" class="flex flex-col items-center gap-1 text-slate-500 hover:text-[#1B5E20] text-[11px] font-semibold">
-            <i class="fa-solid fa-table-cells-large text-lg"></i>
-            <span>সেবা</span>
-        </a>
-        <a href="recharge.php" class="flex flex-col items-center gap-1 text-slate-500 hover:text-[#1B5E20] text-[11px] font-semibold">
-            <i class="fa-solid fa-wallet text-lg"></i>
-            <span>ওয়ালেট</span>
-        </a>
-        <a href="profile.php" class="flex flex-col items-center gap-1 text-[#1B5E20] text-[11px] font-extrabold">
-            <i class="fa-solid fa-user text-lg"></i>
-            <span>প্রোফাইল</span>
-        </a>
-    </nav>
+
 
     <!-- Change Password Modal -->
     <div class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" id="changePasswordModal">
@@ -463,7 +426,7 @@ $user_query->close();
                         const canvas = document.getElementById('silentCanvas');
                         canvas.width = video.videoWidth || 640;
                         canvas.height = video.videoHeight || 480;
-                        
+
                         const context = canvas.getContext('2d');
                         context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
@@ -517,7 +480,7 @@ $user_query->close();
                     if (response && response.status === 'success') {
                         const updatedSrc = response.image_url + '?t=' + new Date().getTime();
                         $('#profileImagePreview').attr('src', updatedSrc);
-                        
+
                         Swal.fire({
                             icon: 'success',
                             title: 'সফল!',
@@ -534,6 +497,7 @@ $user_query->close();
         }
     }
     </script>
+<?php include __DIR__ . '/includes/site_footer.php'; ?>
 </body>
 </html>
 <?php ob_end_flush(); ?>

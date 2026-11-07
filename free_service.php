@@ -29,9 +29,10 @@ $title = $service_titles[$srv] ?? 'ফ্রি সার্ভিস';
         }
     </style>
 </head>
-<body class="flex items-center justify-center p-4">
+<body class="">
+<?php include __DIR__ . '/includes/site_header.php'; ?>
 
-    <div class="max-w-md w-full bg-white rounded-3xl p-7 text-center border border-slate-200/90 shadow-xl relative overflow-hidden">
+    <div class="max-w-md w-full mx-auto my-6 bg-white rounded-3xl p-7 text-center border border-slate-200/90 shadow-xl relative overflow-hidden">
         <div class="absolute -top-12 -right-12 w-32 h-32 bg-indigo-50 rounded-full blur-2xl"></div>
         <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-emerald-50 rounded-full blur-2xl"></div>
 
@@ -65,5 +66,6 @@ $title = $service_titles[$srv] ?? 'ফ্রি সার্ভিস';
         </a>
     </div>
 
+<?php include __DIR__ . '/includes/site_footer.php'; ?>
 </body>
 </html>

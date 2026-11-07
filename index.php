@@ -54,15 +54,15 @@ if (is_dir($slider_path)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>সকল সেবা - সব কাজ, এক প্ল্যাটফর্মে</title>
-    
+    <title><?php echo soko_e(soko_brand('site_name')); ?> - <?php echo soko_e(soko_brand('site_tagline')); ?></title>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/maateen/bangla-fonts/Nikosh/stylesheet.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" href="/assets/logo.jpg">
-    
+    <link rel="shortcut icon" href="<?php echo soko_e(soko_brand('site_favicon')); ?>">
+
     <style>
         * {
             margin: 0;
@@ -163,55 +163,7 @@ if (is_dir($slider_path)) {
 <body>
 
     <!-- ১. টপ হেডার -->
-    <header class="bg-white sticky top-0 z-50 border-b border-slate-200 shadow-sm w-full">
-        <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-2">
-            
-            <a href="index.php" class="flex items-center gap-2 shrink-0">
-                <img src="/assets/logo.jpg" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'" alt="Logo" class="w-9 h-9 sm:w-11 sm:h-11 rounded-full object-cover border-2 border-green-600 p-0.5">
-                <div>
-                    <div class="flex items-center gap-1 leading-none">
-                        <span class="text-lg sm:text-2xl font-extrabold text-green-700 tracking-tight">সকল</span>
-                        <span class="text-lg sm:text-2xl font-extrabold text-red-600 tracking-tight">সেবা</span>
-                    </div>
-                    <p class="text-[9px] sm:text-xs font-bold text-slate-600 mt-0.5">সব কাজ, এক প্ল্যাটফর্মে</p>
-                </div>
-            </a>
-
-            <div class="hidden md:flex flex-1 max-w-md mx-4">
-                <div class="relative w-full flex">
-                    <input type="text" id="landingSearch" placeholder="যে কোন সার্ভিস সার্চ করুন..." class="w-full pl-4 pr-10 py-2 rounded-l-full border border-slate-300 focus:outline-none focus:border-green-600 text-sm bg-slate-50">
-                    <button class="bg-[#2E6F40] hover:bg-green-800 text-white px-5 rounded-r-full transition flex items-center justify-center">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- রেসপন্সিভ বাটন গ্রুপ (মোবাইলে ওভারল্যাপ ফিক্সড) -->
-            <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-                <a href="login.php" class="bg-[#388E3C] hover:bg-green-800 text-white font-bold text-[11px] sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg transition shadow-sm flex items-center gap-1">
-                    <i class="fa-solid fa-right-to-bracket text-[10px] sm:text-xs"></i> <span>লগইন</span>
-                </a>
-
-                <a href="register_user.php" class="bg-[#D32F2F] hover:bg-red-700 text-white font-bold text-[11px] sm:text-sm px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg transition shadow-sm flex items-center gap-1">
-                    <i class="fa-solid fa-user-plus text-[10px] sm:text-xs"></i> <span>রেজিস্ট্রেশন</span>
-                </a>
-            </div>
-        </div>
-
-        <nav class="bg-[#2E6F40] text-white w-full overflow-x-auto scrollbar-none">
-            <div class="max-w-7xl mx-auto px-3 sm:px-6 flex items-center gap-1 text-xs font-semibold py-2 whitespace-nowrap">
-                <a href="index.php" class="px-3 py-1.5 rounded-lg bg-white/15 flex items-center gap-1.5"><i class="fa-solid fa-house"></i> হোম</a>
-                <a href="login.php" class="px-3 py-1.5 rounded-lg hover:bg-white/10 transition">NID সেবা</a>
-                <a href="login.php" class="px-3 py-1.5 rounded-lg hover:bg-white/10 transition">পাসপোর্ট সেবা</a>
-                <a href="login.php" class="px-3 py-1.5 rounded-lg hover:bg-white/10 transition">জন্ম নিবন্ধন</a>
-                <a href="login.php" class="px-3 py-1.5 rounded-lg hover:bg-white/10 transition">বিকাশ-নগদ-রকেট</a>
-                <a href="login.php" class="px-3 py-1.5 rounded-lg hover:bg-white/10 transition">সিম বায়োমেট্রিক</a>
-                <a href="login.php" class="px-3 py-1.5 rounded-lg hover:bg-white/10 transition">টিন সার্টিফিকেট</a>
-                <a href="login.php" class="px-3 py-1.5 rounded-lg hover:bg-white/10 transition">ভূমি সেবা</a>
-                <a href="login.php" class="px-3 py-1.5 rounded-lg hover:bg-white/10 transition">অন্যান্য</a>
-            </div>
-        </nav>
-    </header>
+    <?php include __DIR__ . '/includes/site_header.php'; ?>
 
     <!-- ২. মেইন ল্যান্ডিং কন্টেন্ট -->
     <main class="max-w-7xl mx-auto px-3 sm:px-6 py-4 space-y-4 w-full">
@@ -257,7 +209,7 @@ if (is_dir($slider_path)) {
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-                
+
                 <div class="cat-card" onclick="location.href='login.php'" style="cursor:pointer;">
                     <div>
                         <div class="cat-header-ribbon bg-gradient-to-r from-[#2E7D32] to-[#4CAF50]">
@@ -473,6 +425,7 @@ if (is_dir($slider_path)) {
             });
         });
     </script>
+<?php include __DIR__ . '/includes/site_footer.php'; ?>
 </body>
 </html>
 <?php ob_end_flush(); ?>

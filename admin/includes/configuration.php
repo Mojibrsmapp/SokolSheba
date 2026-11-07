@@ -24,3 +24,4 @@ if (!function_exists('get_site_setting')) {
         return $default;
     }
 }
+require_once dirname(__DIR__, 2) . "/includes/site_brand.php";

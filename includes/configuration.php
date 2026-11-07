@@ -40,4 +40,4 @@ if (!function_exists('get_site_setting')) {
         return $default;
     }
 }
-?>
+require_once __DIR__ . "/site_brand.php";

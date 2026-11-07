@@ -36,17 +36,17 @@ if ($settings_result) {
     }
 }
 
-mysqli_close($conn);
+
 ?>
 <!DOCTYPE html>
 <html lang="bn">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>লগইন - সকল সেবা</title>
+  <title>লগইন - <?php echo soko_e(soko_brand('site_name')); ?></title>
 
   <link rel="stylesheet" href="assets/vendors/css/vendor.bundle.base.css">
-  <link rel="shortcut icon" type="image/jpeg" href="assets/logo.jpg">
+  <link rel="shortcut icon" type="image/jpeg" href="<?php echo soko_e(soko_brand('site_favicon')); ?>">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -429,23 +429,25 @@ mysqli_close($conn);
       font-weight: 600 !important;
     }
   </style>
+<style>body{display:block!important;padding:0!important}.auth-container{margin:24px auto!important;padding:0 12px}</style>
 </head>
 <body>
+<?php include __DIR__ . '/includes/site_header.php'; ?>
 
   <div class="auth-container">
     <div class="login-card">
-      
+
       <div class="card-top-header">
         <div class="logo-avatar-wrap">
-          <img src="assets/logo.jpg" alt="সকল সেবা">
+          <img src="<?php echo soko_e(soko_brand('site_logo')); ?>" alt="সকল সেবা">
         </div>
-        <h2>সকল সেবা</h2>
-        <p>সব কাজ, এক প্ল্যাটফর্মে</p>
+        <h2><?php echo soko_e(soko_brand('site_name')); ?></h2>
+        <p><?php echo soko_e(soko_brand('site_tagline')); ?></p>
       </div>
 
       <div class="card-body-content">
         <form id="loginForm">
-          
+
           <div class="form-group-custom">
             <div class="input-wrapper">
               <div class="input-icon-box">
@@ -620,7 +622,7 @@ mysqli_close($conn);
           if (xhr.status == 200) {
             try {
               var response = JSON.parse(xhr.responseText);
-              
+
               if (response.status === 'success') {
                 loginBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>লগইন সফল!</span>';
                 Swal.fire({
@@ -683,5 +685,6 @@ mysqli_close($conn);
       xhr.send('email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password) + '&token=' + encodeURIComponent(token));
     });
   </script>
+<?php include __DIR__ . '/includes/site_footer.php'; ?>
 </body>
 </html>

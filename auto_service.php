@@ -138,12 +138,12 @@ $escape = function ($value) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>সকল সার্ভিস - Sokol Sheba</title>
+    <title>সকল সার্ভিস - <?php echo soko_e(soko_brand('site_name')); ?></title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/maateen/bangla-fonts/Nikosh/stylesheet.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" href="/assets/logo.jpg">
+    <link rel="shortcut icon" href="<?php echo soko_e(soko_brand('site_favicon')); ?>">
     <style>
         :root {
             --brand-green: #078B38;
@@ -298,27 +298,10 @@ $escape = function ($value) {
     </style>
 </head>
 <body>
-    <header class="sticky top-0 z-40 border-b border-[#DFEBE1] bg-white shadow-sm">
-        <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
-            <div class="flex items-center gap-3">
-                <a href="dashboard.php" class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition" aria-label="ড্যাশবোর্ডে ফিরে যান">
-                    <i class="fa-solid fa-arrow-left"></i>
-                </a>
-                <div>
-                    <h1 class="text-base md:text-lg font-extrabold text-[#124D2B]">সকল সার্ভিস</h1>
-                    <p class="text-xs text-[#53665A]">স্বাগতম, <?php echo $escape($userName); ?></p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 bg-[#EAF6EE] border border-[#C8E3CF] px-3.5 py-1.5 rounded-full">
-                <i class="fa-solid fa-wallet text-[#078B38] text-xs"></i>
-                <span class="text-xs font-bold text-[#53665A]">ব্যালেন্স:</span>
-                <span class="text-xs font-black text-[#078B38]">৳ <?php echo number_format((float)$userBalance, 2); ?></span>
-            </div>
-        </div>
-    </header>
+    <?php include __DIR__ . '/includes/site_header.php'; ?>
 
     <main class="mx-auto max-w-6xl space-y-6 px-4 py-5">
-        
+
         <div class="tab-scroll-wrap" id="categoryTabs">
             <button type="button" class="category-tab-btn active" data-category="all">
                 সকল সেবা (<?php echo $serviceCount; ?>)
@@ -347,7 +330,7 @@ $escape = function ($value) {
                     <div class="service-item-wrapper flex" data-category="<?php echo $escape($service['category']); ?>">
                         <a href="<?php echo ($service['status'] === 'active' && !$service['restricted']) ? $targetLink : '#'; ?>" 
                            class="service-card-item w-full <?php echo ($service['status'] !== 'active' || $service['restricted']) ? 'opacity-75 cursor-not-allowed' : ''; ?>">
-                            
+
                             <div>
                                 <div class="mb-2 flex items-start justify-between gap-2">
                                     <h3 class="text-sm font-extrabold text-slate-900"><?php echo $escape($service['name']); ?></h3>
@@ -412,33 +395,6 @@ $escape = function ($value) {
         <?php endif; ?>
     </main>
 
-    <div class="mobile-bottom-nav">
-        <a href="dashboard.php" class="m-nav-link">
-            <i class="fa-solid fa-house"></i>
-            <span>হোম</span>
-        </a>
-
-        <a href="dashboard.php#all_services" class="m-nav-link active">
-            <i class="fa-solid fa-shapes"></i>
-            <span>সেবা</span>
-        </a>
-
-        <div class="m-nav-center">
-            <a href="recharge.php" class="m-nav-center-btn" title="রিচার্জ করুন">
-                <i class="fa-solid fa-bolt" style="color: #ffdd44;"></i>
-            </a>
-        </div>
-
-        <a href="work_history.php" class="m-nav-link">
-            <i class="fa-solid fa-wallet"></i>
-            <span>হিস্টোরি</span>
-        </a>
-
-        <a href="profile.php" class="m-nav-link">
-            <i class="fa-solid fa-user"></i>
-            <span>প্রোফাইল</span>
-        </a>
-    </div>
 
     <script>
         $(document).ready(function() {
@@ -462,5 +418,6 @@ $escape = function ($value) {
             });
         });
     </script>
+<?php include __DIR__ . '/includes/site_footer.php'; ?>
 </body>
 </html>

@@ -198,7 +198,7 @@ $stmt->close();
                         </tr>
                     <?php else: ?>
                         <?php foreach ($services_list as $row):$fields = json_decode($row['custom_fields'] ?? '[]', true);$field_count = is_array($fields) ? count($fields) : 0;
-                            $img_src = !empty($row['service_image']) ?$row['service_image'] : '/assets/logo.jpg';
+                            $img_src = !empty($row['service_image']) ?$row['service_image'] : soko_brand('site_logo');
                         ?>
                         <tr>
                             <td>

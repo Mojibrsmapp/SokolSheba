@@ -53,23 +53,23 @@ if ($settings_result && mysqli_num_rows($settings_result) > 0) {
     $row = mysqli_fetch_assoc($settings_result);
     $support_wa = $row['setting_value'];
 }
-$conn->close();
+
 ?>
 <!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <title>রেজিস্ট্রেশন - সকল সেবা</title>
-    
+    <title>রেজিস্ট্রেশন - <?php echo soko_e(soko_brand('site_name')); ?></title>
+
     <link rel="stylesheet" href="assets/vendors/css/vendor.bundle.base.css">
-    <link rel="shortcut icon" type="image/jpeg" href="assets/logo.jpg">
+    <link rel="shortcut icon" type="image/jpeg" href="<?php echo soko_e(soko_brand('site_favicon')); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Hind+Siliguri:wght@500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --bg-page: #e8f5ec;
@@ -108,7 +108,7 @@ $conn->close();
             max-width: 420px; 
             margin: auto; 
         }
-        
+
         .register-card { 
             background: var(--card-bg); 
             border: 1.5px solid #d3e8db; 
@@ -175,7 +175,7 @@ $conn->close();
             display: flex; 
             align-items: center; 
         }
-        
+
         .input-icon-box {
             position: absolute;
             left: 10px;
@@ -191,7 +191,7 @@ $conn->close();
             z-index: 2;
             pointer-events: none;
         }
-        
+
         .smooth-input { 
             width: 100%; 
             height: 44px;
@@ -216,7 +216,7 @@ $conn->close();
             background: #ffffff; 
             box-shadow: 0 0 0 3px rgba(17, 140, 68, 0.14); 
         }
-        
+
         .toggle-pwd { 
             position: absolute; 
             right: 14px; 
@@ -248,7 +248,7 @@ $conn->close();
             cursor: pointer;
             margin: 0;
         }
-        
+
         .btn-register-submit { 
             width: 100%; 
             height: 44px;
@@ -421,15 +421,17 @@ $conn->close();
             font-weight: 600 !important;
         }
     </style>
+<style>body{display:block!important;padding:0!important}.auth-container{margin:24px auto!important;padding:0 12px}</style>
 </head>
 <body>
+<?php include __DIR__ . '/includes/site_header.php'; ?>
 
     <div class="auth-container">
         <div class="register-card">
-            
+
             <div class="card-top-header">
                 <div class="logo-avatar-wrap">
-                    <img src="assets/logo.jpg" alt="সকল সেবা">
+                    <img src="<?php echo soko_e(soko_brand('site_logo')); ?>" alt="সকল সেবা">
                 </div>
                 <div class="top-info-badge">
                     সহজে রেজিস্ট্রেশন করুন এবং<br>উপভোগ করুন সকল সেবা
@@ -438,7 +440,7 @@ $conn->close();
 
             <div class="card-body-content">
                 <form method="POST" action="" id="registerForm">
-                    
+
                     <div class="form-group-custom">
                         <div class="input-wrapper">
                             <div class="input-icon-box">
@@ -495,7 +497,7 @@ $conn->close();
                         <i class="fa-solid fa-user-plus"></i>
                         <span>রেজিস্ট্রেশন করুন</span>
                     </button>
-                    
+
                     <div class="divider-wrapper">
                         <span>অথবা</span>
                     </div>
@@ -644,5 +646,6 @@ $conn->close();
         });
         <?php endif; ?>
     </script>
+<?php include __DIR__ . '/includes/site_footer.php'; ?>
 </body>
 </html>

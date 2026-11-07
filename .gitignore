@@ -1,0 +1,5 @@
+# Uploaded branding is installation-specific, not source code.
+/uploads/branding/*
+!/uploads/branding/.htaccess
+/node_modules/
+/.cache/

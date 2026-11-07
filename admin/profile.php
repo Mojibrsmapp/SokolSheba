@@ -37,7 +37,7 @@ $user_ip = getUserIP();
                 
                 <div class="relative pt-6">
                     <div class="w-24 h-24 mx-auto rounded-2xl bg-white p-1 shadow-md border border-slate-100">
-                        <img src="/assets/logo.jpg" alt="Profile Picture" class="w-full h-full object-cover rounded-xl" onerror="this.src='https://ui-avatars.com/api/?name=<?php echo urlencode($admin_name); ?>&background=4f46e5&color=fff';">
+                        <img src="<?php echo soko_e(soko_brand('site_logo')); ?>" alt="Profile Picture" class="w-full h-full object-cover rounded-xl" onerror="this.src='https://ui-avatars.com/api/?name=<?php echo urlencode($admin_name); ?>&background=4f46e5&color=fff';">
                     </div>
 
                     <h3 class="text-lg font-extrabold text-slate-800 mt-3"><?php echo htmlspecialchars($admin_name ?? 'Admin'); ?></h3>

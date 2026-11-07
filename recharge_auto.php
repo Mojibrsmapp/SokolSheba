@@ -29,7 +29,7 @@
                     <?php
                     }
                     ?>
-                    
+
 <style>
 /* Full page background */
 body{
@@ -270,5 +270,6 @@ $(document).ready(function () {
     });
 });
 </script>
+<?php include __DIR__ . '/footer.php'; ?>
 </body>
 </html>

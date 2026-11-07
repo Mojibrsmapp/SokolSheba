@@ -326,7 +326,7 @@
 </style>
 
 <div class="page-wrapper-custom">
-    
+
     <div class="notice-marquee-card">
         <?php
         include 'includes/marquee.php';
@@ -342,7 +342,7 @@
                 <i class="fa-solid fa-file-signature text-success"></i>
                 <span>সাইন অফিশিয়াল সার্ভিস অর্ডার</span>
             </h4>
-            <span class="brand-pill">Sokol Sheba</span>
+            <span class="brand-pill"><?php echo soko_e(soko_brand('site_name')); ?></span>
         </div>
 
         <div class="order-card-body">
@@ -410,33 +410,6 @@
 
 </div>
 
-<div class="mobile-bottom-nav">
-    <a href="dashboard.php" class="m-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'dashboard.php') ? 'active' : ''; ?>">
-        <i class="fa-solid fa-house"></i>
-        <span>হোম</span>
-    </a>
-
-    <a href="dashboard.php#all_services" class="m-nav-link">
-        <i class="fa-solid fa-shapes"></i>
-        <span>সেবা</span>
-    </a>
-
-    <div class="m-nav-center">
-        <a href="recharge.php" class="m-nav-center-btn" title="রিচার্জ করুন">
-            <i class="fa-solid fa-bolt" style="color: #ffdd44;"></i>
-        </a>
-    </div>
-
-    <a href="work_history.php" class="m-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'work_history.php') ? 'active' : ''; ?>">
-        <i class="fa-solid fa-wallet"></i>
-        <span>হিস্টোরি</span>
-    </a>
-
-    <a href="profile.php" class="m-nav-link <?php echo (basename($_SERVER['PHP_SELF']) == 'profile.php') ? 'active' : ''; ?>">
-        <i class="fa-solid fa-user"></i>
-        <span>প্রোফাইল</span>
-    </a>
-</div>
 
 <?php include("footer.php"); ?>
 

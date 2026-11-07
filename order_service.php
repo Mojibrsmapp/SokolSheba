@@ -4,7 +4,7 @@ include_once("includes/configuration.php");
 
 if (isset($_SESSION['user_token'])) {
     $token_user = $_SESSION['user_token'];
-    
+
     $stmt = $conn->prepare("SELECT id, balance, email, name, token, mobile FROM users WHERE token = ?");
     $stmt->bind_param("s", $token_user);
     $stmt->execute();
@@ -56,7 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_custom_order'])
         $order_error = "এই সার্ভিসটি বর্তমানে সাময়িকভাবে বন্ধ আছে!";
     } else {
         $cost = floatval($service['price']);
-        
+
         $u_stmt = $conn->prepare("SELECT balance FROM users WHERE id = ? LIMIT 1");
         $u_stmt->bind_param("i", $id);
         $u_stmt->execute();
@@ -161,14 +161,14 @@ $h_stmt->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title><?php echo htmlspecialchars($service['service_name']); ?> - FAST SERVICE</title>
-    
+    <title><?php echo htmlspecialchars($service['service_name']); ?> - <?php echo soko_e(soko_brand('site_name')); ?></title>
+
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <link rel="shortcut icon" href="https://fastservice.totthohub.com/assets/logo.jpg">
-    
+    <link rel="shortcut icon" href="<?php echo soko_e(soko_brand('site_favicon')); ?>">
+
     <style>
         * {
             margin: 0;
@@ -400,31 +400,12 @@ $h_stmt->close();
 </head>
 <body>
 
-    <header class="top-navbar">
-        <div class="flex items-center gap-3">
-            <button type="button" id="openDrawerBtn" class="text-slate-700 text-xl px-1 hover:text-indigo-600">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-            <a href="dashboard.php" class="flex items-center">
-                <img src="https://fastservice.totthohub.com/assets/logo_nav.png" alt="FAST SERVICE Logo" class="header-logo">
-            </a>
-        </div>
-
-        <div class="flex items-center gap-2 sm:gap-3">
-            <div class="balance-badge-top" onclick="location.href='recharge.php'">
-                <i class="fa-solid fa-wallet text-xs"></i>
-                <span><?php echo htmlspecialchars($balance); ?> tk</span>
-            </div>
-            <a href="profile.php">
-                <img src="https://fastservice.totthohub.com/assets/logo.jpg" alt="Profile" class="user-avatar-top">
-            </a>
-        </div>
-    </header>
+    <?php include __DIR__ . '/includes/site_header.php'; ?>
 
     <div class="page-container">
 
         <div class="order-card max-w-2xl mx-auto">
-            
+
             <div class="flex items-center justify-between border-b pb-4 mb-4">
                 <a href="dashboard.php" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5 transition">
                     <i class="fa-solid fa-arrow-left"></i> ব্যাকে যান
@@ -477,7 +458,7 @@ $h_stmt->close();
             <?php endif; ?>
 
             <form action="" method="POST" enctype="multipart/form-data">
-                
+
                 <?php if (!empty($custom_fields)): ?>
                     <?php foreach ($custom_fields as $i => $field): 
                         $f_type = $field['type'] ?? 'text';
@@ -595,31 +576,6 @@ $h_stmt->close();
 
     </div>
 
-    <div class="fab-group">
-        <a href="<?php echo htmlspecialchars(get_site_setting($conn, "whatsapp_group", "#")); ?>" target="_blank" class="fab-join-btn">
-            <i class="fa-brands fa-whatsapp text-lg"></i>
-            <span>Join Group</span>
-        </a>
-    </div>
-
-    <div class="drawer-overlay" id="drawerOverlay"></div>
-    <div class="drawer-menu" id="drawerMenu">
-        <div class="drawer-header">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-grid-2"></i>
-                <h5 class="font-bold text-sm">সকল সার্ভিস তালিকা</h5>
-            </div>
-            <button id="closeDrawerBtn" class="text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div class="drawer-body">
-            <a href="dashboard.php" class="drawer-link"><i class="fa-solid fa-house text-indigo-500"></i> হোম ড্যাশবোর্ড</a>
-            <a href="serverCopy.php" class="drawer-link"><i class="fa-solid fa-server text-sky-500"></i> অটো সার্ভার কপি</a>
-            <a href="recharge.php" class="drawer-link"><i class="fa-solid fa-wallet text-emerald-600"></i> ব্যালেন্স রিচার্জ</a>
-            <a href="work_history.php" class="drawer-link"><i class="fa-solid fa-clock-rotate-left text-violet-500"></i> অর্ডার হিস্টোরি</a>
-            <a href="profile.php" class="drawer-link"><i class="fa-solid fa-user-gear text-slate-600"></i> আমার প্রোফাইল</a>
-            <a href="logout.php" class="drawer-link text-red-600"><i class="fa-solid fa-arrow-right-from-bracket text-red-600"></i> লগআউট</a>
-        </div>
-    </div>
 
     <script>
         $('#openDrawerBtn').click(function() {
@@ -632,5 +588,6 @@ $h_stmt->close();
             $('#drawerMenu').removeClass('open');
         });
     </script>
+<?php include __DIR__ . '/includes/site_footer.php'; ?>
 </body>
 </html>

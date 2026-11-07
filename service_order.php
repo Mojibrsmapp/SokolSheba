@@ -188,8 +188,8 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title><?php echo soko_h($service_title); ?> — অর্ডার | সকল সেবা</title>
-<link rel="shortcut icon" href="assets/logo.jpg">
+<title><?php echo soko_h($service_title); ?> — অর্ডার | <?php echo soko_e(soko_brand('site_name')); ?></title>
+<link rel="shortcut icon" href="<?php echo soko_e(soko_brand('site_favicon')); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -408,45 +408,8 @@ button{font-family:inherit}
 </head>
 <body>
 
-<header class="topbar">
-  <div class="topbar-inner">
-    <a href="dashboard.php" class="brand">
-      <span class="brand-logo"><img src="assets/logo.jpg" alt="সকল সেবা"></span>
-      <span>
-        <span class="brand-name">সকল <em>সেবা</em></span>
-        <span class="brand-tag">সব কাজ, এক প্ল্যাটফর্ম</span>
-      </span>
-    </a>
-    <div class="top-actions">
-      <a href="recharge.php" class="wallet-pill">
-        <span class="wallet-ic"><i class="fa-solid fa-wallet"></i></span>
-        <span class="wallet-txt">
-          <small>ওয়ালেট</small>
-          <b><?php echo soko_money($wallet_balance, 2); ?></b>
-        </span>
-      </a>
-      <a href="support.php" class="icon-btn" aria-label="নোটিফিকেশন"><i class="fa-regular fa-bell"></i><span class="dot"></span></a>
-      <button type="button" class="icon-btn" id="menuBtn" aria-label="মেনু"><i class="fa-solid fa-bars"></i></button>
-    </div>
-  </div>
-</header>
+<?php include __DIR__ . '/includes/site_header.php'; ?>
 
-<div class="drawer" id="drawer">
-  <div class="drawer-veil" data-close="1"></div>
-  <div class="drawer-panel">
-    <div class="drawer-head">
-      <h3>মেনু</h3>
-      <button type="button" class="icon-btn" data-close="1" aria-label="বন্ধ"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <a href="dashboard.php"><i class="fa-solid fa-house"></i> ড্যাশবোর্ড</a>
-    <a href="services.php"><i class="fa-solid fa-layer-group"></i> সকল সেবা</a>
-    <a href="work_history.php"><i class="fa-solid fa-clock-rotate-left"></i> অর্ডার হিস্টোরি</a>
-    <a href="recharge.php"><i class="fa-solid fa-wallet"></i> ওয়ালেট রিচার্জ</a>
-    <a href="profile.php"><i class="fa-solid fa-user"></i> প্রোফাইল</a>
-    <a href="support.php"><i class="fa-solid fa-headset"></i> সাপোর্ট</a>
-    <a href="logout.php" style="color:#B91018"><i class="fa-solid fa-power-off" style="color:#B91018"></i> লগআউট</a>
-  </div>
-</div>
 
 <div class="crumb">
   <div class="crumb-inner">
@@ -659,12 +622,6 @@ button{font-family:inherit}
   </form>
 </main>
 
-<nav class="bottom-nav">
-  <a href="dashboard.php"><i class="fa-solid fa-house"></i><span>হোম</span></a>
-  <a href="services.php" class="is-active"><i class="fa-solid fa-layer-group"></i><span>সেবা</span></a>
-  <a href="recharge.php"><i class="fa-solid fa-wallet"></i><span>ওয়ালেট</span></a>
-  <a href="profile.php"><i class="fa-regular fa-user"></i><span>প্রোফাইল</span></a>
-</nav>
 
 <script>
 (function () {
@@ -719,5 +676,6 @@ button{font-family:inherit}
   }
 })();
 </script>
+<?php include __DIR__ . '/includes/site_footer.php'; ?>
 </body>
 </html>

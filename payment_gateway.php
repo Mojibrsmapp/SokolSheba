@@ -83,8 +83,8 @@ $active_number = isset($numbers[$selected_method]) ? $numbers[$selected_method] 
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>পেমেন্ট গেটওয়ে — অর্ডার #<?php echo (int)$order['id']; ?> | সকল সেবা</title>
-<link rel="shortcut icon" href="assets/logo.jpg">
+<title>পেমেন্ট গেটওয়ে — অর্ডার #<?php echo (int)$order['id']; ?> | <?php echo soko_e(soko_brand('site_name')); ?></title>
+<link rel="shortcut icon" href="<?php echo soko_e(soko_brand('site_favicon')); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -314,21 +314,7 @@ body{font-size:14px;line-height:1.44;padding-bottom:12px}
 </head>
 <body>
 
-<header class="topbar">
-  <div class="topbar-inner">
-    <a href="dashboard.php" class="brand">
-      <span class="brand-logo"><img src="assets/logo.jpg" alt="সকল সেবা"></span>
-      <span>
-        <span class="brand-name">সকল <em>সেবা</em></span>
-        <span class="brand-tag">সব কাজ, এক প্ল্যাটফর্ম</span>
-      </span>
-    </a>
-    <div class="top-meta">
-      <span class="tm"><i class="fa-solid fa-shield-halved"></i> নিরাপদ লেনদেন</span>
-      <span class="tm"><i class="fa-solid fa-headset"></i> ২৪/৭ সাপোর্ট</span>
-    </div>
-  </div>
-</header>
+<?php include __DIR__ . '/includes/site_header.php'; ?>
 
 <div class="band">
   <div class="band-inner">
@@ -435,7 +421,6 @@ body{font-size:14px;line-height:1.44;padding-bottom:12px}
 </main>
 
 
-
 <script>
 (function () {
   var cards = document.querySelectorAll('.pay-card');
@@ -509,5 +494,6 @@ body{font-size:14px;line-height:1.44;padding-bottom:12px}
   }
 })();
 </script>
+<?php include __DIR__ . '/includes/site_footer.php'; ?>
 </body>
 </html>

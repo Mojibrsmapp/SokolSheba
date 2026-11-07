@@ -6,7 +6,7 @@ include_once("includes/service_catalog.php");
 
 if (isset($_SESSION['user_token'])) {
     $token_user = $_SESSION['user_token'];
-    
+
     $stmt = $conn->prepare("SELECT id, balance, email, name, token, mobile, image FROM users WHERE token = ?");
     if ($stmt) {
         $stmt->bind_param("s", $token_user);
@@ -35,18 +35,6 @@ if (isset($_SESSION['user_token'])) {
 }
 
 // Site settings
-$settings_data = [];
-$q_set = @$conn->query("SELECT setting_key, setting_value FROM site_settings");
-if ($q_set) {
-    while ($rs = mysqli_fetch_assoc($q_set)) {
-        $settings_data[$rs['setting_key']] = $rs['setting_value'];
-    }
-}
-$support_num = !empty($settings_data['support_whatsapp_num']) ? $settings_data['support_whatsapp_num'] : '01849207118';
-$whatsapp_link = !empty($settings_data['whatsapp_group']) ? $settings_data['whatsapp_group'] : 'https://wa.me/8801849207118';
-$telegram_link = !empty($settings_data['telegram_link']) ? $settings_data['telegram_link'] : 'https://t.me/Sheba_kit';
-$support_email = 'Shokolsheba@gmail.com';
-
 // Dynamic Slider
 $slider_images = ['/assets/slider/1.jpg', '/assets/slider/2.jpg'];
 $slider_path = __DIR__ . '/assets/slider';
@@ -69,8 +57,8 @@ if (is_dir($slider_path)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>সকল সেবা - সব কাজ, এক প্ল্যাটফর্মে</title>
-    
+    <title><?php echo soko_e(soko_brand('site_name')); ?> - <?php echo soko_e(soko_brand('site_tagline')); ?></title>
+
     <!-- Nikosh Bangla Font -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/maateen/bangla-fonts/Nikosh/stylesheet.css">
     <!-- FontAwesome 6 Free CDN -->
@@ -79,8 +67,8 @@ if (is_dir($slider_path)) {
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" href="/assets/logo.jpg">
-    
+    <link rel="shortcut icon" href="<?php echo soko_e(soko_brand('site_favicon')); ?>">
+
     <style>
         * {
             margin: 0;
@@ -291,42 +279,7 @@ if (is_dir($slider_path)) {
 <body>
 
     <!-- 1. Top Header -->
-    <header class="bg-white sticky top-0 z-40 border-b border-slate-100 shadow-sm">
-        <div class="max-w-6xl mx-auto px-3 py-2 flex items-center justify-between gap-2">
-            
-            <a href="dashboard.php" class="flex items-center gap-2 shrink-0">
-                <img src="/assets/logo.jpg" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'" alt="Logo" class="header-logo-img border-2 border-green-600 p-0.5 shadow-sm">
-                <div class="flex flex-col items-center justify-center text-center">
-                    <div class="flex items-center justify-center gap-0.5 leading-none">
-                        <span class="text-xl sm:text-2xl font-black text-green-700 tracking-tight">সকল</span>
-                        <span class="text-xl sm:text-2xl font-black text-red-600 tracking-tight">সেবা</span>
-                    </div>
-                    <p class="text-[9.5px] sm:text-[10px] font-bold text-slate-500 mt-1 leading-none tracking-tight">সব কাজ, এক প্ল্যাটফর্মে</p>
-                </div>
-            </a>
-
-            <div class="flex items-center gap-1.5 sm:gap-2">
-                <button onclick="location.href='recharge.php'" class="flex items-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 px-3 py-1.5 rounded-xl shadow-sm transition">
-                    <div class="w-6 h-6 rounded-lg bg-green-50 text-green-700 flex items-center justify-center text-xs">
-                        <i class="fa-solid fa-wallet"></i>
-                    </div>
-                    <div class="text-left leading-none">
-                        <span class="text-[9px] text-slate-400 font-bold block mb-0.5">ওয়ালেট</span>
-                        <span class="text-xs font-black text-green-700">৳ <?php echo htmlspecialchars($balance); ?></span>
-                    </div>
-                </button>
-
-                <button onclick="Swal.fire('জরুরী নোটিশ', 'সকল কাজ চালু আছে, অযথা এডমিনকে ফোন করে কেউ বিরক্ত করবেন না। ধন্যবাদ সবাইকে', 'info')" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center justify-center relative border border-slate-200 transition">
-                    <i class="fa-regular fa-bell text-base text-slate-600"></i>
-                    <span class="w-2 h-2 bg-red-500 rounded-full absolute top-2 right-2 border border-white"></span>
-                </button>
-
-                <button id="openDrawerBtn" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-800 flex items-center justify-center border border-slate-200 transition">
-                    <i class="fa-solid fa-bars text-lg"></i>
-                </button>
-            </div>
-        </div>
-    </header>
+    <?php include __DIR__ . '/includes/site_header.php'; ?>
 
     <!-- Main Content Area -->
     <main class="max-w-6xl mx-auto px-3 sm:px-5 py-3.5 space-y-3.5">
@@ -372,7 +325,7 @@ if (is_dir($slider_path)) {
 
         <!-- 2 Columns in Mobile Grid (grid-cols-2 md:grid-cols-3) -->
         <div class="grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3.5" id="servicesContainer">
-            
+
             <!-- 1. NID Seba -->
             <div class="category-box">
                 <div>
@@ -598,150 +551,10 @@ if (is_dir($slider_path)) {
         <!-- Bottom Notice Marquee -->
         <div class="bg-white border border-slate-200 rounded-xl px-3 py-2 flex items-center gap-2 text-xs font-bold text-slate-700 shadow-sm">
             <i class="fa-solid fa-bullhorn text-green-700 text-xs shrink-0"></i>
-            <span class="truncate text-[11px] sm:text-xs">বিঃদ্রঃ- সকল কাজ চালু আছে, অযথা এডমিনকে ফোন করে কেউ বিরক্ত করবেন না। ধন্যবাদ সবাইকে।</span>
+            <span class="truncate text-[11px] sm:text-xs"><?php echo soko_e(soko_brand('site_notice')); ?></span>
         </div>
 
     </main>
-
-    <!-- Draggable Support Button -->
-    <div class="fab-container" id="draggableFab">
-        <div class="fab-menu" id="fabMenu">
-            <a href="<?php echo htmlspecialchars($whatsapp_link); ?>" target="_blank" class="fab-item">
-                <i class="fa-brands fa-whatsapp text-emerald-600 text-base"></i> 
-                <span>WhatsApp সাপোর্ট</span>
-            </a>
-            <a href="<?php echo htmlspecialchars($telegram_link); ?>" target="_blank" class="fab-item">
-                <i class="fa-brands fa-telegram text-sky-500 text-base"></i> 
-                <span>Telegram চ্যানেল</span>
-            </a>
-            <a href="mailto:<?php echo htmlspecialchars($support_email); ?>" class="fab-item">
-                <i class="fa-solid fa-envelope text-red-500 text-sm"></i> 
-                <span class="truncate"><?php echo htmlspecialchars($support_email); ?></span>
-            </a>
-        </div>
-        <button class="fab-btn" id="fabToggle" title="সাপোর্ট পেতে ক্লিক করুন">
-            <i class="fa-solid fa-headset"></i>
-        </button>
-    </div>
-
-    <!-- Mobile Bottom Navigation with Center Popup Trigger (Image 2 style) -->
-    <nav class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 py-1.5 px-3 flex items-center justify-around z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-        <a href="dashboard.php" class="flex flex-col items-center gap-0.5 text-[#107C41] text-[10.5px] font-extrabold">
-            <i class="fa-solid fa-house text-base"></i>
-            <span>হোম</span>
-        </a>
-        <a href="services.php" class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-green-700 text-[10.5px] font-semibold">
-            <i class="fa-solid fa-table-cells-large text-base"></i>
-            <span>সেবা</span>
-        </a>
-
-        <!-- Center Popup Trigger Button -->
-        <button type="button" id="openAutoPopupBtn" class="center-action-btn" title="অটো সার্ভিস মেনু">
-            <i class="fa-solid fa-bolt text-xl text-amber-400"></i>
-        </button>
-
-        <a href="recharge.php" class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-green-700 text-[10.5px] font-semibold">
-            <i class="fa-solid fa-wallet text-base"></i>
-            <span>ওয়ালেট</span>
-        </a>
-        <a href="profile.php" class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-green-700 text-[10.5px] font-semibold">
-            <i class="fa-regular fa-user text-base"></i>
-            <span>প্রোফাইল</span>
-        </a>
-    </nav>
-
-    <!-- ======================================================== -->
-    <!-- Auto Service Popup Modal (Image 2 - Curved Round Pills)   -->
-    <!-- ======================================================== -->
-    <div class="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-50 hidden transition-all duration-300 flex flex-col justify-end items-center pb-6 px-4" id="autoServiceModal">
-        
-        <div class="w-full max-w-sm flex flex-col items-center space-y-2.5 mb-3 overflow-y-auto max-h-[68vh] py-2 px-1 no-scrollbar">
-            
-            <div class="w-full text-center mb-1">
-                <span class="inline-flex items-center gap-1.5 bg-emerald-900/80 border border-emerald-500/40 text-emerald-200 text-xs font-bold px-4 py-1.5 rounded-full shadow">
-                    <i class="fa-solid fa-bolt text-amber-400"></i> ২৪/৭ অটো সার্ভিসসমূহ
-                </span>
-            </div>
-
-            <!-- Auto Service Pill Buttons -->
-            <a href="auto_service.php?type=voter" class="auto-pill-item">
-                <i class="fa-solid fa-magnifying-glass text-emerald-600 w-5"></i>
-                <span>ভোটার তথ্য অনুসন্ধান</span>
-            </a>
-            <a href="auto_service.php?type=userid" class="auto-pill-item">
-                <i class="fa-solid fa-id-badge text-sky-600 w-5"></i>
-                <span>User Id to Server Copy</span>
-            </a>
-            <a href="auto_service.php?type=death" class="auto-pill-item">
-                <i class="fa-solid fa-file-medical text-rose-600 w-5"></i>
-                <span>Death Cer. Make</span>
-            </a>
-            <a href="auto_service.php?type=sign2server" class="auto-pill-item">
-                <i class="fa-solid fa-signature text-purple-600 w-5"></i>
-                <span>Sign 2 Server Copy</span>
-            </a>
-            <a href="auto_service.php?type=haf" class="auto-pill-item">
-                <i class="fa-solid fa-file-invoice text-amber-600 w-5"></i>
-                <span>Haf Server Copy</span>
-            </a>
-            <a href="auto_service.php?type=epassport" class="auto-pill-item">
-                <i class="fa-solid fa-passport text-blue-600 w-5"></i>
-                <span>E-Passport Make</span>
-            </a>
-            <a href="auto_service.php?type=driving" class="auto-pill-item">
-                <i class="fa-solid fa-id-card text-teal-600 w-5"></i>
-                <span>Driving License</span>
-            </a>
-            <a href="auto_service.php?type=clone_sonod" class="auto-pill-item">
-                <i class="fa-solid fa-clone text-indigo-600 w-5"></i>
-                <span>Clone Sonod</span>
-            </a>
-            <a href="auto_service.php?type=sign2nid" class="auto-pill-item">
-                <i class="fa-solid fa-file-lines text-pink-600 w-5"></i>
-                <span>Sign 2 Nid</span>
-            </a>
-            <a href="auto_service.php?type=cv" class="auto-pill-item">
-                <i class="fa-solid fa-file-pdf text-orange-600 w-5"></i>
-                <span>CV Make</span>
-            </a>
-
-        </div>
-
-        <!-- Big Close Action Button (Like Screenshot 2) -->
-        <button type="button" id="closeAutoPopupBtn" class="w-14 h-14 rounded-full bg-[#0b1329] border-2 border-white/20 text-white flex items-center justify-center text-xl shadow-2xl transition hover:scale-105">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-
-    </div>
-
-    <!-- Side Drawer Menu -->
-    <div class="fixed inset-0 bg-slate-950/40 backdrop-blur-[2px] z-50 hidden" id="drawerOverlay"></div>
-    <div class="fixed top-0 right-[-100%] w-[55%] sm:w-56 h-full bg-white shadow-2xl z-50 transition-all duration-300 flex flex-col border-l border-slate-200" id="drawerMenu">
-        <div class="px-3.5 py-3 bg-[#107C41] text-white flex items-center justify-between">
-            <div class="flex items-center gap-1.5 min-w-0">
-                <i class="fa-solid fa-layer-group text-emerald-200 text-xs"></i>
-                <h5 class="font-extrabold text-xs truncate">সকল সেবা মেনু</h5>
-            </div>
-            <button id="closeDrawerBtn" class="w-6 h-6 rounded-md bg-white/15 hover:bg-white/25 text-white flex items-center justify-center text-xs transition">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-        <div class="flex-1 overflow-y-auto p-2 space-y-0.5 text-[11.5px] font-bold">
-            <a href="dashboard.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg bg-green-50 text-green-800"><i class="fa-solid fa-house w-4 text-green-700 text-xs"></i> <span class="truncate">হোম ড্যাশবোর্ড</span></a>
-            <a href="serverCopy.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-server w-4 text-purple-600 text-xs"></i> <span class="truncate">অটো সার্ভার কপি</span></a>
-            <a href="sign_order.php?type=10_12_17" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-file-signature w-4 text-indigo-600 text-xs"></i> <span class="truncate">সাইন কপি অর্ডার</span></a>
-            <a href="auto_tin.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-file-invoice w-4 text-amber-600 text-xs"></i> <span class="truncate">অটো টিন সার্টিফিকেট</span></a>
-            <a href="numbertobio.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-sim-card w-4 text-orange-600 text-xs"></i> <span class="truncate">সিম বায়োমেট্রিক</span></a>
-            <a href="location_service.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-location-dot w-4 text-teal-600 text-xs"></i> <span class="truncate">লোকেশন ট্র্যাকিং</span></a>
-            <a href="mfs_service.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-wallet w-4 text-rose-600 text-xs"></i> <span class="truncate">বিকাশ-নগদ-রকেট</span></a>
-            <a href="services.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-file-arrow-up w-4 text-emerald-600 text-xs"></i> <span class="truncate">কাস্টম ও ফাইল অর্ডার</span></a>
-            <div class="my-1 border-t border-slate-100"></div>
-            <a href="recharge.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-circle-plus w-4 text-green-600 text-xs"></i> <span class="truncate">ব্যালেন্স রিচার্জ</span></a>
-            <a href="work_history.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-clock-rotate-left w-4 text-violet-600 text-xs"></i> <span class="truncate">অর্ডার হিস্টোরি</span></a>
-            <a href="profile.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-user-gear w-4 text-slate-600 text-xs"></i> <span class="truncate">আমার প্রোফাইল</span></a>
-            <a href="logout.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-red-600 hover:bg-red-50"><i class="fa-solid fa-arrow-right-from-bracket w-4 text-xs"></i> <span class="truncate">লগআউট</span></a>
-        </div>
-    </div>
 
     <!-- Swiper JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
@@ -753,28 +566,6 @@ if (is_dir($slider_path)) {
             speed: 600,
         });
 
-        // Drawer
-        $('#openDrawerBtn').click(function() {
-            $('#drawerOverlay').fadeIn(200);
-            $('#drawerMenu').css('right', '0');
-        });
-        $('#closeDrawerBtn, #drawerOverlay').click(function() {
-            $('#drawerOverlay').fadeOut(200);
-            $('#drawerMenu').css('right', '-100%');
-        });
-
-        // Auto Service Popup Handler (Image 2 match)
-        $('#openAutoPopupBtn').click(function() {
-            $('#autoServiceModal').removeClass('hidden').hide().fadeIn(250);
-        });
-        $('#closeAutoPopupBtn, #autoServiceModal').click(function(e) {
-            if (e.target === this || e.target.id === 'closeAutoPopupBtn' || $(e.target).closest('#closeAutoPopupBtn').length) {
-                $('#autoServiceModal').fadeOut(200, function() {
-                    $(this).addClass('hidden');
-                });
-            }
-        });
-
         $('#serviceSearchInput').on('keyup', function() {
             var value = $(this).val().toLowerCase();
             $("#servicesContainer .category-box").filter(function() {
@@ -782,83 +573,8 @@ if (is_dir($slider_path)) {
             });
         });
 
-        // Draggable Support Button
-        const fab = document.getElementById('draggableFab');
-        const fabToggle = document.getElementById('fabToggle');
-        const fabMenu = document.getElementById('fabMenu');
-        
-        let isDragging = false;
-        let hasMoved = false;
-        let startX, startY, origX, origY;
-
-        function onTouchStart(e) {
-            if (e.target.closest('.fab-menu')) return;
-            isDragging = true;
-            hasMoved = false;
-
-            const evt = e.type === 'touchstart' ? e.touches[0] : e;
-            startX = evt.clientX;
-            startY = evt.clientY;
-
-            const rect = fab.getBoundingClientRect();
-            origX = rect.left;
-            origY = rect.top;
-        }
-
-        function onTouchMove(e) {
-            if (!isDragging) return;
-
-            const evt = e.type === 'touchmove' ? e.touches[0] : e;
-            const deltaX = evt.clientX - startX;
-            const deltaY = evt.clientY - startY;
-
-            if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
-                hasMoved = true;
-            }
-
-            let newLeft = origX + deltaX;
-            let newTop = origY + deltaY;
-
-            const maxLeft = window.innerWidth - fab.offsetWidth - 10;
-            const maxTop = window.innerHeight - fab.offsetHeight - 80;
-
-            newLeft = Math.max(10, Math.min(newLeft, maxLeft));
-            newTop = Math.max(60, Math.min(newTop, maxTop));
-
-            fab.style.left = newLeft + 'px';
-            fab.style.top = newTop + 'px';
-            fab.style.bottom = 'auto';
-            fab.style.right = 'auto';
-
-            if (e.type === 'touchmove') {
-                e.preventDefault();
-            }
-        }
-
-        function onTouchEnd() {
-            isDragging = false;
-        }
-
-        fabToggle.addEventListener('mousedown', onTouchStart);
-        document.addEventListener('mousemove', onTouchMove);
-        document.addEventListener('mouseup', onTouchEnd);
-
-        fabToggle.addEventListener('touchstart', onTouchStart, { passive: true });
-        document.addEventListener('touchmove', onTouchMove, { passive: false });
-        document.addEventListener('touchend', onTouchEnd);
-
-        $('#fabToggle').on('click', function(e) {
-            if (!hasMoved) {
-                $('#fabMenu').fadeToggle(200);
-            }
-        });
-
-        $(document).click(function(e) {
-            if (!$(e.target).closest('.fab-container').length) {
-                $('#fabMenu').fadeOut(200);
-            }
-        });
     </script>
+<?php include __DIR__ . '/includes/site_footer.php'; ?>
 </body>
 </html>
 <?php ob_end_flush(); ?>
