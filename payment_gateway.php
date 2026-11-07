@@ -234,6 +234,82 @@ button{font-family:inherit}
   .steps:before{top:27px}
 }
 @media print{.no-print{display:none!important}}
+
+/* ============ compact, one-screen layout ============ */
+body{font-size:14px;line-height:1.44;padding-bottom:12px}
+.topbar-inner{padding:8px 14px;gap:10px}
+.brand-logo{width:40px;height:40px;flex:0 0 40px;border-width:2px}
+.brand-name{font-size:20px}
+.brand-tag{font-size:11.5px;margin-top:0}
+.top-meta{font-size:11.5px;gap:12px}
+.band-inner{padding:11px 14px;gap:11px}
+.band .bi-ic{width:38px;height:38px;flex:0 0 38px;font-size:16px;border-radius:11px}
+.band h1{font-size:18px}
+.band p{font-size:12px}
+.band .shield{font-size:86px}
+.shell{padding:11px 12px;max-width:760px}
+.alert{padding:9px 11px;font-size:12.5px;margin-bottom:9px}
+
+/* method cards */
+.pay-grid{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
+.pay-card{padding:9px 8px 7px;border-radius:11px}
+.pay-card .mark{height:30px}
+.pay-card .mark img{max-height:28px;max-width:82px}
+.pay-card .mark .glyph{display:none}
+.pay-card .mk-name{font-size:11px;margin-top:2px;color:var(--muted)}
+.pay-card .tick{top:6px;right:6px;width:16px;height:16px;font-size:9px}
+.pay-card.is-on .mk-name{color:var(--green-dark);font-weight:700}
+
+/* order summary */
+.sum{background:#fff;border:1px solid var(--green-line);border-radius:12px;padding:9px 12px;margin-bottom:10px}
+.sum-line{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--muted);padding:2.5px 0}
+.sum-line b{color:var(--ink);font-weight:700;font-size:13px}
+.sum-line.is-total{border-top:1px dashed #DCEFE2;margin-top:4px;padding-top:6px;font-size:13.5px;font-weight:700;color:var(--ink)}
+.sum-line.is-total b{color:var(--green-dark);font-size:17px}
+
+/* merchant number strip */
+.send-line{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#F3F9F5;border:1px dashed #BFE0CC;border-radius:11px;padding:8px 11px;margin-bottom:10px}
+.send-line .sl-txt{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;min-width:0}
+.send-line .sl-txt i{color:var(--green);font-size:12px;align-self:center}
+.send-line .sl-txt b{font-size:16px;letter-spacing:.4px;color:var(--ink)}
+.send-line .sl-txt small{font-size:11px;color:var(--muted)}
+.copy-btn{font-size:11.5px;padding:5px 10px;border-radius:8px;flex:0 0 auto}
+
+/* inputs */
+.field{margin-bottom:9px}
+.field label{font-size:12.5px;margin-bottom:4px}
+.inp input{height:40px;font-size:13.5px;border-radius:10px;padding:0 12px 0 35px}
+.inp > i{left:11px;font-size:12.5px}
+.field .opt-tag{font-size:10px;padding:1.5px 6px}
+.field label .star{color:var(--red)}
+
+/* screenshot row */
+.slip-row{position:relative;display:flex;align-items:center;gap:9px;border:1px dashed #CDE3D6;border-radius:11px;padding:8px 11px;background:#FAFDFB;cursor:pointer;margin-bottom:10px;transition:.15s}
+.slip-row:hover{border-color:var(--green);background:#F4FBF6}
+.slip-row.has-file{border-style:solid;border-color:var(--green);background:#EFF8F2}
+.slip-row .sr-ic{color:var(--green);font-size:14px;flex:0 0 auto}
+.slip-row .sr-txt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.slip-row .sr-txt b{font-size:12.5px;font-weight:600;color:var(--ink)}
+.slip-row .slip-picked{font-size:10.8px;color:#8AA396;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slip-row.has-file .slip-picked{color:var(--green);font-weight:600}
+.slip-row .sr-btn{font-size:11.5px;font-weight:700;color:var(--green-dark);background:#EAF6EE;border-radius:8px;padding:5px 11px;flex:0 0 auto}
+.slip-row input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+
+/* check + button */
+.check-row{font-size:12.5px;margin:2px 0 10px;align-items:center}
+.check-row input{width:18px;height:18px;flex:0 0 18px;margin-top:0}
+.btn-pay{height:46px;font-size:15px;border-radius:11px;box-shadow:0 5px 14px rgba(11,122,59,.22)}
+.foot-note{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;font-size:11.3px;color:var(--muted);padding:9px 0 2px}
+.foot-note a{color:var(--muted)}
+.foot-note i{color:var(--green);margin-right:3px}
+@media (max-width:640px){
+  .brand-name{font-size:18px}
+  .brand-tag{display:none}
+  .band h1{font-size:16.5px}
+  .band p{font-size:11.3px}
+  .band-inner{padding:9px 12px}
+  .shell{padding:9px}
+}
 </style>
 </head>
 <body>
@@ -268,12 +344,6 @@ button{font-family:inherit}
 
 <main class="shell">
 
-  <ol class="steps">
-    <li class="step done"><span class="dot"><i class="fa-solid fa-check"></i></span><span class="lbl">পেমেন্ট পদ্ধতি নির্বাচন</span></li>
-    <li class="step now"><span class="dot">২</span><span class="lbl">পেমেন্ট সম্পন্ন করুন</span></li>
-    <li class="step"><span class="dot">৩</span><span class="lbl">পেমেন্ট নিশ্চিতকরণ</span></li>
-  </ol>
-
   <?php if (count($errors) > 0): ?>
     <div class="alert">
       <i class="fa-solid fa-circle-exclamation" style="margin-top:2px"></i>
@@ -287,135 +357,84 @@ button{font-family:inherit}
 
   <form method="post" action="payment_gateway.php?order=<?php echo (int)$order['id']; ?>" id="payForm" enctype="multipart/form-data">
     <input type="hidden" name="pay_now" value="1">
-    <section class="card">
-      <div class="card-head">
-        <span class="ch-ic"><i class="fa-solid fa-mobile-screen-button"></i></span>
-        <h2>মোবাইল ব্যাংকিং পেমেন্ট</h2>
-      </div>
-      <div class="card-body">
 
-        <div class="merchant">
-          <span class="m-logo"><img src="assets/logo.jpg" alt=""></span>
-          <span class="m-txt">
-            <b>সকল সেবা এক জায়গায়</b>
-            <small>সেবা পেমেন্ট — <?php echo soko_h($service_title); ?></small>
+    <div class="pay-grid">
+      <?php foreach ($methods as $key => $meta): ?>
+        <label class="pay-card <?php echo $key === $selected_method ? 'is-on' : ''; ?>" data-method="<?php echo soko_h($key); ?>" data-name="<?php echo soko_h($meta['name']); ?>" data-number="<?php echo soko_h(isset($numbers[$key]) ? $numbers[$key] : ''); ?>">
+          <input type="radio" name="method" value="<?php echo soko_h($key); ?>" <?php echo $key === $selected_method ? 'checked' : ''; ?>>
+          <span class="tick"><i class="fa-solid fa-check"></i></span>
+          <span class="mark <?php echo soko_h($meta['css']); ?>">
+            <?php $logo = soko_pay_method_logo($key); ?>
+            <?php if ($logo !== ''): ?>
+              <img src="<?php echo soko_h($logo); ?>" alt="<?php echo soko_h($meta['english']); ?>">
+            <?php else: ?>
+              <?php echo soko_h($meta['name']); ?>
+            <?php endif; ?>
           </span>
-          <span class="m-meta">
-            <span>অর্ডার নং</span>
-            <b>#<?php echo soko_h($receipt_no); ?></b>
-            <span><?php echo soko_bn_date($order['created_at']); ?></span>
-          </span>
-        </div>
-
-        <div class="total-row">
-          <span>মোট পরিশোধযোগ্য টাকা</span>
-          <b><?php echo soko_money($amount); ?></b>
-        </div>
-
-        <div class="send-box" style="margin-top:12px">
-          <span class="sb-title"><i class="fa-solid fa-arrow-right-arrow-left"></i> প্রথমে নিচের নম্বরে <?php echo soko_money($amount); ?> সেন্ড মানি করুন</span>
-          <div class="sb-num">
-            <span>
-              <b id="merchantNumber"><?php echo soko_bn_digits(soko_h($active_number !== '' ? $active_number : 'সাপোর্টে যোগাযোগ করুন')); ?></b>
-              <small id="merchantLabel"><?php echo soko_h($active_meta['name']); ?> — Personal</small>
-            </span>
-            <button type="button" class="copy-btn" id="copyBtn" data-number="<?php echo soko_h($active_number); ?>"><i class="fa-regular fa-copy"></i> কপি</button>
-          </div>
-          <ol>
-            <li>মোবাইল ব্যাংকিং অ্যাপ / *২৪৭# থেকে <b>সেন্ড মানি</b> করুন।</li>
-            <li>টাকা পাঠানোর পর নিচে আপনার নম্বর ও <b>TrxID</b> লিখুন।</li>
-            <li>অ্যাডমিন যাচাই করার পর অর্ডার প্রসেস শুরু হবে।</li>
-          </ol>
-        </div>
-
-        <div style="font-size:14px;font-weight:700;margin:2px 0 9px">মোবাইল ব্যাংকিং নির্বাচন করুন</div>
-        <div class="pay-grid">
-          <?php foreach ($methods as $key => $meta): ?>
-            <label class="pay-card <?php echo $key === $selected_method ? 'is-on' : ''; ?>" data-method="<?php echo soko_h($key); ?>" data-name="<?php echo soko_h($meta['name']); ?>" data-number="<?php echo soko_h(isset($numbers[$key]) ? $numbers[$key] : ''); ?>">
-              <input type="radio" name="method" value="<?php echo soko_h($key); ?>" <?php echo $key === $selected_method ? 'checked' : ''; ?>>
-              <span class="tick"><i class="fa-solid fa-check"></i></span>
-              <span class="mark <?php echo soko_h($meta['css']); ?>">
-                <?php $logo = soko_pay_method_logo($key); ?>
-                <?php if ($logo !== ''): ?>
-                  <img src="<?php echo soko_h($logo); ?>" alt="<?php echo soko_h($meta['english']); ?>">
-                <?php else: ?>
-                  <span class="glyph"><i class="fa-solid fa-bolt"></i></span><?php echo soko_h($meta['name']); ?>
-                <?php endif; ?>
-              </span>
-              <span class="mk-name"><?php echo soko_h($meta['english']); ?></span>
-            </label>
-          <?php endforeach; ?>
-        </div>
-
-        <div class="field">
-          <label for="senderNumber">আপনার <span id="senderMethodLabel"><?php echo soko_h($active_meta['name']); ?></span> নম্বর <span class="opt-tag">ঐচ্ছিক</span></label>
-          <div class="inp">
-            <i class="fa-solid fa-mobile-screen"></i>
-            <input type="tel" id="senderNumber" name="sender_number" value="<?php echo soko_h($sender_number); ?>" placeholder="01XXXXXXXXX" maxlength="14" inputmode="numeric">
-          </div>
-          <div class="hint">যে নম্বর থেকে টাকা পাঠিয়েছেন সেই নম্বরটি দিতে পারেন — না দিলেও চলবে।</div>
-        </div>
-
-        <div class="field">
-          <label for="slipFile">পেমেন্টের স্ক্রিনশট <span class="opt-tag">ঐচ্ছিক</span></label>
-          <label class="slip-up" for="slipFile">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
-            <b>স্ক্রিনশট / স্লিপ আপলোড করুন</b>
-            <small>JPG, PNG অথবা PDF — সর্বোচ্চ ৫MB</small>
-            <span class="slip-picked" id="slipPicked">কোনো ফাইল নির্বাচন করা হয়নি</span>
-            <input type="file" id="slipFile" name="slip" accept="image/*,application/pdf" data-slip="1">
-          </label>
-          <div class="hint">পেমেন্টের স্ক্রিনশট দিলে অ্যাডমিন দ্রুত যাচাই করতে পারবে (ঐচ্ছিক)।</div>
-        </div>
-
-        <div class="field">
-          <label for="trxId">ট্রানজেকশন আইডি (TrxID) <span class="star">*</span></label>
-          <div class="inp">
-            <i class="fa-solid fa-receipt"></i>
-            <input type="text" id="trxId" name="trx_id" value="<?php echo soko_h($trx_id); ?>" placeholder="যেমন: 9F3A7B6C2D" maxlength="40" required>
-          </div>
-          <div class="hint">SMS-এ পাওয়া TrxID টি হুবহু লিখুন (যেমন: 9F3A7B6C2D)।</div>
-        </div>
-
-        <label class="check-row">
-          <input type="checkbox" name="confirm_paid" value="1">
-          <span>আমি <?php echo soko_money($amount); ?> সেন্ড মানি করেছি এবং উপরের তথ্যগুলো যাচাই করেছি।</span>
+          <span class="mk-name"><?php echo soko_h($meta['english']); ?></span>
         </label>
+      <?php endforeach; ?>
+    </div>
 
-        <button type="submit" class="btn-pay" id="payBtn">
-          <i class="fa-solid fa-paper-plane"></i> পেমেন্ট তথ্য জমা দিন <i class="fa-solid fa-arrow-right" style="font-size:13px"></i>
-        </button>
+    <div class="sum">
+      <div class="sum-line"><span>সেবা মূল্য</span><b><?php echo soko_money($amount); ?></b></div>
+      <div class="sum-line"><span>সার্ভিস চার্জ</span><b>৳ ০</b></div>
+      <div class="sum-line is-total"><span>মোট পরিশোধ</span><b><?php echo soko_money($amount); ?></b></div>
+    </div>
 
-        <div class="note" style="margin-top:12px">
-          <i class="fa-solid fa-circle-info"></i>
-          <div>
-            <b>গুরুত্বপূর্ণ তথ্য</b>
-            <ul>
-              <li>পেমেন্ট করার পর আপনার TrxID অ্যাডমিন প্যানেল থেকে যাচাই করা হবে।</li>
-              <li>সাধারণত ৫–১৫ মিনিটের মধ্যে পেমেন্ট কনফার্ম হয়।</li>
-              <li>কোনো সমস্যা হলে ২৪/৭ সাপোর্টে যোগাযোগ করুন।</li>
-            </ul>
-          </div>
-        </div>
+    <div class="send-line">
+      <span class="sl-txt">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+        <b id="merchantNumber"><?php echo soko_bn_digits(soko_h($active_number !== '' ? $active_number : 'সাপোর্টে যোগাযোগ করুন')); ?></b>
+        <small id="merchantLabel"><?php echo soko_h($active_meta['name']); ?> — Personal</small>
+      </span>
+      <button type="button" class="copy-btn" id="copyBtn" data-number="<?php echo soko_h($active_number); ?>"><i class="fa-regular fa-copy"></i> কপি</button>
+    </div>
 
-        <div style="text-align:center;margin-top:10px">
-          <a href="work_history.php" style="font-size:12.5px;color:#5E7466;font-weight:600"><i class="fa-solid fa-clock-rotate-left"></i> পরে পেমেন্ট করবো — অর্ডার হিস্টোরি</a>
-        </div>
-
+    <div class="field">
+      <label for="senderNumber">আপনার <span id="senderMethodLabel"><?php echo soko_h($active_meta['name']); ?></span> নম্বর <span class="opt-tag">ঐচ্ছিক</span></label>
+      <div class="inp">
+        <i class="fa-solid fa-mobile-screen"></i>
+        <input type="tel" id="senderNumber" name="sender_number" value="<?php echo soko_h($sender_number); ?>" placeholder="01XXXXXXXXX" maxlength="14" inputmode="numeric">
       </div>
-    </section>
+    </div>
+
+    <div class="field">
+      <label for="trxId">ট্রানজেকশন আইডি (TrxID) <span class="star">*</span></label>
+      <div class="inp">
+        <i class="fa-solid fa-receipt"></i>
+        <input type="text" id="trxId" name="trx_id" value="<?php echo soko_h($trx_id); ?>" placeholder="যেমন: 9F3A7B6C2D" maxlength="40" required>
+      </div>
+    </div>
+
+    <label class="slip-row" for="slipFile">
+      <i class="fa-solid fa-image sr-ic"></i>
+      <span class="sr-txt">
+        <b>পেমেন্টের স্ক্রিনশট <span class="opt-tag">ঐচ্ছিক</span></b>
+        <span class="slip-picked" id="slipPicked">কোনো ফাইল নির্বাচিত হয়নি</span>
+      </span>
+      <span class="sr-btn">আপলোড</span>
+      <input type="file" id="slipFile" name="slip" accept="image/*,application/pdf" data-slip="1">
+    </label>
+
+    <label class="check-row">
+      <input type="checkbox" name="confirm_paid" value="1">
+      <span>আমি <?php echo soko_money($amount); ?> সেন্ড মানি করেছি</span>
+    </label>
+
+    <button type="submit" class="btn-pay" id="payBtn">
+      পেমেন্ট করতে এগিয়ে যান <i class="fa-solid fa-arrow-right" style="font-size:13px"></i>
+    </button>
   </form>
+
+  <div class="foot-note">
+    <span><i class="fa-solid fa-lock"></i> নিরাপদ পেমেন্ট</span>
+    <span><i class="fa-solid fa-headset"></i> ২৪/৭ সাপোর্ট</span>
+    <a href="work_history.php"><i class="fa-solid fa-clock-rotate-left"></i> অর্ডার হিস্টরি</a>
+  </div>
 </main>
 
-<div class="page-foot">
-  <div class="foot-strip">
-    <span class="fs"><i class="fa-solid fa-lock"></i><span>Secure Payment Gateway<small>Powered by সকল সেবা</small></span></span>
-    <span class="fs"><i class="fa-solid fa-headset"></i><span>২৪/৭ সাপোর্ট<small>যেকোনো সমস্যায় পাশে আছি</small></span></span>
-  </div>
-  <div class="foot-note">
-    <i class="fa-solid fa-shield-halved"></i> নিরাপদ পেমেন্ট | আপনার তথ্য সুরক্ষিত রাখুন
-  </div>
-</div>
+
 
 <script>
 (function () {
@@ -464,7 +483,7 @@ button{font-family:inherit}
   var slip = document.getElementById('slipFile');
   if (slip) {
     slip.addEventListener('change', function () {
-      var wrap = slip.closest('.slip-up');
+      var wrap = slip.closest('.slip-row');
       var badge = document.getElementById('slipPicked');
       if (slip.files && slip.files.length > 0) {
         badge.textContent = slip.files[0].name + ' (' + Math.round(slip.files[0].size / 1024) + ' KB)';
