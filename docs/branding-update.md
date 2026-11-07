@@ -15,7 +15,7 @@ Run `sql/upgrade_2026_11_branding.sql` in the site's existing database if you pr
 
 ## Behaviour
 
-- The same header, bottom navigation, auto-service popup, menu, notice and draggable support widget are shared by customer pages (including older pages that use `header.php` / `footer.php`). Login, registration and the public landing page also use the shared navigation.
+- The same header, bottom navigation, auto-service popup, menu, notice and draggable support widget are shared by customer pages (including older pages that use `header.php` / `footer.php`). Login, registration and the public landing page retain the shared header, menu, notices and support widget, but omit the fixed bottom navigation and auto-service popup. They do not reserve bottom-navigation space. Authentication cards use compact responsive spacing.
 - The mobile header stays in one row. Long names/balances are truncated rather than wrapping; the wallet remains clickable.
 - Navigation logo and favicon fall back to the main logo if left empty.
 - A profile without an uploaded photo uses the current main site logo. Existing custom profile photos are preserved.
@@ -40,9 +40,16 @@ Run with PHP 7.4+ CLI:
 php tests/site_shell_test.php defaults
 php tests/site_shell_test.php custom
 php tests/site_shell_test.php missing
+php tests/site_shell_test.php defaults login.php
+php tests/site_shell_test.php defaults register_user.php
+php tests/site_shell_test.php defaults index.php
 node --check assets/js/site_shell.js
 ```
 
 The fixtures check defaults, missing-table fallback, custom branding, logo inheritance, escaping/unsafe URLs, WhatsApp normalization, query caching, active navigation and duplicate-include protection. They are CLI-only and do not connect to the production database.
 
 During this update, dashboard/services/profile were rendered with fixture database results and checked in Chromium at 320, 360, 390, 565, 768 and 1280 px, plus the shared shell fixture (24 page/viewport combinations). Menu, notices, auto-service popup, search, support toggling/dragging and print visibility were checked. The live database, real admin uploads, payments and hosting permissions still require deployment smoke testing.
+
+### Public-page spacing follow-up
+
+Login, registration and guest `index.php` were fixture-rendered and checked at 320, 360, 390, 565, 768, 1366 and 1920 px (21 combinations). Checks cover omitted bottom navigation/auto popup, zero reserved footer padding, no horizontal overflow, single-row header, compact card spacing, reachable lower form links, password visibility toggle, and retained support/menu/notices. Database authentication and registration were not exercised by these visual fixtures.

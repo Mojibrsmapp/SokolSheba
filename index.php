@@ -160,7 +160,7 @@ if (is_dir($slider_path)) {
         }
     </style>
 </head>
-<body>
+<body class="ss-public-page">
 
     <!-- ১. টপ হেডার -->
     <?php include __DIR__ . '/includes/site_header.php'; ?>

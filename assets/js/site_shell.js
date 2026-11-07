@@ -36,6 +36,7 @@
     const toggle = document.getElementById('ss-support-toggle');
     const panel = document.getElementById('ss-support-panel');
     if (!fab || !toggle || !panel) return;
+    const bottomClearance = document.querySelector('.ss-footer') ? 160 : 78;
     let drag = null, moved = false;
     function positionPanel() {
         const rect = fab.getBoundingClientRect();
@@ -59,7 +60,7 @@
         moved = true;
         setSupport(false);
         fab.style.left = Math.max(12, Math.min(innerWidth - 70, drag.left + dx)) + 'px';
-        fab.style.top = Math.max(80, Math.min(innerHeight - 160, drag.top + dy)) + 'px';
+        fab.style.top = Math.max(80, Math.min(innerHeight - bottomClearance, drag.top + dy)) + 'px';
         fab.style.right = 'auto'; fab.style.bottom = 'auto';
     });
     toggle.addEventListener('pointerup', () => { drag = null; });
