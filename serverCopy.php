@@ -148,7 +148,7 @@
     <div class="col-lg-8">
       <div class="custom-card p-4 p-md-5 mb-4">
         <form id="server_form" method="post" class="py-2">
-            <h2 class="text-center fw-extrabold text-slate-800 mb-4" style="font-size: 24px;">সার্ভিস ড্যাশবোর্ড - FAST SERVICE</h2>
+            <h2 class="text-center fw-extrabold text-slate-800 mb-4" style="font-size: 24px;">সার্ভিস ড্যাশবোর্ড - <?php echo soko_e(soko_brand('site_name')); ?></h2>
             
             <div class="smart-paste-box">
                 <div class="flex items-center justify-between mb-2">
@@ -236,11 +236,7 @@
   </div>
 </div>
 
-<div style="position: fixed; bottom: 20px; right: 20px; z-index: 99;">
-    <a href="<?php echo htmlspecialchars(get_site_setting($conn, "whatsapp_group", "#")); ?>" target="_blank" style="background: #0EA5E9; color: #FFF; padding: 12px 20px; border-radius: 30px; font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 8px; text-decoration: none; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);">
-        <i class="fa-brands fa-whatsapp text-lg"></i> Join Group
-    </a>
-</div>
+
 
 <?php include('footer.php'); ?>
 <script>

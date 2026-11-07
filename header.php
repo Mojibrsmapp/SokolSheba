@@ -1,11 +1,11 @@
 <?php 
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
 include_once("includes/configuration.php");
 
 if (isset($_SESSION['user_token'])) {
     $token_user = $_SESSION['user_token'];
-    
+
     $stmt = $conn->prepare("SELECT id, balance, email, name, token, mobile, image FROM users WHERE token = ?");
     $stmt->bind_param("s", $token_user);
     $stmt->execute();
@@ -19,7 +19,7 @@ if (isset($_SESSION['user_token'])) {
         $name = $row["name"];
         $token = $row["token"];
         $phone = $row["mobile"];
-        $user_image = (!empty($row["image"])) ? $row["image"] : 'assets/images/faces/face8.jpg';
+        $user_image = (!empty($row["image"])) ? $row["image"] : soko_brand('site_logo');
     } else {
         unset($_SESSION['user_token']);
         unset($_SESSION['user_id']);
@@ -52,22 +52,22 @@ $whatsapp_group_link = get_site_setting($conn, 'whatsapp_group', '#');
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Sokol Sheba - ড্যাশবোর্ড</title>
-    
+    <title><?php echo soko_e(soko_brand('site_name')); ?> - ড্যাশবোর্ড</title>
+
     <link rel="stylesheet" href="assets/vendors/feather/feather.css">
     <link rel="stylesheet" href="assets/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="assets/vendors/ti-icons/css/themify-icons.css">
     <link rel="stylesheet" href="assets/vendors/font-awesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="assets/vendors/css/vendor.bundle.base.css">
     <link rel="stylesheet" href="assets/css/style.css">
-    
-    <link rel="shortcut icon" href="/assets/logo.jpg" />
+
+    <link rel="shortcut icon" href="<?php echo soko_e(soko_brand('site_favicon')); ?>" />
     <link href="https://fonts.maateen.me/solaiman-lipi/font.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="assets/js/app_core.js"></script>
 
@@ -319,94 +319,19 @@ $whatsapp_group_link = get_site_setting($conn, 'whatsapp_group', '#');
     }
 
     </style>
+<style>.page-body-wrapper{padding-top:0!important}.main-panel{width:100%!important;margin-left:0!important}.content-wrapper{margin-top:0!important;padding-top:20px!important}</style>
 </head>
 <body class="with-welcome-text">
+    <?php include __DIR__ . '/includes/site_header.php'; ?>
     <div class="container-scroller">
-      
-      <nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
-        <div class="navbar-brand-wrapper d-flex align-items-center justify-content-start">
-          <div class="me-2">
-            <button class="navbar-toggler navbar-toggler align-self-center p-1 border-0 bg-transparent" type="button" data-bs-toggle="minimize">
-              <i class="fa-solid fa-bars-staggered" style="color: #078B38; font-size: 18px;"></i>
-            </button>
-          </div>
-          <div>
-            <a class="navbar-brand brand-logo" href="dashboard.php">
-              <img src="/assets/logo.jpg" alt="Sokol Sheba" />
-              <div class="brand-text-wrap d-none d-sm-flex">
-                <span class="brand-name">সকল সেবা</span>
-                <span class="brand-slogan">সব কাজ, এক প্ল্যাটফর্মে</span>
-              </div>
-            </a>
-          </div>
-        </div>
 
-        <div class="navbar-menu-wrapper d-flex align-items-center">
-          <ul class="navbar-nav ms-auto flex-row align-items-center"> 
-            <li class="nav-item">
-              <button class="balance-badge" onclick="location.href='recharge.php'" type="button">
-                <i class="fa-solid fa-wallet"></i>
-                <span id="balance-display"><?php echo htmlspecialchars($balance); ?></span> ৳
-              </button>
-            </li>
-            
-            <li class="nav-item dropdown user-dropdown ms-2">
-              <a class="nav-link p-0" id="UserDropdown" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-                <img class="rounded-circle" src="<?php echo htmlspecialchars($user_image); ?>" alt="Profile" style="width: 36px; height: 36px; object-fit: cover; border: 2px solid #078B38;"> 
-              </a>
-              <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
-                <div class="dropdown-header text-center">
-                  <img class="rounded-circle mb-2" src="<?php echo htmlspecialchars($user_image); ?>" alt="Profile" style="width: 44px; height: 44px; object-fit: cover; border: 2px solid #E51B23;">
-                  <p class="mb-0 fw-bold" style="color: #124D2B; font-size: 14px;"><?php echo htmlspecialchars($name); ?></p>
-                  <p class="mb-0 small" style="color: #53665A;"><?php echo htmlspecialchars($email); ?></p>
-                </div>
-                <a class="dropdown-item" href="profile.php"><i class="fa-solid fa-user-gear me-2" style="color: #078B38;"></i> প্রোফাইল</a>
-                <a class="dropdown-item" href="logout.php"><i class="fa-solid fa-power-off me-2" style="color: #E51B23;"></i> লগআউট</a>
-              </div>
-            </li>
-          </ul>
-
-          <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center p-0 border-0 bg-transparent ms-2" type="button" data-toggle="offcanvas">
-            <i class="fa-solid fa-bars" style="color: #078B38; font-size: 19px;"></i>
-          </button>
-        </div>
-      </nav>
 
       <div class="container-fluid page-body-wrapper">
-        <nav class="sidebar sidebar-offcanvas" id="sidebar">
-          <ul class="nav">
-            <li class="nav-item <?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
-              <a class="nav-link" href="dashboard.php"><i class="fa-solid fa-house-chimney menu-icon" style="color: #078B38;"></i><span class="menu-title">ড্যাশবোর্ড</span></a>
-            </li>
-            <li class="nav-item <?php echo ($current_page == 'serverCopy.php') ? 'active' : ''; ?>">
-              <a class="nav-link" href="serverCopy.php"><i class="fa-solid fa-server menu-icon" style="color: #078B38;"></i><span class="menu-title">অটো সার্ভার কপি</span></a>
-            </li>
-            <li class="nav-item <?php echo ($current_page == 'nid.php') ? 'active' : ''; ?>">
-              <a class="nav-link" href="nid.php"><i class="fa-solid fa-id-card menu-icon" style="color: #078B38;"></i><span class="menu-title">এনআইডি মেইক</span></a>
-            </li>
-            <li class="nav-item <?php echo ($current_page == 'recharge.php') ? 'active' : ''; ?>">
-              <a class="nav-link" href="recharge.php"><i class="fa-solid fa-wallet menu-icon" style="color: #078B38;"></i><span class="menu-title">রিচার্জ করুন</span></a>
-            </li>
-            <li class="nav-item <?php echo ($current_page == 'work_history.php') ? 'active' : ''; ?>">
-              <a class="nav-link" href="work_history.php"><i class="fa-solid fa-clock-rotate-left menu-icon" style="color: #078B38;"></i><span class="menu-title">কাজের হিস্টোরি</span></a>
-            </li>
-            <li class="nav-item <?php echo ($current_page == 'profile.php') ? 'active' : ''; ?>">
-              <a class="nav-link" href="profile.php"><i class="fa-solid fa-user-shield menu-icon" style="color: #078B38;"></i><span class="menu-title">প্রোফাইল</span></a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="logout.php"><i class="fa-solid fa-arrow-right-from-bracket menu-icon" style="color: #E51B23;"></i><span class="menu-title" style="color: #E51B23;">লগআউট</span></a>
-            </li>
-          </ul>
-        </nav>
+
 
         <div class="main-panel">
-          <div class="content-wrapper pt-0" style="margin-top: 65px;">
+          <div class="content-wrapper pt-0" style="margin-top: 0;">
 
-<div class="fixed bottom-5 right-5 z-50">
-    <a href="<?php echo htmlspecialchars($whatsapp_group_link); ?>" target="_blank" class="btn-join-whatsapp font-bold px-4 py-2.5 rounded-full flex items-center gap-2 text-xs transition transform hover:scale-105 text-decoration-none">
-        <i class="fa-brands fa-whatsapp text-base"></i> Join Group
-    </a>
-</div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -421,7 +346,7 @@ $whatsapp_group_link = get_site_setting($conn, 'whatsapp_group', '#');
                 if (response && response.balance !== undefined) {
                     const currentBalance = response.balance;
                     if (currentBalance !== previousBalance) {
-                        $('#balance-display').text(currentBalance);
+                        $('#balance-display, #ss-balance').text(currentBalance);
                         previousBalance = currentBalance;
                     }
                 }

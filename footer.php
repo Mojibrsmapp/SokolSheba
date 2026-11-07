@@ -1,26 +1,4 @@
-
-
-
-<?php 
-
-$id = 1;
-$query = "SELECT whatsapp_group FROM admin_user WHERE id = ?";
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-  $whatsapp_group = get_site_setting($conn, "whatsapp_group", "https://chat.whatsapp.com/KBeWP9QSjUQ1Gi7sfwErVy");
-} else {
-    $whatsapp_group = get_site_setting($conn, "whatsapp_group", "https://chat.whatsapp.com/KBeWP9QSjUQ1Gi7sfwErVy");
-}
-
-
-
-?>
-<div class=" position-fixed bottom-0 end-0 p-2"><a href="<?php echo $whatsapp_group; ?>"><button class="btn btn-success btn-rounded btn-icon"><i class="fab fa-whatsapp"></i> Join Group</button></a></div>
+</div>
 </div>
         <!-- main-panel ends -->
       </div>
@@ -48,3 +26,5 @@ if ($result->num_rows > 0) {
     <script src="assets/js/dashboard.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
+<?php include __DIR__ . '/includes/site_footer.php'; ?>

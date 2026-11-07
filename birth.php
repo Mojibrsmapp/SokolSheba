@@ -10,10 +10,10 @@ include('header.php');
 
 function saveBirthDataToDatabase($data) {
     global $conn;
-    
+
     $email = base64_decode($_SESSION["user_id"]);
     $unique_id = uniqid('hdbfnekfn_');
-    
+
     $query = "INSERT INTO birth_log (
         user, email, birthRegistrationNumber, officeAddressFirst, officeAddressSecond, 
         gender, dateOfRegistration, dateOfIssuance, barCode, qrLink, 
@@ -31,12 +31,12 @@ function saveBirthDataToDatabase($data) {
         ?, ?, ?, ?,
         ?, ?
     )";
-    
+
     $stmt = $conn->prepare($query);
-    
+
     date_default_timezone_set('Asia/Dhaka');
     $created_at = date('Y-m-d H:i:s');
-    
+
     $stmt->bind_param(
         "isssssssssssssssssssssssssss",
         $data['user_id'],
@@ -68,7 +68,7 @@ function saveBirthDataToDatabase($data) {
         $created_at,
         $unique_id
     );
-    
+
     if ($stmt->execute()) {
         return $unique_id;
     }
@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nameBangla'])) {
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
     $user_id = $user['id'] ?? 0;
-    
+
     $formData = [
         'user_id' => $user_id,
         'birthRegistrationNumber' => $_POST['birthRegistrationNumber'],
@@ -111,14 +111,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nameBangla'])) {
         'permanentAddressBangla' => $_POST['permanentAddressBangla'],
         'permanentAddressEnglish' => $_POST['permanentAddressEnglish']
     ];
-    
+
     $unique_id = saveBirthDataToDatabase($formData);
     if ($unique_id) {
         echo '<script>alert("Data saved successfully! Unique ID: ' . $unique_id . '");</script>';
-        
+
         $priceFile = 'api_key/birth_make.txt';
         $birth_make = file_exists($priceFile) ? (float)file_get_contents($priceFile) : 0;
-        
+
         if ($birth_make > 0) {
             $stmtBalance = $conn->prepare("SELECT balance FROM users WHERE email = ?");
             $stmtBalance->bind_param("s", $email);
@@ -126,14 +126,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nameBangla'])) {
             $resultBalance = $stmtBalance->get_result();
             $userBalance = $resultBalance->fetch_assoc();
             $currentBalance = $userBalance['balance'];
-            
+
             if ($currentBalance >= $birth_make) {
                 $newBalance = $currentBalance - $birth_make;
-                
+
                 $stmtUpdate = $conn->prepare("UPDATE users SET balance = ? WHERE email = ?");
                 $stmtUpdate->bind_param("ds", $newBalance, $email);
                 $stmtUpdate->execute();
-                
+
                 date_default_timezone_set('Asia/Dhaka');
                 $orderTime = date('Y-m-d H:i:s');
                 $stmtHistory = $conn->prepare("INSERT INTO history_work (email, order_type, price, current_balance, balance_after_cut, about_order, order_time) 
@@ -298,7 +298,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nameBangla'])) {
       </div>
     </div>
     <div class="col-md-3"></div>
-    
+
     <div class="col-md-12">
       <form method="POST" action="birth-bn.php" id="BrnBN" target="_blank">
             <div class="row">
@@ -486,40 +486,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nameBangla'])) {
                     </div>
                 </div>
             </div>
-        
+
             <button type="submit" class="btn btn-primary text-center d-block mx-auto" style="background: var(--brand-green); border-color: var(--brand-green);">ডাউনলোড করুন</button>
       </form>
     </div>
   </div>
 </div>
 
-<div class="mobile-bottom-nav">
-    <a href="dashboard.php" class="m-nav-link">
-        <i class="fa-solid fa-house"></i>
-        <span>হোম</span>
-    </a>
-
-    <a href="dashboard.php#all_services" class="m-nav-link active">
-        <i class="fa-solid fa-shapes"></i>
-        <span>সেবা</span>
-    </a>
-
-    <div class="m-nav-center">
-        <a href="recharge.php" class="m-nav-center-btn" title="রিচার্জ করুন">
-            <i class="fa-solid fa-bolt" style="color: #ffdd44;"></i>
-        </a>
-    </div>
-
-    <a href="work_history.php" class="m-nav-link">
-        <i class="fa-solid fa-wallet"></i>
-        <span>হিস্টোরি</span>
-    </a>
-
-    <a href="profile.php" class="m-nav-link">
-        <i class="fa-solid fa-user"></i>
-        <span>প্রোফাইল</span>
-    </a>
-</div>
 
 <?php include('footer.php'); ?>
 
@@ -690,7 +663,7 @@ function autoSelect(value) {
         barcodeCheckbox.checked = true;
         handleBarcodeCheckChange(barcodeCheckbox);
     }
-    
+
     var qrLinkCheckbox = document.getElementById('qrLink' + value);
     if (qrLinkCheckbox) {
         qrLinkCheckbox.checked = true;

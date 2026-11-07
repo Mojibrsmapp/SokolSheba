@@ -200,7 +200,7 @@ function soko_receipt_is_file($value)
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>পেমেন্ট রশিদ #<?php echo soko_h($receipt_no); ?> — <?php echo soko_h($service_title); ?></title>
-<link rel="shortcut icon" href="assets/logo.jpg">
+<link rel="shortcut icon" href="<?php echo soko_e(soko_brand('site_favicon')); ?>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -355,18 +355,20 @@ table.kv tr.total td.v{font-size:22px;color:var(--green-dark);font-weight:700}
   @page{size:A4;margin:8mm}
 }
 </style>
+<style>body{padding:0}.sheet{margin:16px auto}@media print{.sheet{margin:0}}</style>
 </head>
 <body>
+<?php include __DIR__ . '/includes/site_header.php'; ?>
 
 <div class="sheet">
 
   <div class="head">
     <div class="head-in">
       <div class="h-brand">
-        <span class="h-logo"><img src="assets/logo.jpg" alt="সকল সেবা"></span>
+        <span class="h-logo"><img src="<?php echo soko_e(soko_brand('site_logo')); ?>" alt="সকল সেবা"></span>
         <span>
-          <span class="h-name">সকল <em>সেবা</em></span>
-          <span class="h-tag">সব কাজ, এক প্ল্যাটফর্ম</span>
+          <span class="h-name"><?php echo soko_e(soko_brand('site_name')); ?></span>
+          <span class="h-tag"><?php echo soko_e(soko_brand('site_tagline')); ?></span>
         </span>
       </div>
       <div class="h-panel">আপনার বিশ্বস্ত<br>অনলাইন সেবা কেন্দ্র</div>
@@ -414,7 +416,7 @@ table.kv tr.total td.v{font-size:22px;color:var(--green-dark);font-weight:700}
     <!-- service -->
     <div class="seg has-mark">
       <div class="seg-pill"><i class="fa-solid fa-layer-group"></i> সেবার বিবরণ</div>
-      <div class="watermark"><img src="assets/logo.jpg" alt=""></div>
+      <div class="watermark"><img src="<?php echo soko_e(soko_brand('site_logo')); ?>" alt=""></div>
       <table class="kv" style="max-width:470px">
         <tr><td class="k">সেবার নাম</td><td class="v"><?php echo soko_h($service_title); ?></td></tr>
         <tr><td class="k">সেবার ধরন</td><td class="v"><?php echo soko_h($category); ?></td></tr>
@@ -467,7 +469,7 @@ table.kv tr.total td.v{font-size:22px;color:var(--green-dark);font-weight:700}
               <div class="mc-check"><i class="fa-solid <?php echo $is_paid ? 'fa-check' : 'fa-clock'; ?>"></i></div>
               <div class="mc-title"><?php echo $is_paid ? 'পেমেন্ট সফল' : 'যাচাই চলছে'; ?></div>
               <div class="mc-row"><span>পরিমাণ</span><b><?php echo soko_money($amount); ?></b></div>
-              <div class="mc-row"><span>প্রাপক</span><b>সকল সেবা</b></div>
+              <div class="mc-row"><span>প্রাপক</span><b><?php echo soko_e(soko_brand('site_name')); ?></b></div>
               <div class="mc-row"><span>ট্রানজেকশন আইডি</span><b><?php echo soko_h($trx_display); ?></b></div>
               <div class="mc-row"><span>তারিখ ও সময়</span><b><?php echo soko_bn_date($paid_at); ?></b></div>
             </div>
@@ -542,7 +544,7 @@ table.kv tr.total td.v{font-size:22px;color:var(--green-dark);font-weight:700}
       </div>
       <div class="fs center">
         <b>ধন্যবাদ</b>
-        <small>সকল সেবার সাথে থাকার জন্য!</small>
+        <small><?php echo soko_e(soko_brand('site_name')); ?>-এর সাথে থাকার জন্য!</small>
       </div>
       <div class="fs">
         <i class="fa-solid fa-shield-halved"></i>
@@ -572,5 +574,6 @@ table.kv tr.total td.v{font-size:22px;color:var(--green-dark);font-weight:700}
   <a class="btn ghost" href="dashboard.php"><i class="fa-solid fa-house"></i> ড্যাশবোর্ড</a>
 </div>
 
+<?php include __DIR__ . '/includes/site_footer.php'; ?>
 </body>
 </html>

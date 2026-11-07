@@ -134,14 +134,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>কাস্টম ও ফাইল অর্ডার - Sokol Sheba</title>
+    <title>কাস্টম ও ফাইল অর্ডার - <?php echo soko_e(soko_brand('site_name')); ?></title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/maateen/bangla-fonts/Nikosh/stylesheet.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" href="/assets/logo.jpg">
+    <link rel="shortcut icon" href="<?php echo soko_e(soko_brand('site_favicon')); ?>">
 
     <style>
         :root {
@@ -486,19 +486,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
 </head>
 <body>
 
-    <header class="bg-white sticky top-0 z-40 border-b border-[#DFEBE1] shadow-sm">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="dashboard.php" class="flex items-center gap-2 text-[#078B38] font-black text-sm hover:underline">
-                <i class="fa-solid fa-arrow-left"></i>
-                <span>ড্যাশবোর্ড</span>
-            </a>
-            <div class="flex items-center gap-2 bg-[#EAF6EE] border border-[#C8E3CF] px-3.5 py-1.5 rounded-full">
-                <i class="fa-solid fa-wallet text-[#078B38] text-xs"></i>
-                <span class="text-xs font-bold text-[#53665A]">ব্যালেন্স:</span>
-                <span class="text-xs font-black text-[#078B38]">৳ <?php echo number_format($user_balance, 2); ?></span>
-            </div>
-        </div>
-    </header>
+    <?php include __DIR__ . '/includes/site_header.php'; ?>
 
     <main class="max-w-4xl mx-auto px-4 py-5 md:py-7">
 
@@ -508,7 +496,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
                     <i class="fa-solid fa-file-arrow-up text-[#078B38]"></i>
                     <span>কাস্টম ও ফাইল সার্ভিস অর্ডার</span>
                 </h2>
-                <span class="service-badge">Sokol Sheba</span>
+                <span class="service-badge"><?php echo soko_e(soko_brand('site_name')); ?></span>
             </div>
 
             <div class="order-card-body">
@@ -598,33 +586,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
 
     </main>
 
-    <div class="mobile-bottom-nav">
-        <a href="dashboard.php" class="m-nav-link">
-            <i class="fa-solid fa-house"></i>
-            <span>হোম</span>
-        </a>
-
-        <a href="dashboard.php#all_services" class="m-nav-link active">
-            <i class="fa-solid fa-shapes"></i>
-            <span>সেবা</span>
-        </a>
-
-        <div class="m-nav-center">
-            <a href="recharge.php" class="m-nav-center-btn" title="রিচার্জ করুন">
-                <i class="fa-solid fa-bolt" style="color: #ffdd44;"></i>
-            </a>
-        </div>
-
-        <a href="work_history.php" class="m-nav-link">
-            <i class="fa-solid fa-wallet"></i>
-            <span>হিস্টোরি</span>
-        </a>
-
-        <a href="profile.php" class="m-nav-link">
-            <i class="fa-solid fa-user"></i>
-            <span>প্রোফাইল</span>
-        </a>
-    </div>
 
     <script>
         $(document).ready(function() {
@@ -737,5 +698,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_order'])) {
             });
         <?php endif; ?>
     </script>
+<?php include __DIR__ . '/includes/site_footer.php'; ?>
 </body>
 </html>

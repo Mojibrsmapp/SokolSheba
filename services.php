@@ -6,7 +6,7 @@ include_once("includes/service_catalog.php");
 
 if (isset($_SESSION['user_token'])) {
     $token_user = $_SESSION['user_token'];
-    
+
     $stmt = $conn->prepare("SELECT id, balance, email, name, token, mobile, image FROM users WHERE token = ?");
     if ($stmt) {
         $stmt->bind_param("s", $token_user);
@@ -35,15 +35,8 @@ if (isset($_SESSION['user_token'])) {
 }
 
 // সাইট সেটিংস (সাপোর্ট / হোয়াটসঅ্যাপ)
-$settings_data = [];
-$q_set = @$conn->query("SELECT setting_key, setting_value FROM site_settings");
-if ($q_set) {
-    while ($rs = $q_set->fetch_assoc()) {
-        $settings_data[$rs['setting_key']] = $rs['setting_value'];
-    }
-}
-$support_num = !empty($settings_data['support_whatsapp_num']) ? $settings_data['support_whatsapp_num'] : '01849207118';
-$whatsapp_link = !empty($settings_data['whatsapp_group']) ? $settings_data['whatsapp_group'] : 'https://wa.me/88' . preg_replace('/[^0-9]/', '', $support_num);
+$whatsapp_link = soko_whatsapp_url();
+
 
 // Database theke custom_services gulo category onujayi group kora
 $services_by_cat = [];
@@ -119,9 +112,9 @@ $search_q = isset($_GET['q']) ? trim($_GET['q']) : '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title><?php echo $is_cat_page ? htmlspecialchars($hero_cat) . ' - ' : 'সকল সেবাসমূহ - '; ?>সকল সেবা</title>
+    <title><?php echo $is_cat_page ? soko_e($hero_cat) . ' - ' : 'সেবাসমূহ - '; ?><?php echo soko_e(soko_brand('site_name')); ?></title>
 
-    <link rel="shortcut icon" href="assets/logo.jpg">
+    <link rel="shortcut icon" href="<?php echo soko_e(soko_brand('site_favicon')); ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -278,35 +271,7 @@ $search_q = isset($_GET['q']) ? trim($_GET['q']) : '';
 <body>
 
 <!-- ================= header ================= -->
-<header class="topbar">
-    <div class="topbar-in">
-        <a href="dashboard.php" class="brand">
-            <img src="assets/logo.jpg" alt="সকল সেবা">
-            <span>
-                <b>সকল <em>সেবা</em></b>
-                <small>সব কাজ, এক প্লাটফর্ম</small>
-            </span>
-        </a>
-        <div class="top-actions">
-            <a href="recharge.php" class="wallet">
-                <i class="fa-solid fa-wallet"></i>
-                <span>
-                    <small>ওয়ালেট</small>
-                    <b>৳ <?php echo number_format((float)$balance, 2); ?></b>
-                </span>
-            </a>
-            <a href="support.php" class="ib" aria-label="নোটিফিকেশন"><i class="fa-regular fa-bell"></i><span class="dot"></span></a>
-            <button type="button" class="ib" id="menuBtn" aria-label="মেনু"><i class="fa-solid fa-bars"></i></button>
-        </div>
-    </div>
-    <div class="menu-panel" id="menuPanel">
-        <a href="dashboard.php"><i class="fa-solid fa-house"></i> হোম</a>
-        <a href="recharge.php"><i class="fa-solid fa-wallet"></i> ওয়ালেট</a>
-        <a href="work_history.php"><i class="fa-solid fa-file-invoice"></i> অর্ডার হিস্টরি</a>
-        <a href="profile.php"><i class="fa-regular fa-user"></i> প্রোফাইল</a>
-        <a href="support.php"><i class="fa-solid fa-headset"></i> সাপোর্ট</a>
-    </div>
-</header>
+<?php include __DIR__ . '/includes/site_header.php'; ?>
 
 <!-- ================= breadcrumb ================= -->
 <div class="crumb">
@@ -453,16 +418,7 @@ $search_q = isset($_GET['q']) ? trim($_GET['q']) : '';
 </main>
 
 <!-- ================= bottom nav ================= -->
-<nav class="bnav">
-    <div class="bnav-in">
-        <a href="dashboard.php"><i class="fa-solid fa-house"></i><span>হোম</span></a>
-        <a href="services.php" class="is-on"><i class="fa-solid fa-table-cells-large"></i><span>সেবা</span></a>
-        <a href="services.php" class="fab" aria-label="অর্ডার"><i class="fa-solid fa-bolt"></i></a>
-        <span class="spacer"></span>
-        <a href="recharge.php"><i class="fa-solid fa-wallet"></i><span>ওয়ালেট</span></a>
-        <a href="profile.php"><i class="fa-regular fa-user"></i><span>প্রোফাইল</span></a>
-    </div>
-</nav>
+
 
 <script>
 (function () {
@@ -537,5 +493,6 @@ $search_q = isset($_GET['q']) ? trim($_GET['q']) : '';
     });
 })();
 </script>
+<?php include __DIR__ . '/includes/site_footer.php'; ?>
 </body>
 </html>

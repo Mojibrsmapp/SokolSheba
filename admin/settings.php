@@ -1,5 +1,22 @@
 <?php
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 include_once("includes/configuration.php");
+
+// Authorize before processing settings or uploads (not only when rendering header).
+if (empty($_SESSION['admin_token'])) {
+    header('Location: index.php');
+    exit;
+}
+$auth = $conn->prepare('SELECT id FROM admin_user WHERE token = ? LIMIT 1');
+$auth->bind_param('s', $_SESSION['admin_token']);
+$auth->execute();
+$authorized = $auth->get_result()->fetch_assoc();
+$auth->close();
+if (!$authorized) {
+    header('Location: index.php');
+    exit;
+}
+if (empty($_SESSION['settings_csrf'])) $_SESSION['settings_csrf'] = bin2hex(random_bytes(32));
 
 $conn->query("CREATE TABLE IF NOT EXISTS `site_settings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -9,54 +26,77 @@ $conn->query("CREATE TABLE IF NOT EXISTS `site_settings` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;");
 
-$msg = "";
-$msg_type = "";
-
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_settings'])) {
-    if (isset($_POST['settings']) && is_array($_POST['settings'])) {
-        $stmt = $conn->prepare("INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = ?");
+$msg = '';
+$msg_type = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_settings'])) {
+    $uploaded_paths = [];
+    try {
+        if (!is_string($_POST['csrf_token'] ?? null) || !hash_equals($_SESSION['settings_csrf'], $_POST['csrf_token'])) {
+            throw new RuntimeException('সেশন যাচাই ব্যর্থ। পেজ রিফ্রেশ করে আবার চেষ্টা করুন।');
+        }
+        $allowed_keys = array_merge(array_keys(soko_brand_fields()), ['whatsapp_group','telegram_link','support_whatsapp_num','bkash_number','nagad_number','rocket_number','upay_number']);
+        $values = [];
+        if (!is_array($_POST['settings'] ?? null)) throw new RuntimeException('সেটিংস সঠিক নয়।');
         foreach ($_POST['settings'] as $key => $val) {
-            $key_clean = trim($key);
-            $val_clean = trim($val);
-            $stmt->bind_param("sss", $key_clean, $val_clean, $val_clean);
-            $stmt->execute();
+            if (!in_array($key, $allowed_keys, true) || !is_string($val)) throw new RuntimeException('সেটিংস সঠিক নয়।');
+            $val = trim($val);
+            if (strlen($val) > 10000) throw new RuntimeException('সেটিংসের তথ্য অতিরিক্ত দীর্ঘ।');
+            if ($key === 'site_name' && ($val === '' || strlen($val) > 200)) throw new RuntimeException('সাইটের নাম দিন (সর্বোচ্চ ২০০ বাইট)।');
+            if ($key === 'support_email' && $val !== '' && !filter_var($val, FILTER_VALIDATE_EMAIL)) throw new RuntimeException('সঠিক সাপোর্ট ইমেইল দিন।');
+            if (in_array($key, ['site_logo','nav_logo','site_favicon','whatsapp_group','telegram_link'], true) && $val !== '' && soko_safe_url($val, '') === '') throw new RuntimeException('লোগো বা লিংক: HTTPS URL অথবা assets/uploads-এর ফাইল পাথ দিন।');
+            $values[$key] = $val;
+        }
+        foreach (['site_logo','nav_logo','site_favicon'] as $key) {
+            $file = $_FILES[$key . '_upload'] ?? null;
+            if (!$file || $file['error'] === UPLOAD_ERR_NO_FILE) continue;
+            if ($file['error'] !== UPLOAD_ERR_OK || $file['size'] > 2 * 1024 * 1024) throw new RuntimeException('প্রতিটি লোগো সর্বোচ্চ ২ MB হতে হবে।');
+            $image = @getimagesize($file['tmp_name']);
+            $types = ['image/jpeg'=>'jpg','image/png'=>'png','image/webp'=>'webp','image/gif'=>'gif'];
+            if (!$image || !isset($types[$image['mime']]) || $image[0] > 4096 || $image[1] > 4096) throw new RuntimeException('সঠিক JPG, PNG, WebP বা GIF ছবি দিন (সর্বোচ্চ 4096×4096)।');
+            $directory = dirname(__DIR__) . '/uploads/branding';
+            if (!is_dir($directory) && !mkdir($directory, 0755, true)) throw new RuntimeException('লোগো ফোল্ডার তৈরি করা যায়নি।');
+            $filename = bin2hex(random_bytes(16)) . '.' . $types[$image['mime']];
+            $destination = $directory . '/' . $filename;
+            if (!move_uploaded_file($file['tmp_name'], $destination)) throw new RuntimeException('লোগো আপলোড করা যায়নি।');
+            $uploaded_paths[] = $destination;
+            $values[$key] = '/uploads/branding/' . $filename;
+        }
+        $conn->begin_transaction();
+        $stmt = $conn->prepare('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)');
+        if (!$stmt) throw new RuntimeException('সেটিংস সংরক্ষণ করা যায়নি।');
+        foreach ($values as $key => $val) {
+            $stmt->bind_param('ss', $key, $val);
+            if (!$stmt->execute()) throw new RuntimeException('সেটিংস সংরক্ষণ করা যায়নি।');
         }
         $stmt->close();
-
-        $method_sync_map = [
-            'bkash_number'  => ['key' => 'bkash',  'name' => 'bKash'],
-            'nagad_number'  => ['key' => 'nagad',  'name' => 'Nagad'],
-            'rocket_number' => ['key' => 'rocket', 'name' => 'Rocket'],
-            'upay_number'   => ['key' => 'upay',   'name' => 'Upay']
-        ];
-
-        $has_pay_table = @$conn->query("SHOW TABLES LIKE 'payment_settings'");
+        $has_pay_table = $conn->query("SHOW TABLES LIKE 'payment_settings'");
         if ($has_pay_table && $has_pay_table->num_rows > 0) {
-            $p_stmt = $conn->prepare("INSERT INTO payment_settings (method_key, method_name, number, type) VALUES (?, ?, ?, 'Personal') ON DUPLICATE KEY UPDATE number = ?");
-            foreach ($method_sync_map as $set_key => $m_data) {
-                if (isset($_POST['settings'][$set_key])) {
-                    $m_num = trim($_POST['settings'][$set_key]);
-                    $p_stmt->bind_param("ssss", $m_data['key'], $m_data['name'], $m_num, $m_num);
-                    $p_stmt->execute();
-                }
+            $p_stmt = $conn->prepare("INSERT INTO payment_settings (method_key, method_name, number, type) VALUES (?, ?, ?, 'Personal') ON DUPLICATE KEY UPDATE number = VALUES(number)");
+            if (!$p_stmt) throw new RuntimeException('পেমেন্ট সেটিংস সংরক্ষণ করা যায়নি।');
+            foreach (['bkash'=>'bKash','nagad'=>'Nagad','rocket'=>'Rocket','upay'=>'Upay'] as $method => $label) {
+                if (!isset($values[$method . '_number'])) continue;
+                $number = $values[$method . '_number'];
+                $p_stmt->bind_param('sss', $method, $label, $number);
+                if (!$p_stmt->execute()) throw new RuntimeException('পেমেন্ট সেটিংস সংরক্ষণ করা যায়নি।');
             }
             $p_stmt->close();
         }
-
-        $msg = "সকল সেটিংস সফলভাবে সংরক্ষিত হয়েছে!";
-        $msg_type = "success";
+        $conn->commit();
+        // Redirect clears the per-request branding cache and prevents repeat uploads.
+        header('Location: settings.php?saved=1');
+        exit;
+    } catch (Throwable $error) {
+        $conn->rollback();
+        foreach ($uploaded_paths as $path) @unlink($path);
+        $msg = $error instanceof RuntimeException ? $error->getMessage() : 'সেটিংস সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।';
+        $msg_type = 'error';
     }
 }
-
+if (isset($_GET['saved'])) { $msg = 'সকল সেটিংস সফলভাবে সংরক্ষিত হয়েছে!'; $msg_type = 'success'; }
 $settings = [];
-$res = $conn->query("SELECT setting_key, setting_value FROM site_settings");
-if ($res) {
-    while ($row = $res->fetch_assoc()) {
-        $settings[$row['setting_key']] = $row['setting_value'];
-    }
-}
+$res = $conn->query('SELECT setting_key, setting_value FROM site_settings');
+if ($res) while ($row = $res->fetch_assoc()) $settings[$row['setting_key']] = $row['setting_value'];
 ?>
-
 <?php include_once("header.php"); ?>
 
 <div class="space-y-6 max-w-5xl mx-auto">
@@ -83,7 +123,28 @@ if ($res) {
     </div>
     <?php endif; ?>
 
-    <form method="POST" action="" class="space-y-6">
+    <form method="POST" action="" enctype="multipart/form-data" class="space-y-6">
+        <input type="hidden" name="csrf_token" value="<?php echo soko_e($_SESSION['settings_csrf']); ?>">
+        <div class="bg-white p-5 md:p-6 rounded-3xl border border-slate-200/90 shadow-sm space-y-5">
+            <h4 class="text-sm font-extrabold text-slate-800">সাইটের পরিচয় ও লোগো</h4>
+            <p class="text-xs text-slate-500">সব পেজের নাম, হেডার লোগো, favicon ও প্রোফাইলের ডিফল্ট ছবি এখান থেকে নিয়ন্ত্রণ করুন। ছবি আপলোড করলে সেটি URL-এর পরিবর্তে ব্যবহৃত হবে।</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <?php foreach (soko_brand_fields() as $brand_key => $brand_field): if ($brand_key === 'site_notice') continue;
+                $is_image = in_array($brand_key, ['site_logo','nav_logo','site_favicon'], true);
+                $current_value = $settings[$brand_key] ?? $brand_field[1];
+            ?>
+                <div class="space-y-2">
+                    <label for="brand-<?php echo $brand_key; ?>" class="block text-xs font-bold text-slate-700"><?php echo soko_e($brand_field[0]); ?></label>
+                    <input id="brand-<?php echo $brand_key; ?>" type="<?php echo $brand_key === 'support_email' ? 'email' : 'text'; ?>" name="settings[<?php echo $brand_key; ?>]" value="<?php echo soko_e($current_value); ?>" <?php echo $brand_key === 'site_name' ? 'required maxlength="200"' : ''; ?> class="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-700 bg-slate-50" placeholder="<?php echo $is_image ? 'https://... অথবা /uploads/...' : ''; ?>">
+                    <?php if ($is_image): ?>
+                        <img src="<?php echo soko_e(soko_safe_url($current_value, soko_brand('site_logo'))); ?>" alt="বর্তমান লোগো" class="w-16 h-16 object-contain rounded-xl border border-slate-200 bg-white">
+                        <input type="file" name="<?php echo $brand_key; ?>_upload" accept="image/png,image/jpeg,image/webp,image/gif" aria-label="<?php echo soko_e($brand_field[0]); ?> আপলোড" class="w-full text-xs text-slate-600">
+                        <p class="text-xs text-slate-400">PNG, JPG, WebP, GIF • সর্বোচ্চ ২ MB</p>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+            </div>
+        </div>
 
         <div class="bg-white p-5 md:p-6 rounded-3xl border border-slate-200/90 shadow-sm space-y-5">
             <div class="flex items-center gap-2 pb-3 border-b border-slate-100">

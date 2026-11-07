@@ -59,7 +59,7 @@ $stmt->close();
     <link rel="stylesheet" href="assets/vendors/css/vendor.bundle.base.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" href="/assets/logo.jpg" />
+    <link rel="shortcut icon" href="<?php echo soko_e(soko_brand('site_favicon')); ?>" />
 
     <style>
         * {
@@ -178,7 +178,7 @@ $stmt->close();
             <!-- Branding Header -->
             <div class="text-center mb-6">
                 <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/10 border border-white/20 p-2 shadow-inner flex items-center justify-center">
-                    <img src="/assets/logo.jpg" alt="Sokol Kaj Logo" class="w-full h-full object-cover rounded-xl">
+                    <img src="<?php echo soko_e(soko_brand('site_logo')); ?>" alt="Sokol Kaj Logo" class="w-full h-full object-cover rounded-xl">
                 </div>
                 <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold text-amber-300 bg-amber-400/15 border border-amber-400/25 mb-2">
                     <i class="fa-solid fa-shield-halved"></i> SECURE ADMIN PORTAL

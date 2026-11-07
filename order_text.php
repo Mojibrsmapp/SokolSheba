@@ -115,14 +115,14 @@ if ($h_stmt) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>অর্ডার টেক্সট সার্ভিস - Sokol Sheba</title>
-    
+    <title>অর্ডার টেক্সট সার্ভিস - <?php echo soko_e(soko_brand('site_name')); ?></title>
+
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="shortcut icon" type="image/jpeg" href="/assets/logo.jpg">
-    
+    <link rel="shortcut icon" type="image/jpeg" href="<?php echo soko_e(soko_brand('site_favicon')); ?>">
+
     <style>
         :root {
             --brand-green: #078B38;
@@ -308,22 +308,12 @@ if ($h_stmt) {
 </head>
 <body>
 
-    <header class="top-navbar">
-        <div class="flex items-center gap-2">
-            <a href="dashboard.php" class="flex items-center gap-2 text-decoration-none">
-                <img src="/assets/logo.jpg" alt="Sokol Sheba" class="header-logo">
-                <span class="font-extrabold text-sm text-[#124D2B] d-none sm:inline">Sokol Sheba</span>
-            </a>
-        </div>
-        <div class="balance-badge-top" onclick="location.href='recharge.php'">
-            <i class="fa-solid fa-wallet text-xs"></i> <span><?php echo htmlspecialchars($balance); ?> ৳</span>
-        </div>
-    </header>
+    <?php include __DIR__ . '/includes/site_header.php'; ?>
 
     <div class="max-w-4xl mx-auto px-3 py-6">
 
         <div class="bg-white rounded-3xl p-6 border border-[#DFEBE1] shadow-sm mb-6">
-            
+
             <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
                 <a href="dashboard.php" class="text-xs font-bold text-[#53665A] hover:text-[#078B38] flex items-center gap-1.5">
                     <i class="fa-solid fa-arrow-left"></i> ড্যাশবোর্ডে ফিরুন
@@ -447,33 +437,6 @@ if ($h_stmt) {
 
     </div>
 
-    <div class="mobile-bottom-nav">
-        <a href="dashboard.php" class="m-nav-link">
-            <i class="fa-solid fa-house"></i>
-            <span>হোম</span>
-        </a>
-
-        <a href="dashboard.php#all_services" class="m-nav-link active">
-            <i class="fa-solid fa-shapes"></i>
-            <span>সেবা</span>
-        </a>
-
-        <div class="m-nav-center">
-            <a href="recharge.php" class="m-nav-center-btn" title="রিচার্জ করুন">
-                <i class="fa-solid fa-bolt" style="color: #ffdd44;"></i>
-            </a>
-        </div>
-
-        <a href="work_history.php" class="m-nav-link">
-            <i class="fa-solid fa-wallet"></i>
-            <span>হিস্টোরি</span>
-        </a>
-
-        <a href="profile.php" class="m-nav-link">
-            <i class="fa-solid fa-user"></i>
-            <span>প্রোফাইল</span>
-        </a>
-    </div>
 
     <script>
         function selectTextService(el, srvId) {
@@ -486,5 +449,6 @@ if ($h_stmt) {
             $('#submitBtnText').text(`অর্ডার কনফার্ম করুন (৳ ${price})`);
         }
     </script>
+<?php include __DIR__ . '/includes/site_footer.php'; ?>
 </body>
 </html>
