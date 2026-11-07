@@ -42,6 +42,7 @@ $is_active = (strtolower(trim((string)$service['status'])) === 'active');
 $wallet_balance = (float)$user['balance'];
 $channels = soko_payment_channels($conn);
 $service_icon = soko_service_icon($service_title, $category);
+$default_method = ($total_payable > 0 && $wallet_balance >= $total_payable) ? 'wallet' : 'mobile';
 
 $errors = array();
 $old_values = array();
@@ -49,7 +50,7 @@ $old_values = array();
 if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['place_order'])) {
 
     $payment_method = isset($_POST['payment_method']) ? strtolower(trim($_POST['payment_method'])) : 'mobile';
-    if ($payment_method !== 'mobile' && $payment_method !== 'bank' && $payment_method !== 'wallet') {
+    if ($payment_method !== 'wallet') {
         $payment_method = 'mobile';
     }
 
@@ -64,7 +65,7 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
         $key = $field['key'];
         $type = $field['type'];
         $label = $field['title'];
-        $is_required = (int)$field['required'] === 1;
+        $is_required = false; // all fields are optional by design
 
         if ($type === 'file') {
             $file_key = 'file_' . $key;
@@ -103,28 +104,6 @@ if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &
             }
             $submitted[$label] = '';
             continue;
-        }
-
-        if ($type === 'date') {
-            $check = DateTime::createFromFormat('Y-m-d', $value);
-            if (!$check) {
-                $errors[] = $label . ': সঠিক তারিখ নির্বাচন করুন।';
-            }
-        }
-
-        if ($key === 'mobile' || strpos(strtolower($label), 'মোবাইল') !== false) {
-            $digits = preg_replace('/[^0-9]/', '', $value);
-            if ($key === 'mobile' && strlen($digits) !== 11) {
-                $errors[] = 'মোবাইল নম্বর ১১ ডিজিটের হতে হবে।';
-            }
-        }
-
-        if ($key === 'nid') {
-            $digits = preg_replace('/[^0-9]/', '', $value);
-            $allowed_lengths = array(10, 12, 13, 17);
-            if (!in_array(strlen($digits), $allowed_lengths, true)) {
-                $errors[] = 'NID / ফরম নম্বর ১০, ১২, ১৩ অথবা ১৭ ডিজিটের হতে হবে।';
-            }
         }
 
         $submitted[$label] = $value;
@@ -527,6 +506,7 @@ button{font-family:inherit}
   </ol>
 
   <form method="post" action="service_order.php?id=<?php echo (int)$service['id']; ?>" enctype="multipart/form-data" id="orderForm" novalidate>
+    <input type="hidden" name="place_order" value="1">
     <div class="grid">
 
       <!-- left: information -->
@@ -534,7 +514,7 @@ button{font-family:inherit}
         <div class="card-head">
           <span class="ch-ic"><i class="fa-solid fa-user"></i></span>
           <h2>ব্যক্তিগত তথ্য</h2>
-          <span class="req-note">* আবশ্যক পূরণ করতে হবে</span>
+          <span class="req-note" style="color:#0B7A3B;background:#EAF6EE;border-radius:99px;padding:3px 9px;font-weight:600">সব ঘর ঐচ্ছিক</span>
         </div>
         <div class="card-body">
           <?php foreach ($fields as $field): ?>
@@ -543,7 +523,7 @@ button{font-family:inherit}
               $type = $field['type'];
               $input_id = 'f_' . $key;
               $current = isset($old_values[$key]) ? $old_values[$key] : '';
-              $star = ((int)$field['required'] === 1) ? ' <span class="star">*</span>' : '';
+              $star = ''; // সব ফিল্ড ঐচ্ছিক
             ?>
 
             <?php if ($type === 'file'): ?>
@@ -561,7 +541,7 @@ button{font-family:inherit}
             <?php elseif ($type === 'textarea'): ?>
               <div class="field">
                 <label class="flabel" for="<?php echo soko_h($input_id); ?>"><?php echo soko_h($field['title']); ?><?php echo $star; ?></label>
-                <textarea class="textarea" id="<?php echo soko_h($input_id); ?>" name="field_<?php echo soko_h($key); ?>" placeholder="<?php echo soko_h($field['placeholder']); ?>" <?php echo ((int)$field['required'] === 1) ? 'required' : ''; ?>><?php echo soko_h($current); ?></textarea>
+                <textarea class="textarea" id="<?php echo soko_h($input_id); ?>" name="field_<?php echo soko_h($key); ?>" placeholder="<?php echo soko_h($field['placeholder']); ?>" ><?php echo soko_h($current); ?></textarea>
               </div>
 
             <?php else: ?>
@@ -576,7 +556,7 @@ button{font-family:inherit}
                     value="<?php echo soko_h($current); ?>"
                     placeholder="<?php echo soko_h($field['placeholder']); ?>"
                     <?php echo $type === 'tel' ? 'inputmode="numeric" maxlength="14"' : ''; ?>
-                    <?php echo ((int)$field['required'] === 1) ? 'required' : ''; ?>>
+                    >
                 </div>
               </div>
             <?php endif; ?>
@@ -616,7 +596,7 @@ button{font-family:inherit}
           <div class="pay-title"><i class="fa-solid fa-money-check-dollar"></i> পেমেন্ট পদ্ধতি</div>
 
           <label class="pay-opt" data-pay="mobile">
-            <input type="radio" name="payment_method" value="mobile" checked>
+            <input type="radio" name="payment_method" value="mobile" <?php echo $default_method === 'mobile' ? 'checked' : ''; ?>>
             <span class="po-main">
               <b>মোবাইল ব্যাংকিং</b>
               <span class="logos">
@@ -628,17 +608,8 @@ button{font-family:inherit}
             <i class="fa-solid fa-mobile-screen-button po-ic"></i>
           </label>
 
-          <label class="pay-opt" data-pay="bank">
-            <input type="radio" name="payment_method" value="bank">
-            <span class="po-main">
-              <b>ব্যাংক ট্রান্সফার</b>
-              <small>অ্যাকাউন্টে টাকা পাঠিয়ে অর্ডার করুন</small>
-            </span>
-            <i class="fa-solid fa-building-columns po-ic"></i>
-          </label>
-
           <label class="pay-opt" data-pay="wallet">
-            <input type="radio" name="payment_method" value="wallet">
+            <input type="radio" name="payment_method" value="wallet" <?php echo $default_method === 'wallet' ? 'checked' : ''; ?>>
             <span class="po-main">
               <b>ওয়ালেট ব্যালেন্স</b>
               <small>আপনার ব্যালেন্স: <?php echo soko_money($wallet_balance, 2); ?></small>
@@ -654,7 +625,7 @@ button{font-family:inherit}
             </div>
           </div>
 
-          <button type="submit" name="place_order" value="1" class="btn-order" id="orderBtn">
+          <button type="submit" class="btn-order" id="orderBtn">
             <i class="fa-solid fa-cart-shopping"></i> অর্ডার করুন <i class="fa-solid fa-arrow-right" style="font-size:13px"></i>
           </button>
         </div>
@@ -715,8 +686,10 @@ button{font-family:inherit}
     form.addEventListener('submit', function () {
       var btn = document.getElementById('orderBtn');
       if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> প্রসেস হচ্ছে...';
+        setTimeout(function () {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> প্রসেস হচ্ছে...';
+        }, 0);
       }
     });
   }

@@ -511,7 +511,6 @@ if (!function_exists('soko_payment_label')) {
         $map = array(
             'mobile' => 'মোবাইল ব্যাংকিং',
             'mobile_banking' => 'মোবাইল ব্যাংকিং',
-            'bank' => 'ব্যাংক ট্রান্সফার',
             'wallet' => 'ওয়ালেট ব্যালেন্স',
         );
         $key = strtolower(trim((string)$method));

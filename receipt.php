@@ -26,7 +26,7 @@ if (!$order) {
 $is_new = isset($_GET['new']) && (string)$_GET['new'] === '1';
 
 $parsed = soko_read_payment_note($order['input_data']);
-$payment_method = $parsed['payment'];          // wallet | mobile | bank
+$payment_method = $parsed['payment'];          // wallet | mobile
 $detail_rows = $parsed['rows'];
 
 $state = soko_order_payment_state($conn, $order);   // wallet|verified|pending|rejected|unpaid

@@ -265,6 +265,7 @@ button{font-family:inherit}
   <?php endif; ?>
 
   <form method="post" action="payment_gateway.php?order=<?php echo (int)$order['id']; ?>" id="payForm">
+    <input type="hidden" name="pay_now" value="1">
     <section class="card">
       <div class="card-head">
         <span class="ch-ic"><i class="fa-solid fa-mobile-screen-button"></i></span>
@@ -344,7 +345,7 @@ button{font-family:inherit}
           <span>আমি <?php echo soko_money($amount); ?> সেন্ড মানি করেছি এবং উপরের তথ্যগুলো যাচাই করেছি।</span>
         </label>
 
-        <button type="submit" name="pay_now" value="1" class="btn-pay" id="payBtn">
+        <button type="submit" class="btn-pay" id="payBtn">
           <i class="fa-solid fa-paper-plane"></i> পেমেন্ট তথ্য জমা দিন <i class="fa-solid fa-arrow-right" style="font-size:13px"></i>
         </button>
 
@@ -428,8 +429,10 @@ button{font-family:inherit}
     form.addEventListener('submit', function () {
       var btn = document.getElementById('payBtn');
       if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> জমা হচ্ছে...';
+        setTimeout(function () {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> জমা হচ্ছে...';
+        }, 0);
       }
     });
   }
