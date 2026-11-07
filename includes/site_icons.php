@@ -4,6 +4,7 @@ function soko_icon($name) {
         'home' => '<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/>',
         'grid' => '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
         'wallet' => '<path fill="currentColor" stroke="none" d="M5 3h14v3H5a1 1 0 0 1 0-2h14V2H5a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h15a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a1 1 0 0 1 0-2v-1Z"/><path d="M22 11h-6a3 3 0 0 0 0 6h6" stroke="white" stroke-width="1.4"/><circle cx="16" cy="14" r="1" fill="white" stroke="none"/>',
+        'passport' => '<rect x="4" y="2" width="16" height="20" rx="2"/><circle cx="12" cy="10" r="5"/><path d="M7 10h10M12 5c3 3 3 7 0 10-3-3-3-7 0-10M9 18h6"/>',
         'history' => '<path d="M3 11a9 9 0 1 1 2 7M3 4v7h7M12 7v5l3 2"/>',
         'file' => '<path d="M6 2h8l5 5v15H6Zm8 0v6h5M9 12h7M9 16h7"/>',
         'logout' => '<path d="M9 4H3v16h6M9 12h12m-5-5 5 5-5 5"/>',

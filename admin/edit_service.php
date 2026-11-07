@@ -1,5 +1,6 @@
 <?php 
 include_once("header.php");
+require_once __DIR__ . '/../includes/service_catalog.php';
 
 $service_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 if ($service_id <= 0) {
@@ -28,21 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_service'])) {
     $description = trim($_POST['description'] ?? '');
     $access_link = trim($_POST['access_link'] ?? '');
 
-    $field_titles = $_POST['field_title'] ?? [];
-    $field_types =$_POST['field_type'] ?? [];
-    $field_required =$_POST['field_required'] ?? [];
-
-    $fields_array = [];
-    if (!empty($field_titles)) {
-        for ($i = 0; $i < count($field_titles); $i++) {$t = trim($field_titles[$i]);
-            if (!empty($t)) {$fields_array[] = [
-                    'title' => $t,
-                    'type' => $field_types[$i] ?? 'text',
-                    'required' => isset($field_required[$i]) ? 1 : 0
-                ];
-            }
-        }
-    }
+    $fields_array = soko_admin_form_fields($_POST);
     $custom_fields_json = json_encode($fields_array, JSON_UNESCAPED_UNICODE);
 
     $service_image_path = null;
@@ -88,9 +75,7 @@ if (!$srv) {
     exit();
 }
 
-$existing_fields = json_decode($srv['custom_fields'] ?? '[]', true);
-if (!is_array($existing_fields)) {$existing_fields = [];
-}
+$existing_fields = array_values(soko_resolve_fields($srv));
 ?>
 
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -142,10 +127,12 @@ if (!is_array($existing_fields)) {$existing_fields = [];
         padding: 12px;
         margin-bottom: 10px;
         display: grid;
-        grid-template-columns: 2fr 1.5fr auto auto;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
         align-items: center;
     }
+    .dynamic-field-row > input, .dynamic-field-row > select { min-width:0; }
+    @media(max-width:600px) { .dynamic-field-row { grid-template-columns:minmax(0,1fr); } }
     .btn-gradient {
         background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
         color: #ffffff;
@@ -285,7 +272,7 @@ if (!is_array($existing_fields)) {$existing_fields = [];
                         <h6 class="text-xs font-extrabold text-indigo-950 flex items-center gap-1.5">
                             <i class="fa-solid fa-file-pen text-indigo-600"></i> ফর্ম ফিল্ডসমূহ (ইউজার ইনপুট)
                         </h6>
-                        <p class="text-[11px] text-slate-500">ইউজার সাবমিট করার সময় যেসব তথ্য ইনপুট দিবে</p>
+                        <p class="text-[11px] text-slate-500">এখানের ফিল্ড ব্যবহারকারীর অর্ডার ফর্মে দেখাবে। খালি থাকলে সেবার ডিফল্ট ফিল্ড দেখাবে। NID আবেদনে জন্ম নিবন্ধন PDF আবশ্যক। আলাদা API/অটো পেজের নিজস্ব ফর্ম অপরিবর্তিত থাকবে; এই ফর্ম ব্যবহার করতে অটো এক্সেস লিংক ফাঁকা রাখুন।</p>
                     </div>
                     <button type="button" onclick="addFormField()" class="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-xl shadow-sm transition">
                         + নতুন ফিল্ড
@@ -296,16 +283,20 @@ if (!is_array($existing_fields)) {$existing_fields = [];
                     <?php if (!empty($existing_fields)): ?>
                         <?php foreach ($existing_fields as $idx =>$fld): ?>
                             <div class="dynamic-field-row" id="fieldRow_exist_<?php echo $idx; ?>">
-                                <input type="text" name="field_title[]" value="<?php echo htmlspecialchars($fld['title'] ?? ''); ?>" placeholder="ফিল্ড শিরোনাম" class="form-control-custom" required>
-                                <select name="field_type[]" class="form-control-custom">
+                                <input type="hidden" name="field_key[<?php echo $idx; ?>]" value="<?php echo htmlspecialchars($fld['key'] ?? ''); ?>">
+                                <input type="text" name="field_title[<?php echo $idx; ?>]" value="<?php echo htmlspecialchars($fld['title'] ?? ''); ?>" placeholder="ফিল্ড শিরোনাম" class="form-control-custom" required>
+                                <select name="field_type[<?php echo $idx; ?>]" class="form-control-custom">
                                     <option value="text" <?php echo (($fld['type'] ?? '') === 'text') ? 'selected' : ''; ?>>টেক্সট ইনপুট (Text)</option>
                                     <option value="date" <?php echo (($fld['type'] ?? '') === 'date') ? 'selected' : ''; ?>>জন্মতারিখ (Date)</option>
+                                    <option value="tel" <?php echo (($fld['type'] ?? '') === 'tel') ? 'selected' : ''; ?>>মোবাইল নম্বর (Tel)</option>
                                     <option value="number" <?php echo (($fld['type'] ?? '') === 'number') ? 'selected' : ''; ?>>নাম্বার (Number)</option>
                                     <option value="file" <?php echo (($fld['type'] ?? '') === 'file') ? 'selected' : ''; ?>>ফাইল আপলোড (File)</option>
                                     <option value="textarea" <?php echo (($fld['type'] ?? '') === 'textarea') ? 'selected' : ''; ?>>বড় বিবরণ (Textarea)</option>
                                 </select>
+                                <input type="text" name="field_placeholder[<?php echo $idx; ?>]" value="<?php echo htmlspecialchars($fld['placeholder'] ?? ''); ?>" placeholder="ইনপুটের নির্দেশনা / Placeholder" class="form-control-custom">
+                                <input type="text" name="field_accept[<?php echo $idx; ?>]" value="<?php echo htmlspecialchars($fld['accept'] ?? ''); ?>" placeholder="ফাইল: .pdf অথবা image/*,.pdf" class="form-control-custom">
                                 <label class="flex items-center gap-1 text-xs text-slate-600 cursor-pointer select-none">
-                                    <input type="checkbox" name="field_required[]" value="1" <?php echo !empty($fld['required']) ? 'checked' : ''; ?> class="accent-indigo-600">
+                                    <input type="checkbox" name="field_required[<?php echo $idx; ?>]" value="1" <?php echo !empty($fld['required']) ? 'checked' : ''; ?> class="accent-indigo-600">
                                     <span>বাধ্যতামূলক</span>
                                 </label>
                                 <button type="button" onclick="removeFormField('fieldRow_exist_<?php echo $idx; ?>')" class="text-rose-500 hover:text-rose-700 p-1">
@@ -326,7 +317,7 @@ if (!is_array($existing_fields)) {$existing_fields = [];
 </div>
 
 <script>
-let fieldCount = 100;
+let fieldCount = <?php echo count($existing_fields); ?>;
 
 function addFormField() {
     fieldCount++;
@@ -334,16 +325,19 @@ function addFormField() {
     row.className = 'dynamic-field-row';
     row.id = 'fieldRow_' + fieldCount;
     row.innerHTML = `
-        <input type="text" name="field_title[]" placeholder="ফিল্ড শিরোনাম (যেমন: জন্মতারিখ / NID)" class="form-control-custom" required>
-        <select name="field_type[]" class="form-control-custom">
+        <input type="text" name="field_title[${fieldCount}]" placeholder="ফিল্ড শিরোনাম (যেমন: জন্মতারিখ / NID)" class="form-control-custom" required>
+        <select name="field_type[${fieldCount}]" class="form-control-custom">
             <option value="text">টেক্সট ইনপুট (Text)</option>
             <option value="date">জন্মতারিখ (Date)</option>
             <option value="number">নাম্বার (Number)</option>
+            <option value="tel">মোবাইল নম্বর (Tel)</option>
             <option value="file">ফাইল আপলোড (File)</option>
             <option value="textarea">বড় বিবরণ (Textarea)</option>
         </select>
+        <input type="text" name="field_placeholder[${fieldCount}]" placeholder="ইনপুটের নির্দেশনা / Placeholder" class="form-control-custom">
+        <input type="text" name="field_accept[${fieldCount}]" placeholder="ফাইল: .pdf অথবা image/*,.pdf" class="form-control-custom">
         <label class="flex items-center gap-1 text-xs text-slate-600 cursor-pointer select-none">
-            <input type="checkbox" name="field_required[]" value="1" checked class="accent-indigo-600">
+            <input type="checkbox" name="field_required[${fieldCount}]" value="1" checked class="accent-indigo-600">
             <span>বাধ্যতামূলক</span>
         </label>
         <button type="button" onclick="removeFormField('fieldRow_${fieldCount}')" class="text-rose-500 hover:text-rose-700 p-1">

@@ -1,5 +1,6 @@
 <?php
 include_once("header.php");
+require_once __DIR__ . '/../includes/service_catalog.php';
 
 $msg = "";
 $err = "";
@@ -197,7 +198,7 @@ $stmt->close();
                             </td>
                         </tr>
                     <?php else: ?>
-                        <?php foreach ($services_list as $row):$fields = json_decode($row['custom_fields'] ?? '[]', true);$field_count = is_array($fields) ? count($fields) : 0;
+                        <?php foreach ($services_list as $row):$fields = soko_resolve_fields($row);$field_count = count($fields);
                             $img_src = !empty($row['service_image']) ?$row['service_image'] : soko_brand('site_logo');
                         ?>
                         <tr>

@@ -18,7 +18,7 @@ Uses existing `orders`, `users`, `custom_services` and `history_work` columns. *
 
 The shared footer adds history to the 12 customer pages backed by `orders`: `service_order`, `order_service`, `order_file`, `order_text`, `services`, `auto_service`, `auto_tin`, `numbertobio`, `mfs_service`, `location_service`, `imei_service` and `call_sms_list`.
 
-Individual custom-service forms use the exact service name; category catalogs use the selected category. Dedicated handlers retain their existing owner/service-filtered latest-20 queries. Catalog/general order forms show the owner's orders. The aggregate `work_history.php` page offers paginated orders (20/page) and a separate latest-50 balance ledger. Older API-specific services that use separate history tables keep their existing histories/download workflows; they are not silently copied into `orders`.
+The old `order_service.php` and `order_file.php` links now redirect to the canonical `service_order.php` form (or service catalog when no selection exists), so they cannot bypass validation. Individual custom-service forms use the exact service name; category catalogs use the selected category. Dedicated handlers retain their existing owner/service-filtered latest-20 queries. Catalog/general order forms show the owner's orders. The aggregate `work_history.php` page offers paginated orders (20/page) and a separate latest-50 balance ledger. Older API-specific services that use separate history tables keep their existing histories/download workflows; they are not silently copied into `orders`.
 
 ## Downloads and compatibility
 
@@ -61,7 +61,7 @@ for page in service_order recharge services auto_tin numbertobio mfs_service loc
 done
 printf '@tailwind base;\n@tailwind components;\n@tailwind utilities;\n' > "$TOOLS/input.css"
 "$TOOLS/node_modules/.bin/tailwindcss" --content './*.php' -i "$TOOLS/input.css" -o "$SOKO_UI_FIXTURE_DIR/tailwind.css" --minify
-node tests/customer_ui_browser_test.cjs
+# Generate the additional follow-up fixtures listed below before running the extended UI suite.
 node tests/typography_browser_test.cjs
 ```
 
@@ -72,3 +72,45 @@ Live MySQL, real account switching, an actual admin file upload, payment submiss
 ## Deployment
 
 Merge the feature branch first, then pull `main` using the existing deployment process. Check `git status` first; preserve local production changes (especially any local `receipt.php` changes) rather than resetting them. Refresh the browser cache after deployment. No new writable folders are needed beyond the existing result upload folders.
+
+
+## Follow-up: admin-driven application fields and notice redesign
+
+No SQL migration is needed. In **Admin → Services list → Edit service**, the editor now displays the effective fields, including defaults when the service has no saved configuration. Edit labels, type, required status, input hint and file accept list, or add custom fields. Saved nonempty JSON takes precedence over built-in defaults. Empty configuration uses defaults. Field keys survive label edits. Sparse row indices prevent unchecked/deleted rows from shifting required flags onto another field.
+
+Business rules for first applications are applied after admin configuration:
+
+- **New birth registration:** own name, father, mother, village/address line, thana/upazila, district and division are supplied when absent; defaults also include birth date and contact number. No already-issued BRN is requested. Existing field labels/optional flags can be edited; the core address/parent fields are restored if omitted entirely.
+- **New NID application:** an already-issued NID is not requested. A birth-certificate PDF is mandatory even if an old saved configuration omitted it. Both the extension and PDF header are checked, maximum 5MB. An image renamed to `.pdf` is rejected. This is type validation, not malware scanning or government certificate verification.
+- **New passport application:** asks for NID rather than an already-issued passport number. Renewal/correction/verification services are not classified as first applications.
+- **Mobile banking information:** built-in info fields no longer contain payment TrxID; old TrxID info fields are omitted. The separate mobile-payment gateway still requires its own genuine payment reference as before. Wallet orders do not add a payment TrxID field to the service form.
+
+The main form now renders required stars, native `required` attributes and accessible labels. Server-side validation runs before uploads/transactions; invalid/missing mandatory values never start a balance deduction. File accept restrictions are checked on the server as well as shown in the picker. Successful input uploads retain their relative paths for admin review; failed requests clean up files they saved.
+
+**Scope of admin fields:** these controls govern services in `custom_services` that use the canonical order flow. Auto-service catalog cards show the same resolved fields. A configured link to a separate API-specific page retains that page's own form/processing; arbitrary extra fields cannot automatically be passed to an unrelated API. Clear the auto access link to use the configurable catalog form. No API-specific database/form migration is included in this patch.
+
+The unrelated mock government/NID graphic has been removed from the shared order hero for every service. A compact document/wallet/passport icon replaces it, with the price and three feature items laid out in a responsive grid. A shared customer notice strip opens a redesigned full notice dialog; its text remains editable through the existing admin branding setting. Public login/register/index behavior and single-line header are preserved.
+
+### Additional tests
+
+```sh
+php tests/service_form_test.php
+php tests/service_order_validation_test.php
+```
+
+The first tests field defaults, admin JSON precedence, sparse checkbox indices, first-application contracts and PDF validation. The second executes the actual main controller's invalid POST paths with a no-write connection and verifies that missing text/PDF, fake PDF and missing admin-required fields do not start a transaction.
+
+To run the extended browser suite, generate the original fixtures above, plus:
+
+```sh
+php tests/customer_ui_fixture.php service_order.php 'নতুন NID জন্য আবেদন' > "$SOKO_UI_FIXTURE_DIR/nid_application.html"
+php tests/customer_ui_fixture.php service_order.php 'নতুন পাসপোর্ট আবেদন' > "$SOKO_UI_FIXTURE_DIR/passport_application.html"
+php tests/customer_ui_fixture.php service_order.php 'উপায় ইনফো' > "$SOKO_UI_FIXTURE_DIR/mfs_info.html"
+php tests/customer_ui_fixture.php service_order.php 'কাস্টম সেবা' '[{"title":"বিশেষ নোট","type":"textarea","required":0,"placeholder":"এখানে লিখুন"}]' > "$SOKO_UI_FIXTURE_DIR/admin_custom.html"
+php tests/customer_ui_fixture.php admin/add_service.php > "$SOKO_UI_FIXTURE_DIR/admin_add.html"
+php tests/customer_ui_fixture.php admin/edit_service.php > "$SOKO_UI_FIXTURE_DIR/admin_edit.html"
+# Include ./admin/*.php when compiling Tailwind for these admin fixtures.
+PHP_BIN=php node tests/customer_ui_browser_test.cjs
+```
+
+The extended suite covers 17 route/variant previews at four widths (68 cases), plus six real admin-editor DOM → submitted data → PHP field parser → customer resolver round trips. Compatibility URLs preview the canonical target rather than rendering their former duplicate templates. Staging still needs a real admin save/read-back against MySQL and an actual multipart upload/payment smoke test.

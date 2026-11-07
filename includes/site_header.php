@@ -17,7 +17,7 @@ if ($ss_logged_in && $ss_balance === null) {
 }
 ?>
 <link rel="stylesheet" href="/assets/css/site_typography.css?v=1">
-<link rel="stylesheet" href="/assets/css/site_shell.css?v=3">
+<link rel="stylesheet" href="/assets/css/site_shell.css?v=4">
 <link rel="stylesheet" href="/assets/css/customer_history.css?v=1">
 <header class="ss-header" data-site-shell>
     <div class="ss-header-inner">
@@ -34,3 +34,13 @@ if ($ss_logged_in && $ss_balance === null) {
         </div>
     </div>
 </header>
+
+<?php if ($ss_logged_in): ?>
+<div class="ss-announcement" data-site-shell>
+    <button type="button" class="ss-announcement-inner" data-ss-open="ss-notice" aria-controls="ss-notice" aria-expanded="false">
+        <span class="ss-announcement-label"><?php echo soko_icon('bell'); ?> নোটিশ</span>
+        <span class="ss-announcement-copy"><?php echo soko_e(soko_brand('site_notice')); ?></span>
+        <span class="ss-announcement-more" aria-hidden="true">›</span>
+    </button>
+</div>
+<?php endif; ?>

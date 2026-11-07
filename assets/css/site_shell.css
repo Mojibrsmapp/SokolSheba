@@ -83,3 +83,20 @@ body > main, .content-wrapper, .main-panel { min-width:0; }
 .ss-menu-icon .ss-icon { width:18px; height:18px; }
 .ss-menu-arrow { margin-left:auto; color:#9aafa2; }
 .ss-drawer-links a[href="/logout.php"] { color:#b91c1c; }
+/* Notice strip and dialog use the same admin-editable notice, without marquee motion. */
+.ss-announcement { padding:10px 12px 0; background:#f5faf7; }
+.ss-announcement-inner { width:100%; max-width:1128px; margin:auto; padding:7px 10px; display:flex; align-items:center; gap:10px; border:1px solid #cfe8d8; border-radius:12px; color:#315841; background:linear-gradient(100deg,#fff,#edf8f1); box-shadow:0 2px 8px #0b693808; cursor:pointer; }
+.ss-announcement-label { display:flex; align-items:center; gap:6px; flex-shrink:0; font-weight:800; color:#08743a; padding:5px 8px; border-radius:8px; background:#dff3e6; font-size:12px; }
+.ss-announcement-label .ss-icon { width:16px; height:16px; }
+.ss-announcement-copy { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; }
+.ss-announcement-more { margin-left:auto; flex-shrink:0; font-size:24px; color:#138447; }
+.ss-notice-card { padding:0; border-radius:24px; box-shadow:0 20px 60px #052e1640; }
+.ss-notice-heading { display:flex; align-items:center; gap:12px; padding:22px 20px; color:#fff; background:linear-gradient(125deg,#075b30,#11924b); }
+.ss-notice-heading > div { flex:1; min-width:0; }
+.ss-notice-heading small { display:block; font-size:11px; color:#ccebd9; }
+.ss-notice-heading strong { display:block; font-size:22px; margin-top:3px; }
+.ss-notice-heading .ss-square { color:white; background:#ffffff15; border-color:#ffffff40; }
+.ss-notice-symbol { display:flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:15px; background:#ffffff20; }
+.ss-notice-body { padding:20px; }
+.ss-notice-body .ss-notice-text { padding:14px; border:1px solid #d9ecdf; border-radius:14px; background:#f5fbf7; line-height:1.9; margin:0 0 18px; overflow-wrap:anywhere; }
+.ss-notice-dismiss { display:block; width:100%; border:0; border-radius:12px; padding:12px; background:#087b3d; color:white; font-weight:700; }
