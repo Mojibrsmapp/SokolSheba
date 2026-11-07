@@ -60,6 +60,7 @@ $service_name = isset($_GET['service']) ? trim($_GET['service']) : 'ব্যা
 $service_category = isset($_GET['category']) ? trim($_GET['category']) : 'টপ-আপ সেবা';
 
 $order_submitted = false;
+$new_dep_id = 0;
 $receipt_data = null;
 $error_msg = "";
 
@@ -321,8 +322,9 @@ if ($h_stmt) {
             body { background: #ffffff !important; padding: 0 !important; }
             .no-print { display: none !important; }
             .phone-card { box-shadow: none !important; border: none !important; max-width: 100% !important; border-radius: 0 !important; }
-            #history_receipt_modal { position: static !important; inset: auto !important; background: transparent !important; display: block !important; padding: 0 !important; }
-            #history_receipt_modal .receipt-paper { box-shadow: none !important; border: none !important; max-width: 100% !important; border-radius: 0 !important; padding: 0 !important; }
+            .grid { display: block !important; }
+            .phone-card { page-break-inside: avoid; }
+            @page { size: A4; margin: 8mm; }
         }
     </style>
 </head>
@@ -601,9 +603,9 @@ if ($h_stmt) {
                         </div>
 
                         <div class="no-print pt-1 flex items-center gap-2">
-                            <button onclick="window.print()" class="flex-1 bg-green-700 hover:bg-green-800 text-white font-extrabold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
+                            <a href="receipt.php?deposit=<?php echo (int)$new_dep_id; ?>&new=1" class="flex-1 bg-green-700 hover:bg-green-800 text-white font-extrabold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
                                 <i class="fa-solid fa-print"></i> রশিদ প্রিন্ট / ডাউনলোড
-                            </button>
+                            </a>
                             <a href="dashboard.php" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs py-2.5 px-4 rounded-xl transition text-center">
                                 ড্যাশবোর্ড
                             </a>
@@ -677,21 +679,10 @@ if ($h_stmt) {
                                         <span class="text-sm sm:text-base font-black text-green-800 block">
                                             ৳ <?php echo number_format($hist['amount'], 2); ?>
                                         </span>
-                                        <button type="button" 
-                                            onclick='viewHistoryReceipt(<?php echo json_encode([
-                                                "order_no" => "SS" . date("Ymd", strtotime($hist["created_at"])) . str_pad($hist["id"], 3, "0", STR_PAD_LEFT),
-                                                "date" => date("d M Y, h:i A", strtotime($hist["created_at"])),
-                                                "method" => $m_name,
-                                                "trx_id" => $hist["trx_id"],
-                                                "amount" => number_format($hist["amount"], 2),
-                                                "status_label" => $status_label,
-                                                "user_name" => $name,
-                                                "user_phone" => $phone,
-                                                "user_email" => $email
-                                            ], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE); ?>)'
+                                        <a href="receipt.php?deposit=<?php echo (int)$hist['id']; ?>"
                                             class="text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1 rounded-xl transition inline-flex items-center gap-1.5 shadow-sm">
                                             <i class="fa-solid fa-receipt"></i> রশিদ
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
                                 <?php endforeach; ?>
@@ -705,53 +696,7 @@ if ($h_stmt) {
 
     </div>
 
-    <div id="history_receipt_modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden no-print">
-        <div class="receipt-paper bg-white w-full max-w-sm rounded-2xl border border-slate-200 shadow-2xl overflow-hidden p-4 sm:p-5 space-y-3 relative">
-            <button onclick="closeReceiptModal()" class="absolute top-3 right-3 text-slate-400 hover:text-slate-700 text-sm w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center no-print">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
 
-            <div class="flex items-center gap-2 border-b border-slate-100 pb-2.5">
-                <img src="/assets/logo.jpg" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'" class="w-9 h-9 rounded-full border border-green-600 p-0.5 object-cover">
-                <div>
-                    <div class="flex items-center gap-1 leading-none">
-                        <span class="text-base font-black text-green-700">সকল</span>
-                        <span class="text-base font-black text-red-600">সেবা</span>
-                    </div>
-                    <p class="text-[9px] font-bold text-slate-500">অফিশিয়াল পেমেন্ট রশিদ</p>
-                </div>
-            </div>
-
-            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 flex items-center justify-between text-xs">
-                <div>
-                    <span class="text-[9px] font-bold text-slate-500 block">রশিদ নং</span>
-                    <span class="font-extrabold text-slate-800" id="m_order_no">#</span>
-                </div>
-                <div class="text-right">
-                    <span class="text-[9px] font-bold text-slate-500 block">তারিখ ও সময়</span>
-                    <span class="font-bold text-slate-700 text-[10px]" id="m_date">-</span>
-                </div>
-            </div>
-
-            <div class="bg-slate-50 rounded-xl p-2.5 text-xs text-slate-700 space-y-1.5 border border-slate-200">
-                <div class="flex justify-between"><span class="text-slate-500">গ্রাহকের নাম:</span><span class="font-bold" id="m_name">-</span></div>
-                <div class="flex justify-between"><span class="text-slate-500">মোবাইল:</span><span class="font-bold font-mono" id="m_phone">-</span></div>
-                <div class="flex justify-between"><span class="text-slate-500">পেমেন্ট মেথড:</span><span class="font-bold text-pink-600" id="m_method">-</span></div>
-                <div class="flex justify-between"><span class="text-slate-500">TrxID:</span><span class="font-mono font-bold text-indigo-700" id="m_trx">-</span></div>
-                <div class="flex justify-between"><span class="text-slate-500">স্ট্যাটাস:</span><span class="font-bold text-emerald-700" id="m_status">-</span></div>
-                <div class="flex justify-between pt-1 border-t border-slate-200"><span class="font-bold text-slate-800">মোট টাকা:</span><span class="font-black text-green-800 text-sm" id="m_amount">৳ 0.00</span></div>
-            </div>
-
-            <div class="no-print pt-1 flex items-center gap-2">
-                <button onclick="window.print()" class="flex-1 bg-green-700 hover:bg-green-800 text-white font-bold text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-print"></i> প্রিন্ট রশিদ
-                </button>
-                <button onclick="closeReceiptModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2 px-3 rounded-xl transition">
-                    বন্ধ করুন
-                </button>
-            </div>
-        </div>
-    </div>
 
     <script>
         const allNumbers = <?php echo json_encode($gateway_numbers); ?>;
@@ -826,22 +771,6 @@ if ($h_stmt) {
             });
         }
 
-        function viewHistoryReceipt(data) {
-            $('#m_order_no').text('#' + data.order_no);
-            $('#m_date').text(data.date);
-            $('#m_name').text(data.user_name);
-            $('#m_phone').text(data.user_phone);
-            $('#m_method').text(data.method);
-            $('#m_trx').text(data.trx_id);
-            $('#m_status').text(data.status_label);
-            $('#m_amount').text('৳ ' + data.amount);
-
-            $('#history_receipt_modal').removeClass('hidden');
-        }
-
-        function closeReceiptModal() {
-            $('#history_receipt_modal').addClass('hidden');
-        }
     </script>
 </body>
 </html>
