@@ -2,6 +2,7 @@
 ob_start();
 session_start();
 include_once("includes/configuration.php");
+include_once("includes/service_catalog.php");
 
 if (isset($_SESSION['user_token'])) {
     $token_user = $_SESSION['user_token'];
@@ -346,7 +347,7 @@ if (is_dir($slider_path)) {
             <div class="swiper sokol-slider-box">
                 <div class="swiper-wrapper">
                     <?php foreach ($slider_images as $idx => $img_url): ?>
-                        <div class="swiper-slide cursor-pointer" onclick="location.href='order_file.php'">
+                        <div class="swiper-slide cursor-pointer" onclick="location.href='services.php'">
                             <img src="<?php echo htmlspecialchars($img_url); ?>" alt="Banner">
                         </div>
                     <?php endforeach; ?>
@@ -364,7 +365,7 @@ if (is_dir($slider_path)) {
                 </div>
                 <h3 class="text-base sm:text-lg font-extrabold text-slate-800">সকল সেবা বিভাগ</h3>
             </div>
-            <a href="order_file.php" class="text-xs font-bold text-green-700 hover:underline flex items-center gap-1">
+            <a href="services.php" class="text-xs font-bold text-green-700 hover:underline flex items-center gap-1">
                 সব বিভাগ দেখুন <i class="fa-solid fa-arrow-right text-[10px]"></i>
             </a>
         </div>
@@ -382,15 +383,15 @@ if (is_dir($slider_path)) {
                         <i class="fa-solid fa-chevron-right text-[10px] opacity-80 shrink-0"></i>
                     </div>
                     <ul class="category-list space-y-1">
-                        <li onclick="location.href='sign_order.php?type=10_12_17'" class="hover:text-green-700 cursor-pointer truncate">• সাইন কপি</li>
-                        <li onclick="location.href='auto_service.php?type=nid'" class="hover:text-green-700 cursor-pointer truncate">• আইডি কার্ড</li>
-                        <li onclick="location.href='serverCopy.php'" class="hover:text-green-700 cursor-pointer truncate">• সার্ভার কপি ১</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-green-700 cursor-pointer truncate">• স্মার্ট কার্ড পিডিএফ</li>
-                        <li onclick="location.href='free_service.php?type=make'" class="hover:text-green-700 cursor-pointer truncate">• অটো NID মেক</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'সাইন কপি'); ?>'" class="hover:text-green-700 cursor-pointer truncate">• সাইন কপি</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'আইডি কার্ড'); ?>'" class="hover:text-green-700 cursor-pointer truncate">• আইডি কার্ড</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'সার্ভার কপি ১'); ?>'" class="hover:text-green-700 cursor-pointer truncate">• সার্ভার কপি ১</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'স্মার্ট কার্ড পিডিএফ'); ?>'" class="hover:text-green-700 cursor-pointer truncate">• স্মার্ট কার্ড পিডিএফ</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'অটো NID মেক'); ?>'" class="hover:text-green-700 cursor-pointer truncate">• অটো NID মেক</li>
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
-                    <a href="order_file.php" class="text-[11px] font-bold text-[#107C41] hover:underline">আরও দেখুন...</a>
+                    <a href="services.php" class="text-[11px] font-bold text-[#107C41] hover:underline">আরও দেখুন...</a>
                 </div>
             </div>
 
@@ -404,15 +405,15 @@ if (is_dir($slider_path)) {
                         <i class="fa-solid fa-chevron-right text-[10px] opacity-80 shrink-0"></i>
                     </div>
                     <ul class="category-list space-y-1">
-                        <li onclick="location.href='order_file.php'" class="hover:text-blue-700 cursor-pointer truncate">• পাসপোর্ট স্লিপ PDF</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-blue-700 cursor-pointer truncate">• প্রথম পাতা PDF</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-blue-700 cursor-pointer truncate">• NID দিয়ে পাসপোর্ট</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-blue-700 cursor-pointer truncate">• ভিসা যাচাই</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-blue-700 cursor-pointer truncate">• পুলিশ ক্লিয়ারেন্স</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'পাসপোর্ট স্লিপ PDF'); ?>'" class="hover:text-blue-700 cursor-pointer truncate">• পাসপোর্ট স্লিপ PDF</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'প্রথম পাতা PDF'); ?>'" class="hover:text-blue-700 cursor-pointer truncate">• প্রথম পাতা PDF</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'NID দিয়ে পাসপোর্ট'); ?>'" class="hover:text-blue-700 cursor-pointer truncate">• NID দিয়ে পাসপোর্ট</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'ভিসা যাচাই'); ?>'" class="hover:text-blue-700 cursor-pointer truncate">• ভিসা যাচাই</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'পুলিশ ক্লিয়ারেন্স'); ?>'" class="hover:text-blue-700 cursor-pointer truncate">• পুলিশ ক্লিয়ারেন্স</li>
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
-                    <a href="order_file.php" class="text-[11px] font-bold text-[#0078D4] hover:underline">আরও দেখুন...</a>
+                    <a href="services.php" class="text-[11px] font-bold text-[#0078D4] hover:underline">আরও দেখুন...</a>
                 </div>
             </div>
 
@@ -426,15 +427,15 @@ if (is_dir($slider_path)) {
                         <i class="fa-solid fa-chevron-right text-[10px] opacity-80 shrink-0"></i>
                     </div>
                     <ul class="category-list space-y-1">
-                        <li onclick="location.href='order_file.php'" class="hover:text-purple-700 cursor-pointer truncate">• জন্ম নিবন্ধন পিডিএফ</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-purple-700 cursor-pointer truncate">• ক্লোন কপি</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-purple-700 cursor-pointer truncate">• নতুন জন্ম নিবন্ধন</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-purple-700 cursor-pointer truncate">• হারানো উত্তোলন</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-purple-700 cursor-pointer truncate">• Server Copy</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'জন্ম নিবন্ধন পিডিএফ'); ?>'" class="hover:text-purple-700 cursor-pointer truncate">• জন্ম নিবন্ধন পিডিএফ</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'ক্লোন কপি'); ?>'" class="hover:text-purple-700 cursor-pointer truncate">• ক্লোন কপি</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'নতুন জন্ম নিবন্ধন'); ?>'" class="hover:text-purple-700 cursor-pointer truncate">• নতুন জন্ম নিবন্ধন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'হারানো উত্তোলন'); ?>'" class="hover:text-purple-700 cursor-pointer truncate">• হারানো উত্তোলন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'Server Copy'); ?>'" class="hover:text-purple-700 cursor-pointer truncate">• Server Copy</li>
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
-                    <a href="order_file.php" class="text-[11px] font-bold text-[#7B1FA2] hover:underline">আরও দেখুন...</a>
+                    <a href="services.php" class="text-[11px] font-bold text-[#7B1FA2] hover:underline">আরও দেখুন...</a>
                 </div>
             </div>
 
@@ -448,11 +449,11 @@ if (is_dir($slider_path)) {
                         <i class="fa-solid fa-chevron-right text-[10px] opacity-80 shrink-0"></i>
                     </div>
                     <ul class="category-list space-y-1">
-                        <li onclick="location.href='mfs_service.php'" class="hover:text-pink-600 cursor-pointer truncate">• বিকাশ ইনফো</li>
-                        <li onclick="location.href='mfs_service.php'" class="hover:text-pink-600 cursor-pointer truncate">• নগদ ইনফো</li>
-                        <li onclick="location.href='mfs_service.php'" class="hover:text-pink-600 cursor-pointer truncate">• রকেট ইনফো</li>
-                        <li onclick="location.href='mfs_service.php'" class="hover:text-pink-600 cursor-pointer truncate">• উপায় ইনফো</li>
-                        <li onclick="location.href='mfs_service.php'" class="hover:text-pink-600 cursor-pointer truncate">• স্টেটমেন্ট তথ্য</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'বিকাশ ইনফো'); ?>'" class="hover:text-pink-600 cursor-pointer truncate">• বিকাশ ইনফো</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'নগদ ইনফো'); ?>'" class="hover:text-pink-600 cursor-pointer truncate">• নগদ ইনফো</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'রকেট ইনফো'); ?>'" class="hover:text-pink-600 cursor-pointer truncate">• রকেট ইনফো</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'উপায় ইনফো'); ?>'" class="hover:text-pink-600 cursor-pointer truncate">• উপায় ইনফো</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'স্টেটমেন্ট তথ্য'); ?>'" class="hover:text-pink-600 cursor-pointer truncate">• স্টেটমেন্ট তথ্য</li>
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
@@ -470,11 +471,11 @@ if (is_dir($slider_path)) {
                         <i class="fa-solid fa-chevron-right text-[10px] opacity-80 shrink-0"></i>
                     </div>
                     <ul class="category-list space-y-1">
-                        <li onclick="location.href='order_file.php'" class="hover:text-orange-600 cursor-pointer truncate">• NID থেকে সিম বাতিল</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-orange-600 cursor-pointer truncate">• সকল সিম বাতিল</li>
-                        <li onclick="location.href='numbertobio.php'" class="hover:text-orange-600 cursor-pointer truncate">• রবি বায়োমেট্রিক</li>
-                        <li onclick="location.href='numbertobio.php'" class="hover:text-orange-600 cursor-pointer truncate">• এয়ারটেল বায়োমেট্রিক</li>
-                        <li onclick="location.href='numbertobio.php'" class="hover:text-orange-600 cursor-pointer truncate">• গ্রামীণ বায়োমেট্রিক</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'NID থেকে সিম বাতিল'); ?>'" class="hover:text-orange-600 cursor-pointer truncate">• NID থেকে সিম বাতিল</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'সকল সিম বাতিল'); ?>'" class="hover:text-orange-600 cursor-pointer truncate">• সকল সিম বাতিল</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'রবি বায়োমেট্রিক'); ?>'" class="hover:text-orange-600 cursor-pointer truncate">• রবি বায়োমেট্রিক</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'এয়ারটেল বায়োমেট্রিক'); ?>'" class="hover:text-orange-600 cursor-pointer truncate">• এয়ারটেল বায়োমেট্রিক</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'গ্রামীণ বায়োমেট্রিক'); ?>'" class="hover:text-orange-600 cursor-pointer truncate">• গ্রামীণ বায়োমেট্রিক</li>
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
@@ -492,11 +493,11 @@ if (is_dir($slider_path)) {
                         <i class="fa-solid fa-chevron-right text-[10px] opacity-80 shrink-0"></i>
                     </div>
                     <ul class="category-list space-y-1">
-                        <li onclick="location.href='location_service.php'" class="hover:text-teal-700 cursor-pointer truncate">• সকল সিমের লোকেশন</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-teal-700 cursor-pointer truncate">• এনআইডি টু নাম্বার</li>
-                        <li onclick="location.href='location_service.php'" class="hover:text-teal-700 cursor-pointer truncate">• পিন পয়েন্ট লোকেশন</li>
-                        <li onclick="location.href='location_service.php'" class="hover:text-teal-700 cursor-pointer truncate">• জিও লোকেশন</li>
-                        <li onclick="location.href='imei_service.php'" class="hover:text-teal-700 cursor-pointer truncate">• IMEI টু নাম্বার</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'সকল সিমের লোকেশন'); ?>'" class="hover:text-teal-700 cursor-pointer truncate">• সকল সিমের লোকেশন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'এনআইডি টু নাম্বার'); ?>'" class="hover:text-teal-700 cursor-pointer truncate">• এনআইডি টু নাম্বার</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'পিন পয়েন্ট লোকেশন'); ?>'" class="hover:text-teal-700 cursor-pointer truncate">• পিন পয়েন্ট লোকেশন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'জিও লোকেশন'); ?>'" class="hover:text-teal-700 cursor-pointer truncate">• জিও লোকেশন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'IMEI টু নাম্বার'); ?>'" class="hover:text-teal-700 cursor-pointer truncate">• IMEI টু নাম্বার</li>
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
@@ -514,11 +515,11 @@ if (is_dir($slider_path)) {
                         <i class="fa-solid fa-chevron-right text-[10px] opacity-80 shrink-0"></i>
                     </div>
                     <ul class="category-list space-y-1">
-                        <li onclick="location.href='auto_tin.php'" class="hover:text-amber-700 cursor-pointer truncate">• নতুন টিন আবেদন</li>
-                        <li onclick="location.href='order_text.php'" class="hover:text-amber-700 cursor-pointer truncate">• হারানো সার্টিফিকেট</li>
-                        <li onclick="location.href='order_text.php'" class="hover:text-amber-700 cursor-pointer truncate">• নিজ নাম সংশোধন</li>
-                        <li onclick="location.href='order_text.php'" class="hover:text-amber-700 cursor-pointer truncate">• অল নাম সংশোধন</li>
-                        <li onclick="location.href='auto_tin.php'" class="hover:text-amber-700 cursor-pointer truncate">• অটো টিন জেনারেট</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'নতুন টিন আবেদন'); ?>'" class="hover:text-amber-700 cursor-pointer truncate">• নতুন টিন আবেদন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'হারানো সার্টিফিকেট'); ?>'" class="hover:text-amber-700 cursor-pointer truncate">• হারানো সার্টিফিকেট</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'নিজ নাম সংশোধন'); ?>'" class="hover:text-amber-700 cursor-pointer truncate">• নিজ নাম সংশোধন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'অল নাম সংশোধন'); ?>'" class="hover:text-amber-700 cursor-pointer truncate">• অল নাম সংশোধন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'অটো টিন জেনারেট'); ?>'" class="hover:text-amber-700 cursor-pointer truncate">• অটো টিন জেনারেট</li>
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
@@ -536,15 +537,15 @@ if (is_dir($slider_path)) {
                         <i class="fa-solid fa-chevron-right text-[10px] opacity-80 shrink-0"></i>
                     </div>
                     <ul class="category-list space-y-1">
-                        <li onclick="location.href='order_file.php'" class="hover:text-purple-700 cursor-pointer truncate">• লাইসেন্স আবেদন</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-purple-700 cursor-pointer truncate">• হারানো উত্তোলন</li>
-                        <li onclick="location.href='order_text.php'" class="hover:text-purple-700 cursor-pointer truncate">• জিরো রিটার্ন</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-purple-700 cursor-pointer truncate">• নবায়ন আবেদন</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-purple-700 cursor-pointer truncate">• লাইসেন্স সংশোধন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'লাইসেন্স আবেদন'); ?>'" class="hover:text-purple-700 cursor-pointer truncate">• লাইসেন্স আবেদন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'হারানো উত্তোলন'); ?>'" class="hover:text-purple-700 cursor-pointer truncate">• হারানো উত্তোলন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'জিরো রিটার্ন'); ?>'" class="hover:text-purple-700 cursor-pointer truncate">• জিরো রিটার্ন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'নবায়ন আবেদন'); ?>'" class="hover:text-purple-700 cursor-pointer truncate">• নবায়ন আবেদন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'লাইসেন্স সংশোধন'); ?>'" class="hover:text-purple-700 cursor-pointer truncate">• লাইসেন্স সংশোধন</li>
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
-                    <a href="order_file.php" class="text-[11px] font-bold text-[#5E35B1] hover:underline">আরও দেখুন...</a>
+                    <a href="services.php" class="text-[11px] font-bold text-[#5E35B1] hover:underline">আরও দেখুন...</a>
                 </div>
             </div>
 
@@ -558,15 +559,15 @@ if (is_dir($slider_path)) {
                         <i class="fa-solid fa-chevron-right text-[10px] opacity-80 shrink-0"></i>
                     </div>
                     <ul class="category-list space-y-1">
-                        <li onclick="location.href='order_file.php'" class="hover:text-sky-700 cursor-pointer truncate">• মৌজা ম্যাপ</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-sky-700 cursor-pointer truncate">• খাজনা অনুমোদন</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-sky-700 cursor-pointer truncate">• সার্ভে খতিয়ান কপি</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-sky-700 cursor-pointer truncate">• নামজারি খতিয়ান কপি</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-sky-700 cursor-pointer truncate">• খাজনা ডিসকাউন্ট</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'মৌজা ম্যাপ'); ?>'" class="hover:text-sky-700 cursor-pointer truncate">• মৌজা ম্যাপ</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'খাজনা অনুমোদন'); ?>'" class="hover:text-sky-700 cursor-pointer truncate">• খাজনা অনুমোদন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'সার্ভে খতিয়ান কপি'); ?>'" class="hover:text-sky-700 cursor-pointer truncate">• সার্ভে খতিয়ান কপি</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'নামজারি খতিয়ান কপি'); ?>'" class="hover:text-sky-700 cursor-pointer truncate">• নামজারি খতিয়ান কপি</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'খাজনা ডিসকাউন্ট'); ?>'" class="hover:text-sky-700 cursor-pointer truncate">• খাজনা ডিসকাউন্ট</li>
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
-                    <a href="order_file.php" class="text-[11px] font-bold text-[#0288D1] hover:underline">আরও দেখুন...</a>
+                    <a href="services.php" class="text-[11px] font-bold text-[#0288D1] hover:underline">আরও দেখুন...</a>
                 </div>
             </div>
 
@@ -580,15 +581,15 @@ if (is_dir($slider_path)) {
                         <i class="fa-solid fa-chevron-right text-[10px] opacity-80 shrink-0"></i>
                     </div>
                     <ul class="category-list space-y-1">
-                        <li onclick="location.href='order_file.php'" class="hover:text-pink-700 cursor-pointer truncate">• নতুন NID জন্য আবেদন</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-pink-700 cursor-pointer truncate">• নতুন পাসপোর্ট আবেদন</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-pink-700 cursor-pointer truncate">• নতুন জন্ম নিবন্ধন</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-pink-700 cursor-pointer truncate">• পল্লী বিদ্যুৎ মিটার আবেদন</li>
-                        <li onclick="location.href='order_file.php'" class="hover:text-pink-700 cursor-pointer truncate">• অন্যান্য অনলাইন আবেদন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'নতুন NID জন্য আবেদন'); ?>'" class="hover:text-pink-700 cursor-pointer truncate">• নতুন NID জন্য আবেদন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'নতুন পাসপোর্ট আবেদন'); ?>'" class="hover:text-pink-700 cursor-pointer truncate">• নতুন পাসপোর্ট আবেদন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'নতুন জন্ম নিবন্ধন'); ?>'" class="hover:text-pink-700 cursor-pointer truncate">• নতুন জন্ম নিবন্ধন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'পল্লী বিদ্যুৎ মিটার আবেদন'); ?>'" class="hover:text-pink-700 cursor-pointer truncate">• পল্লী বিদ্যুৎ মিটার আবেদন</li>
+                        <li onclick="location.href='<?php echo soko_service_link($conn, 'অন্যান্য অনলাইন আবেদন'); ?>'" class="hover:text-pink-700 cursor-pointer truncate">• অন্যান্য অনলাইন আবেদন</li>
                     </ul>
                 </div>
                 <div class="px-2.5 py-1.5 border-t border-slate-100">
-                    <a href="order_file.php" class="text-[11px] font-bold text-[#C2185B] hover:underline">আরও দেখুন...</a>
+                    <a href="services.php" class="text-[11px] font-bold text-[#C2185B] hover:underline">আরও দেখুন...</a>
                 </div>
             </div>
 
@@ -733,7 +734,7 @@ if (is_dir($slider_path)) {
             <a href="numbertobio.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-sim-card w-4 text-orange-600 text-xs"></i> <span class="truncate">সিম বায়োমেট্রিক</span></a>
             <a href="location_service.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-location-dot w-4 text-teal-600 text-xs"></i> <span class="truncate">লোকেশন ট্র্যাকিং</span></a>
             <a href="mfs_service.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-wallet w-4 text-rose-600 text-xs"></i> <span class="truncate">বিকাশ-নগদ-রকেট</span></a>
-            <a href="order_file.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-file-arrow-up w-4 text-emerald-600 text-xs"></i> <span class="truncate">কাস্টম ও ফাইল অর্ডার</span></a>
+            <a href="services.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-file-arrow-up w-4 text-emerald-600 text-xs"></i> <span class="truncate">কাস্টম ও ফাইল অর্ডার</span></a>
             <div class="my-1 border-t border-slate-100"></div>
             <a href="recharge.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-circle-plus w-4 text-green-600 text-xs"></i> <span class="truncate">ব্যালেন্স রিচার্জ</span></a>
             <a href="work_history.php" class="flex items-center gap-2 px-2.5 py-2 rounded-lg text-slate-700 hover:bg-slate-50"><i class="fa-solid fa-clock-rotate-left w-4 text-violet-600 text-xs"></i> <span class="truncate">অর্ডার হিস্টোরি</span></a>

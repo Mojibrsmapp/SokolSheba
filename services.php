@@ -139,7 +139,8 @@ $category_colors = [
             <div class="pl-3.5 pr-2 text-slate-400">
                 <i class="fa-solid fa-magnifying-glass text-xs sm:text-sm"></i>
             </div>
-            <input type="text" id="serviceSearchInput" placeholder="ডাটাবেজ থেকে যে কোন সার্ভিস খুঁজুন..." class="w-full py-1 text-xs sm:text-sm focus:outline-none text-slate-700 bg-transparent">
+            <?php $search_q = isset($_GET['q']) ? trim($_GET['q']) : ''; ?>
+            <input type="text" id="serviceSearchInput" value="<?php echo htmlspecialchars($search_q); ?>" placeholder="ডাটাবেজ থেকে যে কোন সার্ভিস খুঁজুন..." class="w-full py-1 text-xs sm:text-sm focus:outline-none text-slate-700 bg-transparent">
         </div>
 
         <!-- Filter Category Tabs -->
@@ -242,6 +243,25 @@ $category_colors = [
 
     <script>
         // Live Search Filter
+        function applyServiceSearch() {
+            var value = $('#serviceSearchInput').val().toLowerCase();
+            $('.service-item').filter(function() {
+                var match = $(this).text().toLowerCase().indexOf(value) > -1;
+                $(this).toggle(match);
+            });
+            $('.category-block').each(function() {
+                var visibleCount = $(this).find('.service-item:visible').length;
+                $(this).toggle(visibleCount > 0);
+            });
+        }
+
+        // Pre-filled search from ?q= (dashboard service links)
+        $(document).ready(function() {
+            if ($('#serviceSearchInput').val() !== '') {
+                applyServiceSearch();
+            }
+        });
+
         $('#serviceSearchInput').on('keyup', function() {
             var value = $(this).val().toLowerCase();
             $('.service-item').filter(function() {
